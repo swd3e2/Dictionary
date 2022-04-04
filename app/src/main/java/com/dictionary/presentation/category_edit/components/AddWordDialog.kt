@@ -12,6 +12,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -100,6 +101,7 @@ fun AddWordDialog(
                                                             Color(0xffE1ECFB) else Color(0xFF87AAD5),
                                                         shape = RoundedCornerShape(50)
                                                     )
+                                                    .clip(RoundedCornerShape(50))
                                                     .clickable {
                                                         if (!viewModel.wordTranslations.contains(translation)) {
                                                             viewModel.wordTranslations.add(translation)

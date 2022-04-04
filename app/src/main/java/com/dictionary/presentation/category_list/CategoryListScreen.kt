@@ -3,55 +3,59 @@ package com.dictionary.presentation.category_list
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dictionary.presentation.category_list.components.AddCategoryDialog
 import com.dictionary.presentation.category_list.components.CategoryListItem
+import com.dictionary.presentation.common.BottomBar
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
 import com.dictionary.utils.UiEvent
 
 @Composable
 fun CategoryListScreen(
+    launchFileIntent: () -> Unit,
     onNavigate: (UiEvent.Navigate) -> Unit,
     viewModel: CategoriesListViewModel = hiltViewModel()
 ) {
-    val categories = viewModel.categories.collectAsState(initial = emptyList())
     val scaffoldState = rememberScaffoldState()
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
-            when(event) {
+            when (event) {
                 is UiEvent.Navigate -> onNavigate(event)
                 else -> Unit
             }
         }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+    ) {
         Scaffold(
             scaffoldState = scaffoldState,
-            floatingActionButton = {
-                FloatingActionButton(onClick = {
-                    viewModel.onEvent(CategoryListEvent.OnOpenAddCategoryDialog)
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add"
-                    )
-                }
+            bottomBar = {
+                BottomBar()
             }
         ) {
-            Column {
-                Column(modifier = Modifier.fillMaxWidth().padding(30.dp)) {
+            Column(modifier = Modifier.padding(it)
+                .wrapContentHeight()
+                .verticalScroll(rememberScrollState())
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(30.dp, 30.dp, 30.dp, 0.dp),
+                ) {
                     Text(
                         text = "Welcome home, Master",
                         color = SecondaryTextColor,
@@ -71,20 +75,39 @@ fun CategoryListScreen(
                         viewModel::onEvent
                     )
                 }
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp, 0.dp)) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .padding(0.dp, 5.dp)
-                            .wrapContentHeight()
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
                     ) {
-                        items(categories.value) { category ->
-                            CategoryListItem(
-                                category = category,
-                                onEvent = viewModel::onEvent
+                        IconButton(
+                            onClick = launchFileIntent
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Import",
+                                tint = MaterialTheme.colors.primary
                             )
                         }
+                        IconButton(
+                            modifier = Modifier.padding(0.dp, 0.dp, 20.dp, 0.dp),
+                            onClick = {
+                                viewModel.onEvent(CategoryListEvent.OnOpenAddCategoryDialog)
+                            }) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add",
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                    }
+                    for (category in viewModel.categories.value) {
+                        CategoryListItem(
+                            category = category,
+                            onEvent = viewModel::onEvent
+                        )
                     }
                 }
             }

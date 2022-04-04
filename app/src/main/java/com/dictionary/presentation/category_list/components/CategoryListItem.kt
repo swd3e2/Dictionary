@@ -2,6 +2,7 @@ package com.dictionary.presentation.category_list.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import com.dictionary.domain.entity.Category
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -20,6 +22,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.dictionary.R
 import com.dictionary.presentation.category_list.CategoryListEvent
+import com.dictionary.presentation.common.DisabledInteractionSource
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
 
@@ -28,12 +31,14 @@ fun CategoryListItem(
     category: Category,
     onEvent: (CategoryListEvent) -> Unit
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+
     Card(
         modifier = Modifier
-            .padding(0.dp, 5.dp)
+            .padding(15.dp, 5.dp)
+            .clip(RoundedCornerShape(30))
             .clickable { onEvent(CategoryListEvent.OnCategoryClick(category.id!!)) },
-        elevation = 0.dp,
-        shape = RoundedCornerShape(30)
+        elevation = 0.dp
     ) {
         Row(
             Modifier
@@ -76,7 +81,8 @@ fun CategoryListItem(
                 IconButton(
                     onClick = {
                         onEvent(CategoryListEvent.OnDeleteCategory(category.id!!))
-                    }
+                    },
+                    interactionSource = remember { DisabledInteractionSource() }
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,

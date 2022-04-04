@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CategoriesDao {
     @Query("select * from ${Category.TABLE_NAME}")
-    fun list(): Flow<List<Category>>
+    fun list(): List<Category>
 
     @Query("select * from ${Category.TABLE_NAME} where id = :id")
     fun get(id: Int): Category?

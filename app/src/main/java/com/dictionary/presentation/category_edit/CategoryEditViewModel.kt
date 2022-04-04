@@ -1,8 +1,12 @@
 package com.dictionary.presentation.category_edit
 
+import android.app.Activity
+import android.app.Application
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -39,7 +43,7 @@ class CategoryEditViewModel @Inject constructor(
     var openDialog = mutableStateOf(false)
         private set
 
-    var wordTranslations = mutableStateListOf("asd")
+    var wordTranslations = mutableStateListOf<String>()
         private set
 
     var words: Flow<List<Word>>? = null
@@ -98,15 +102,25 @@ class CategoryEditViewModel @Inject constructor(
                 }
             }
             is CategoryEditEvent.OnWordSaveClick -> {
-                if (newWordTerm.value.isEmpty() || newWordDefinition.value.isEmpty()) {
+                if (newWordTerm.value.isEmpty() || (newWordDefinition.value.isEmpty() && wordTranslations.size == 0)) {
                     return
                 }
 
                 viewModelScope.launch {
+                    var definition = ""
+                    if (!newWordDefinition.value.isEmpty()) {
+                        definition = newWordDefinition.value
+                    } else {
+                        for (translation in wordTranslations) {
+                            definition += "$translation, "
+                        }
+                        definition = definition.dropLast(2)
+                    }
+
                     wordRepository.create(Word(
                         id = 0,
                         term = newWordTerm.value,
-                        definition = newWordDefinition.value,
+                        definition = definition,
                         category = category.id,
                         created = Date(),
                         lastRepeated = Date(),
