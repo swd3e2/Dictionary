@@ -19,7 +19,7 @@ class CardsGameViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val wordsRepository: WordRepository,
     savedStateHandle: SavedStateHandle
-): ViewModel() {
+) : ViewModel() {
 
     var category: Category = Category(0, "")
         private set
@@ -27,12 +27,27 @@ class CardsGameViewModel @Inject constructor(
     var currentWord = mutableStateOf<Word?>(null)
         private set
 
+    var currentWordIndex = mutableStateOf(1)
+        private set
+
+    var countOfWords = mutableStateOf(0)
+        private set
+
+    var learnProgress = mutableStateOf(0f)
+        private set
+
+    var learnedWordsCount = mutableStateOf(0)
+        private set
+
+    var notLearnedWordsCount = mutableStateOf(0)
+        private set
+
     private var words: List<Word> = emptyList()
     private var wordsToLearn = mutableStateListOf<Word>()
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
-        if(id != -1) {
+        if (id != -1) {
             viewModelScope.launch {
                 categoryRepository.get(id)?.let { c ->
                     category = c
@@ -46,6 +61,8 @@ class CardsGameViewModel @Inject constructor(
 
                     if (!wordsToLearn.isEmpty()) {
                         currentWord.value = wordsToLearn.first()
+                        currentWordIndex.value = 0
+                        countOfWords.value = wordsToLearn.size
                     }
                 }
             }
@@ -57,11 +74,15 @@ class CardsGameViewModel @Inject constructor(
             is CardsGameEvent.WordLearned -> {
                 val word = event.word
                 word.lastRepeated = Date()
-                word.bucket = word.bucket+1
+//                word.bucket = word.bucket+1
                 wordsRepository.update(word)
 
                 wordsToLearn.remove(currentWord.value)
                 currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null
+                currentWordIndex.value = currentWordIndex.value + 1
+                learnProgress.value =
+                    currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
+                learnedWordsCount.value = learnedWordsCount.value + 1
             }
             is CardsGameEvent.WordNotLearned -> {
                 val word = event.word
@@ -71,6 +92,10 @@ class CardsGameViewModel @Inject constructor(
 
                 wordsToLearn.remove(currentWord.value)
                 currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null
+                currentWordIndex.value = currentWordIndex.value + 1
+                learnProgress.value =
+                    currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
+                notLearnedWordsCount.value = notLearnedWordsCount.value + 1
             }
         }
     }

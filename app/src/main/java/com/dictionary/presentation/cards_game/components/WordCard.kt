@@ -45,8 +45,8 @@ fun WordCard(
                 IntOffset(offset.value.x.roundToInt(), offset.value.y.roundToInt())
             }
             .padding(10.dp, 10.dp)
-            .height(650.dp)
-            .width(350.dp)
+            .height(520.dp)
+            .width(330.dp)
             .graphicsLayer {
                 rotationY = rotation.value
                 cameraDistance = 12f * density
