@@ -5,25 +5,28 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.dictionary.presentation.category_list.CategoryListEvent
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddCategoryDialog(
     categoryTitle: MutableState<String>,
     onEvent: (CategoryListEvent) -> Unit
 ) {
     Dialog(
-        onDismissRequest = {
-            onEvent(CategoryListEvent.OnCloseAddCategoryDialog)
-        },
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+        onDismissRequest = { onEvent(CategoryListEvent.OnCloseAddCategoryDialog) },
         content = {
-            Box{
+            Box(
+                modifier = Modifier.padding(10.dp)
+            ){
                 Card(modifier = Modifier
-                    .width(300.dp)
                     .wrapContentHeight(),
                     backgroundColor = MaterialTheme.colors.surface
                 ) {

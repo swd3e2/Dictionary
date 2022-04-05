@@ -1,30 +1,33 @@
 package com.dictionary.presentation.category_list
 
+import android.app.Application
+import android.net.Uri
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Category
+import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
-import com.dictionary.domain.use_case.create_category.CreateCategoryUseCase
-import com.dictionary.domain.use_case.delete_category.DeleteCategoryUseCase
-import com.dictionary.domain.use_case.get_categories_list.GetCategoriesListUseCase
+import com.dictionary.domain.repository.WordRepository
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class CategoriesListViewModel @Inject constructor(
+    private val app: Application,
     private val categoryRepository: CategoryRepository,
-) : ViewModel() {
+    private val wordsRepository: WordRepository
+) : AndroidViewModel(app) {
 
-    val filename: MutableLiveData<String> by lazy {
-        MutableLiveData<String>()
-    }
+    val filename: MutableLiveData<Uri> by lazy { MutableLiveData<Uri>() }
 
     var openDialog = mutableStateOf(false)
         private set
@@ -41,7 +44,7 @@ class CategoriesListViewModel @Inject constructor(
         categories.value = categoryRepository.list()
     }
 
-    fun onEvent(event: CategoryListEvent): Unit {
+    fun onEvent(event: CategoryListEvent) {
         when (event) {
             is CategoryListEvent.OnSaveClick -> {
                 if (title.value.isEmpty()) {
@@ -57,10 +60,14 @@ class CategoriesListViewModel @Inject constructor(
             }
             is CategoryListEvent.OnDeleteCategory -> {
                 categoryRepository.delete(event.id)
+                wordsRepository.deleteByCategory(event.id)
                 categories.value = categoryRepository.list()
             }
             is CategoryListEvent.OnCategoryClick -> {
                 sendUiEvent(UiEvent.Navigate(Routes.CATEGORY_EDIT + "?id=${event.id}"))
+            }
+            is CategoryListEvent.OnGameClick -> {
+                sendUiEvent(UiEvent.Navigate(Routes.CARDS_GAME + "?id=${event.id}"))
             }
             is CategoryListEvent.OnOpenAddCategoryDialog -> {
                 openDialog.value = true
@@ -72,13 +79,60 @@ class CategoriesListViewModel @Inject constructor(
         }
     }
 
-    fun onFilenameChange(filename: String): Unit {
-        println("NEWNAME: $filename")
+    fun onFilenameChange(uri: Uri) {
+        val readBytes = app.contentResolver.openInputStream(uri)!!.readBytes()
+        val data = readBytes.toString(Charsets.UTF_8)
+
+        println("FILENAME $data")
+        println("FILENAME ${getFilename(uri)}")
+
+        val words = mutableListOf<Word>()
+        for (line in data.lines()) {
+            val splitLine = line.split(';')
+            if (splitLine.size < 2) {
+                continue
+            }
+
+            words.add(Word(
+                id = 0,
+                term = splitLine[0],
+                definition = splitLine[1],
+                category = 0,
+                created = Date(),
+                lastRepeated = Date(),
+            ))
+        }
+
+        if (words.size == 0) {
+            return
+        }
+
+        val categoryId = categoryRepository.create(Category(id = null, name = getFilename(uri)))
+
+        for (word in words) {
+            word.category = categoryId.toInt()
+            wordsRepository.create(word)
+        }
+
+        categories.value = categoryRepository.list()
     }
 
     private fun sendUiEvent(event: UiEvent) {
-        viewModelScope.launch {
-            _uiEvent.send(event)
+        viewModelScope.launch { _uiEvent.send(event) }
+    }
+
+    private fun getFilename(uri: Uri): String {
+        val path = uri.path
+        val splitPath = path?.split('/')
+        if (splitPath == null || splitPath.isEmpty()) {
+            return ""
         }
+
+        val splitFileExtension = splitPath[splitPath.size-1].split('.')
+        if (splitFileExtension.size < 2) {
+            return ""
+        }
+
+        return splitFileExtension[0]
     }
 }

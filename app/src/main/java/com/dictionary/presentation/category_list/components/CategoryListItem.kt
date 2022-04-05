@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.dictionary.domain.entity.Category
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -31,8 +32,6 @@ fun CategoryListItem(
     category: Category,
     onEvent: (CategoryListEvent) -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-
     Card(
         modifier = Modifier
             .padding(15.dp, 5.dp)
@@ -75,9 +74,21 @@ fun CategoryListItem(
                     )
                 }
             }
-            Box(
-                contentAlignment = Alignment.TopEnd
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                IconButton(
+                    onClick = {
+                        onEvent(CategoryListEvent.OnGameClick(category.id!!))
+                    },
+                    interactionSource = remember { DisabledInteractionSource() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AccountBox,
+                        "Card game",
+                        modifier = Modifier.size(20.dp),
+                    )
+                }
                 IconButton(
                     onClick = {
                         onEvent(CategoryListEvent.OnDeleteCategory(category.id!!))

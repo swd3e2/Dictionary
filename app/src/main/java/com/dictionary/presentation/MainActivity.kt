@@ -17,10 +17,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.dictionary.presentation.cards_game.CardsGameList
 import com.dictionary.presentation.category_edit.CategoryEditScreen
 import com.dictionary.presentation.category_list.CategoriesListViewModel
 import com.dictionary.presentation.category_list.CategoryListScreen
-import com.dictionary.presentation.word_edit_info.WordEditScreen
+import com.dictionary.presentation.word_edit.WordEditScreen
 import com.dictionary.utils.Routes
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -34,10 +35,9 @@ class MainActivity : ComponentActivity() {
     private val launcher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                val data = result.data
-                val uri = data?.data!!
-                val readBytes = contentResolver.openInputStream(uri)!!.readBytes()
-                categoriesListViewModel.filename.value = readBytes.toString(Charsets.UTF_8)
+                result.data?.let {
+                    categoriesListViewModel.filename.value = it.data
+                }
             }
         }
 
@@ -107,6 +107,19 @@ class MainActivity : ComponentActivity() {
                             )
                         ) {
                             WordEditScreen(onPopBackStack = {
+                                navController.popBackStack()
+                            })
+                        }
+                        composable(
+                            route = Routes.CARDS_GAME + "?id={id}",
+                            arguments = listOf(
+                                navArgument(name = "id") {
+                                    type = NavType.IntType
+                                    defaultValue = -1
+                                }
+                            )
+                        ) {
+                            CardsGameList(onPopBackStack = {
                                 navController.popBackStack()
                             })
                         }

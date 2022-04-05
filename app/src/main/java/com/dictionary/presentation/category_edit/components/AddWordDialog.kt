@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -18,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.google.accompanist.flowlayout.FlowRow
 import com.dictionary.presentation.category_edit.CategoryEditEvent
 import com.dictionary.presentation.category_edit.CategoryEditViewModel
@@ -25,6 +27,7 @@ import com.dictionary.presentation.category_edit.WordTranslationState
 import com.dictionary.ui.theme.SecondaryTextColor
 
 //@Preview
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddWordDialog(
     viewModel: CategoryEditViewModel,
@@ -34,6 +37,7 @@ fun AddWordDialog(
     onEvent: (CategoryEditEvent) -> Unit
 ) {
     Dialog(
+        properties = DialogProperties(usePlatformDefaultWidth = false),
         onDismissRequest = {
             onEvent(CategoryEditEvent.OnCloseAddWordDialog)
         },
@@ -41,8 +45,9 @@ fun AddWordDialog(
             Box {
                 Card(
                     modifier = Modifier
-                        .width(300.dp)
-                        .wrapContentHeight(),
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .width(300.dp),
                     backgroundColor = MaterialTheme.colors.surface
                 ) {
                     Column(

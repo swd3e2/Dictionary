@@ -1,4 +1,4 @@
-package com.dictionary.presentation.word_edit_info
+package com.dictionary.presentation.word_edit
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle

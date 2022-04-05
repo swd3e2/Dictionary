@@ -1,4 +1,4 @@
-package com.dictionary.presentation.word_edit_info.componetns
+package com.dictionary.presentation.word_edit.componetns
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.*
@@ -7,7 +7,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import com.dictionary.presentation.word_edit_info.WordEditEvent
+import com.dictionary.presentation.word_edit.WordEditEvent
 
 @Composable
 fun DropDownMenu(
@@ -17,12 +17,12 @@ fun DropDownMenu(
     onEvent: (WordEditEvent) -> Unit
 ) {
     Column {
-        TopAppBar() {
+        TopAppBar {
             IconButton(
                 onClick = {
                     onPopBackStack()
                 }) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colors.primary)
             }
             Text(text = label)
             IconButton(onClick = {

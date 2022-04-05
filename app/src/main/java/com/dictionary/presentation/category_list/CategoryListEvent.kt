@@ -5,6 +5,7 @@ sealed class CategoryListEvent {
     object OnSaveClick: CategoryListEvent()
     data class OnChangeTitle(val title: String): CategoryListEvent()
     data class OnDeleteCategory(val id: Int): CategoryListEvent()
+    data class OnGameClick(val id: Int): CategoryListEvent()
     object OnOpenAddCategoryDialog: CategoryListEvent()
     object OnCloseAddCategoryDialog: CategoryListEvent()
 }

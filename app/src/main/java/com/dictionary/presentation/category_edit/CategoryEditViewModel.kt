@@ -1,21 +1,17 @@
 package com.dictionary.presentation.category_edit
 
-import android.app.Activity
-import android.app.Application
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dictionary.common.Resource
 import com.dictionary.domain.entity.Category
 import com.dictionary.domain.entity.Word
+import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.TranslationRepository
 import com.dictionary.domain.repository.WordRepository
-import com.dictionary.domain.use_case.get_category.GetCategoryUseCase
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -31,7 +27,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CategoryEditViewModel @Inject constructor(
-    private val getCategoryUseCase: GetCategoryUseCase,
+    private val categoryRepository: CategoryRepository,
     private val wordRepository: WordRepository,
     private val translationRepository: TranslationRepository,
     savedStateHandle: SavedStateHandle
@@ -69,7 +65,7 @@ class CategoryEditViewModel @Inject constructor(
         val id = savedStateHandle.get<Int>("id")!!
         if(id != -1) {
             viewModelScope.launch {
-                getCategoryUseCase(id)?.let { c ->
+                categoryRepository.get(id)?.let { c ->
                     category = c
                     words = wordRepository.categoryWords(c.id!!)
                 }
@@ -130,6 +126,8 @@ class CategoryEditViewModel @Inject constructor(
                 newWordTerm.value = ""
                 newWordDefinition.value = ""
                 openDialog.value = false
+                _state.value = WordTranslationState(translation = null)
+                wordTranslations.clear()
             }
             is CategoryEditEvent.OnOpenAddWordDialog -> {
                 openDialog.value = true
@@ -138,6 +136,8 @@ class CategoryEditViewModel @Inject constructor(
                 newWordTerm.value = ""
                 newWordDefinition.value = ""
                 openDialog.value = false
+                _state.value = WordTranslationState(translation = null)
+                wordTranslations.clear()
             }
             is CategoryEditEvent.GetTranslation -> {
                 searchJob?.cancel()
@@ -169,5 +169,4 @@ class CategoryEditViewModel @Inject constructor(
             }
         }
     }
-
 }

@@ -43,7 +43,7 @@ fun CustomTextField(
             )
             .fillMaxWidth(),
         textStyle = LocalTextStyle.current.copy(
-            fontSize = 20.sp,
+            fontSize = 16.sp,
             color = SecondaryTextColor
         ),
         singleLine = true,

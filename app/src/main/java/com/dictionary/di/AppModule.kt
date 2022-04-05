@@ -11,10 +11,6 @@ import com.dictionary.data.room.Database
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.TranslationRepository
 import com.dictionary.domain.repository.WordRepository
-import com.dictionary.domain.use_case.create_category.CreateCategoryUseCase
-import com.dictionary.domain.use_case.delete_category.DeleteCategoryUseCase
-import com.dictionary.domain.use_case.get_categories_list.GetCategoriesListUseCase
-import com.dictionary.domain.use_case.get_category.GetCategoryUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,30 +22,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
-    @Provides
-    @Singleton
-    fun provideGetCategoriesListUseCase(repository: CategoryRepository): GetCategoriesListUseCase {
-        return GetCategoriesListUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideGetCategoryUseCaseUseCase(repository: CategoryRepository): GetCategoryUseCase {
-        return GetCategoryUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideDeleteCategoryUseCase(repository: CategoryRepository): DeleteCategoryUseCase {
-        return DeleteCategoryUseCase(repository)
-    }
-
-    @Provides
-    @Singleton
-    fun provideCreateCategoryUseCase(repository: CategoryRepository): CreateCategoryUseCase {
-        return CreateCategoryUseCase(repository)
-    }
 
     @Provides
     @Singleton

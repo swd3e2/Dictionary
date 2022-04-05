@@ -1,4 +1,4 @@
-package com.dictionary.presentation.category_edit.components
+package com.dictionary.presentation.cards_game.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -14,39 +14,19 @@ import com.dictionary.presentation.category_edit.CategoryEditEvent
 
 @Composable
 fun DropDownMenu(
-    label: String,
     onPopBackStack: () -> Unit,
-    menuExpanded: MutableState<Boolean>,
-    onEvent: (CategoryEditEvent) -> Unit
 ) {
     Column {
         TopAppBar(backgroundColor = Color(0x00000000), elevation = 0.dp){
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
             ) {
                 IconButton(
                     onClick = {
                         onPopBackStack()
                     }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colors.primary)
-                }
-                Box{
-                    IconButton(onClick = {
-                        onEvent(CategoryEditEvent.OnMenuClick)
-                    }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Show menu")
-                    }
-                    DropdownMenu(expanded = menuExpanded.value, onDismissRequest = {
-                        onEvent(CategoryEditEvent.OnCloseMenu)
-                    }) {
-                        DropdownMenuItem(onClick = { }) {
-                            Text(text = "Settings")
-                        }
-                        DropdownMenuItem(onClick = { }) {
-                            Text(text = "Delete")
-                        }
-                    }
                 }
             }
         }

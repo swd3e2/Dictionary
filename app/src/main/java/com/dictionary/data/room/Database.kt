@@ -1,5 +1,6 @@
 package com.dictionary.data.room
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -14,8 +15,11 @@ import com.dictionary.domain.entity.Word
         Category::class,
         Word::class,
     ],
-    version = 2,
-    exportSchema = false
+    version = 1,
+    exportSchema = true,
+    autoMigrations = [
+//        AutoMigration (from = 2, to = 3)
+    ]
 )
 @TypeConverters(Converters::class)
 abstract class Database: RoomDatabase() {

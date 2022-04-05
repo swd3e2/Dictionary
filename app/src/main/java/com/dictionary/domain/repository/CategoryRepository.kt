@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface CategoryRepository {
     fun list(): List<Category>
-    fun create(category: Category): Unit
-    fun delete(id: Int): Unit
+    fun create(category: Category): Long
+    fun delete(id: Int)
     fun get(id: Int): Category?
 }

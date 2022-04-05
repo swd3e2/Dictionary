@@ -1,4 +1,4 @@
-package com.dictionary.presentation.word_edit_info
+package com.dictionary.presentation.word_edit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.dictionary.presentation.word_edit_info.componetns.DropDownMenu
+import com.dictionary.presentation.word_edit.componetns.DropDownMenu
 
 @Composable
 fun WordEditScreen(

@@ -14,9 +14,8 @@ class CategoryRepositoryImpl @Inject constructor(
         return dao.list()
     }
 
-    override fun create(category: Category): Unit {
-        val id = dao.create(Category(category.id, category.name))
-        list()
+    override fun create(category: Category): Long {
+        return dao.create(Category(category.id, category.name))
     }
 
     override fun delete(id: Int) {

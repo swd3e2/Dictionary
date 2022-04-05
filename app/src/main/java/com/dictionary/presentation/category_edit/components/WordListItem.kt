@@ -25,7 +25,7 @@ fun WordListItem(
 ) {
     Card(
         modifier = Modifier
-            .padding(0.dp, 5.dp)
+            .padding(15.dp, 5.dp)
             .clip(shape = RoundedCornerShape(30))
             .clickable {
                 onEvent(CategoryEditEvent.OnWordClick(word.id))
@@ -39,7 +39,10 @@ fun WordListItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column{
+            Column(
+                modifier = Modifier
+                    .width(300.dp)
+            ){
                 Text(
                     text = word.term,
                     style = MaterialTheme.typography.body1,
@@ -48,14 +51,6 @@ fun WordListItem(
                 )
                 Text(
                     text = word.definition,
-                    style = MaterialTheme.typography.body1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = SecondaryTextColor,
-                    fontSize = 12.sp
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "Last repeated: ${word.created}",
                     style = MaterialTheme.typography.body1,
                     overflow = TextOverflow.Ellipsis,
                     color = SecondaryTextColor,
