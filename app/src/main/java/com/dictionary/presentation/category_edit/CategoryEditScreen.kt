@@ -51,57 +51,54 @@ fun CategoryEditScreen(
             )
         }
     ) {
-        Column(
+        if (viewModel.openDialog.value) {
+            AddWordDialog(
+                viewModel,
+                viewModel.newWordTerm,
+                viewModel.newWordDefinition,
+                viewModel.state,
+                viewModel::onEvent,
+            )
+        }
+
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(15.dp, 0.dp)
-            ) {
-                Text(
-                    text = viewModel.category.name,
-                    fontSize = 30.sp,
-                    color = PrimaryTextColor,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(15.dp, 5.dp, 20.dp, 0.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TextField(value = "", onValueChange = {}, label = { Text(text = "Search") })
-                IconButton(
-                    onClick = { viewModel.onEvent(CategoryEditEvent.OnOpenAddWordDialog) }
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp, 0.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add",
-                        tint = MaterialTheme.colors.primary
+                    Text(
+                        text = viewModel.category.name,
+                        fontSize = 30.sp,
+                        color = PrimaryTextColor,
+                        fontWeight = FontWeight.Bold
                     )
                 }
-            }
-
-            if (viewModel.openDialog.value) {
-                AddWordDialog(
-                    viewModel,
-                    viewModel.newWordTerm,
-                    viewModel.newWordDefinition,
-                    viewModel.state,
-                    viewModel::onEvent,
-                )
-            }
-
-            LazyColumn(
-                modifier = Modifier.padding(0.dp, 15.dp, 0.dp, 0.dp)
-            ) {
-                words?.let {
-                    items(words.value) { word ->
-                        WordListItem(word, viewModel::onEvent)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(15.dp, 5.dp, 20.dp, 0.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    TextField(value = "", onValueChange = {}, label = { Text(text = "Search") })
+                    IconButton(
+                        onClick = { viewModel.onEvent(CategoryEditEvent.OnOpenAddWordDialog) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add",
+                            tint = MaterialTheme.colors.primary
+                        )
                     }
+                }
+            }
+            words?.let {
+                items(words.value) { word ->
+                    WordListItem(word, viewModel::onEvent)
                 }
             }
         }

@@ -41,8 +41,9 @@ fun CategoryListScreen(
             }
         }
     }
-    Box(modifier = Modifier
-        .fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
     ) {
         Scaffold(
             scaffoldState = scaffoldState,
@@ -50,74 +51,77 @@ fun CategoryListScreen(
                 BottomBar()
             }
         ) {
-            Column(modifier = Modifier.padding(it)
-                .wrapContentHeight()
-//                .verticalScroll(rememberScrollState())
+            Column(
+                modifier = Modifier
+                    .padding(it)
+                    .wrapContentHeight()
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(30.dp, 30.dp, 30.dp, 0.dp),
-                ) {
-                    Text(
-                        text = "Welcome home, Master",
-                        color = SecondaryTextColor,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Your categories",
-                        fontSize = 30.sp,
-                        color = PrimaryTextColor,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
                 if (viewModel.openDialog.value) {
                     AddCategoryDialog(
                         viewModel.title,
                         viewModel::onEvent
                     )
                 }
-                Column(
+                LazyColumn(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        IconButton(
-                            onClick = launchFileIntent
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(30.dp, 30.dp, 30.dp, 0.dp),
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Import",
-                                tint = MaterialTheme.colors.primary
+                            Text(
+                                text = "Welcome home, Master",
+                                color = SecondaryTextColor,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
                             )
-                        }
-                        IconButton(
-                            modifier = Modifier.padding(0.dp, 0.dp, 20.dp, 0.dp),
-                            onClick = {
-                                viewModel.onEvent(CategoryListEvent.OnOpenAddCategoryDialog)
-                            }) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add",
-                                tint = MaterialTheme.colors.primary
+                            Text(
+                                text = "Your categories",
+                                fontSize = 30.sp,
+                                color = PrimaryTextColor,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
-                    LazyColumn{
-                        items(categories.value) { category ->
-                            CategoryListItem(category, viewModel::onEvent)
+                    item {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End
+                        ) {
+                            IconButton(
+                                onClick = launchFileIntent
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                    contentDescription = "Import",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            }
+                            IconButton(
+                                modifier = Modifier.padding(0.dp, 0.dp, 20.dp, 0.dp),
+                                onClick = {
+                                    viewModel.onEvent(CategoryListEvent.OnOpenAddCategoryDialog)
+                                }) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            }
                         }
                     }
+                    items(categories.value) { category ->
+                        CategoryListItem(category, viewModel::onEvent)
+                    }
+                }
 //                    for (category in viewModel.categories) {
 //                        CategoryListItem(
 //                            category = category,
 //                            onEvent = viewModel::onEvent
 //                        )
 //                    }
-                }
             }
         }
     }
