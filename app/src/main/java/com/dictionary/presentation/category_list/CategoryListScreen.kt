@@ -12,9 +12,11 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.dictionary.presentation.category_edit.components.WordListItem
 import com.dictionary.presentation.category_list.components.AddCategoryDialog
 import com.dictionary.presentation.category_list.components.CategoryListItem
 import com.dictionary.presentation.common.BottomBar
@@ -29,6 +31,7 @@ fun CategoryListScreen(
     viewModel: CategoriesListViewModel = hiltViewModel()
 ) {
     val scaffoldState = rememberScaffoldState()
+    val categories = viewModel.categories.collectAsState(initial = emptyList())
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
@@ -49,7 +52,7 @@ fun CategoryListScreen(
         ) {
             Column(modifier = Modifier.padding(it)
                 .wrapContentHeight()
-                .verticalScroll(rememberScrollState())
+//                .verticalScroll(rememberScrollState())
             ) {
                 Column(
                     modifier = Modifier
@@ -103,12 +106,17 @@ fun CategoryListScreen(
                             )
                         }
                     }
-                    for (category in viewModel.categories) {
-                        CategoryListItem(
-                            category = category,
-                            onEvent = viewModel::onEvent
-                        )
+                    LazyColumn{
+                        items(categories.value) { category ->
+                            CategoryListItem(category, viewModel::onEvent)
+                        }
                     }
+//                    for (category in viewModel.categories) {
+//                        CategoryListItem(
+//                            category = category,
+//                            onEvent = viewModel::onEvent
+//                        )
+//                    }
                 }
             }
         }

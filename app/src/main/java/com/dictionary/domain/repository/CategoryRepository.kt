@@ -5,9 +5,9 @@ import com.dictionary.domain.entity.CategoryWithWords
 import kotlinx.coroutines.flow.Flow
 
 interface CategoryRepository {
-    fun listWithWords(): List<CategoryWithWords>
-    fun list(): List<Category>
-    fun create(category: Category): Long
-    fun delete(id: Int)
-    fun get(id: Int): Category?
+    fun listWithWords(): Flow<List<CategoryWithWords>>
+    suspend fun list(): List<Category>
+    suspend fun create(category: Category): Long
+    suspend fun delete(id: Int)
+    suspend fun get(id: Int): Category?
 }

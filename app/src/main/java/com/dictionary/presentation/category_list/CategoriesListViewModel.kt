@@ -16,7 +16,11 @@ import com.dictionary.domain.repository.WordRepository
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.util.*
@@ -29,7 +33,8 @@ class CategoriesListViewModel @Inject constructor(
     private val wordsRepository: WordRepository
 ) : AndroidViewModel(app) {
 
-    val filename: MutableLiveData<Uri> by lazy { MutableLiveData<Uri>() }
+    val _filenameStateFlow = MutableStateFlow<Uri?>(null)
+    val filenameStateFlow = _filenameStateFlow.asStateFlow()
 
     var openDialog = mutableStateOf(false)
         private set
@@ -37,14 +42,17 @@ class CategoriesListViewModel @Inject constructor(
     var title = mutableStateOf("")
         private set
 
-    val categories = mutableStateListOf<CategoryWithWords>()
+//    val categories = mutableStateListOf<CategoryWithWords>()
+    val categories = categoryRepository.listWithWords()
 
-    private val _uiEvent =  Channel<UiEvent>()
+    private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    init {
-        categories.addAll(categoryRepository.listWithWords())
-    }
+//    init {
+//        viewModelScope.launch {
+//            categories.addAll(categoryRepository.listWithWords())
+//        }
+//    }
 
     fun onEvent(event: CategoryListEvent) {
         when (event) {
@@ -52,21 +60,22 @@ class CategoriesListViewModel @Inject constructor(
                 if (title.value.isEmpty()) {
                     return
                 }
-                val newCategory = Category(id = 0, name = title.value)
-                val newCategoryId = categoryRepository.create(newCategory)
-                newCategory.id = newCategoryId.toInt()
-
-                title.value = ""
-                openDialog.value = false
-                categories.add(CategoryWithWords(category = newCategory, words = emptyList()))
+                viewModelScope.launch(Dispatchers.IO) {
+                    val newCategory = Category(id = 0, name = title.value)
+                    val newCategoryId = categoryRepository.create(newCategory)
+                    newCategory.id = newCategoryId.toInt()
+                    title.value = ""
+                    openDialog.value = false
+                }
             }
             is CategoryListEvent.OnChangeTitle -> {
                 title.value = event.title
             }
             is CategoryListEvent.OnDeleteCategory -> {
-                categoryRepository.delete(event.category.category.id)
-                wordsRepository.deleteByCategory(event.category.category.id)
-                categories.remove(event.category)
+                viewModelScope.launch(Dispatchers.IO) {
+                    categoryRepository.delete(event.category.category.id)
+                    wordsRepository.deleteByCategory(event.category.category.id)
+                }
             }
             is CategoryListEvent.OnCategoryClick -> {
                 sendUiEvent(UiEvent.Navigate(Routes.CATEGORY_EDIT + "?id=${event.id}"))
@@ -81,46 +90,45 @@ class CategoriesListViewModel @Inject constructor(
                 title.value = ""
                 openDialog.value = false
             }
-        }
-    }
+            is CategoryListEvent.OnImportFile -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val readBytes = app.contentResolver.openInputStream(event.uri)!!.readBytes()
+                    val data = readBytes.toString(Charsets.UTF_8)
 
-    fun onFilenameChange(uri: Uri) {
-        val readBytes = app.contentResolver.openInputStream(uri)!!.readBytes()
-        val data = readBytes.toString(Charsets.UTF_8)
+                    val words = mutableListOf<Word>()
+                    for (line in data.lines()) {
+                        val splitLine = line.split(';')
+                        if (splitLine.size < 2) {
+                            continue
+                        }
 
-        println("FILENAME $data")
-        println("FILENAME ${getFilename(uri)}")
+                        words.add(
+                            Word(
+                                id = 0,
+                                term = splitLine[0],
+                                definition = splitLine[1],
+                                category = 0,
+                                created = Date(),
+                                lastRepeated = Date(),
+                            )
+                        )
+                    }
 
-        val words = mutableListOf<Word>()
-        for (line in data.lines()) {
-            val splitLine = line.split(';')
-            if (splitLine.size < 2) {
-                continue
+                    if (words.size == 0) {
+                        cancel()
+                    }
+
+                    val category = Category(id = 0, name = getFilename(event.uri))
+                    val categoryId = categoryRepository.create(category)
+                    category.id = categoryId.toInt()
+
+                    for (word in words) {
+                        word.category = category.id
+                        wordsRepository.create(word)
+                    }
+                }
             }
-
-            words.add(Word(
-                id = 0,
-                term = splitLine[0],
-                definition = splitLine[1],
-                category = 0,
-                created = Date(),
-                lastRepeated = Date(),
-            ))
         }
-
-        if (words.size == 0) {
-            return
-        }
-
-        val categoryId = categoryRepository.create(Category(id = 0, name = getFilename(uri)))
-
-        for (word in words) {
-            word.category = categoryId.toInt()
-            wordsRepository.create(word)
-        }
-
-        categories.clear()
-        categories.addAll(categoryRepository.listWithWords())
     }
 
     private fun sendUiEvent(event: UiEvent) {
@@ -134,7 +142,7 @@ class CategoriesListViewModel @Inject constructor(
             return ""
         }
 
-        val splitFileExtension = splitPath[splitPath.size-1].split('.')
+        val splitFileExtension = splitPath[splitPath.size - 1].split('.')
         if (splitFileExtension.size < 2) {
             return ""
         }

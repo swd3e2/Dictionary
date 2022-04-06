@@ -10,23 +10,23 @@ import javax.inject.Inject
 class CategoryRepositoryImpl @Inject constructor(
     private val dao: CategoriesDao
 ) : CategoryRepository {
-    override fun listWithWords(): List<CategoryWithWords> {
+    override fun listWithWords(): Flow<List<CategoryWithWords>> {
         return dao.listWithWords()
     }
 
-    override fun list(): List<Category> {
+    override suspend fun list(): List<Category> {
         return dao.list()
     }
 
-    override fun create(category: Category): Long {
+    override suspend fun create(category: Category): Long {
         return dao.create(Category(category.id, category.name))
     }
 
-    override fun delete(id: Int) {
+    override suspend fun delete(id: Int) {
         dao.delete(id)
     }
 
-    override fun get(id: Int): Category? {
+    override suspend fun get(id: Int): Category? {
         return dao.get(id)
     }
 

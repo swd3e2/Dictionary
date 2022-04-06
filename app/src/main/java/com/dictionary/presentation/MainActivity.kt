@@ -12,6 +12,7 @@ import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,10 +21,12 @@ import androidx.navigation.navArgument
 import com.dictionary.presentation.cards_game.CardsGameList
 import com.dictionary.presentation.category_edit.CategoryEditScreen
 import com.dictionary.presentation.category_list.CategoriesListViewModel
+import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.presentation.category_list.CategoryListScreen
 import com.dictionary.presentation.word_edit.WordEditScreen
 import com.dictionary.utils.Routes
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 
 
 //AppCompatActivity
@@ -36,7 +39,7 @@ class MainActivity : ComponentActivity() {
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 result.data?.let {
-                    categoriesListViewModel.filename.value = it.data
+                    categoriesListViewModel._filenameStateFlow.value = it.data
                 }
             }
         }
@@ -48,8 +51,13 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Observe the LiveData, passing in this activity as the LifecycleOwner and the observer.
-        categoriesListViewModel.filename.observe(this) { categoriesListViewModel.onFilenameChange(it) }
+        lifecycleScope.launchWhenStarted {
+            categoriesListViewModel.filenameStateFlow.collectLatest {
+                it?.let {
+                    categoriesListViewModel.onEvent(CategoryListEvent.OnImportFile(it))
+                }
+            }
+        }
 
         setContent {
             MaterialTheme(

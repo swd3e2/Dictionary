@@ -10,6 +10,7 @@ import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.WordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -72,30 +73,34 @@ class CardsGameViewModel @Inject constructor(
     fun onEvent(event: CardsGameEvent) {
         when (event) {
             is CardsGameEvent.WordLearned -> {
-                val word = event.word
-                word.lastRepeated = Date()
+                viewModelScope.launch(Dispatchers.IO) {
+                    val word = event.word
+                    word.lastRepeated = Date()
 //                word.bucket = word.bucket+1
-                wordsRepository.update(word)
+                    wordsRepository.update(word)
 
-                wordsToLearn.remove(currentWord.value)
-                currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null
-                currentWordIndex.value = currentWordIndex.value + 1
-                learnProgress.value =
-                    currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
-                learnedWordsCount.value = learnedWordsCount.value + 1
+                    wordsToLearn.remove(currentWord.value)
+                    currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null
+                    currentWordIndex.value = currentWordIndex.value + 1
+                    learnProgress.value =
+                        currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
+                    learnedWordsCount.value = learnedWordsCount.value + 1
+                }
             }
             is CardsGameEvent.WordNotLearned -> {
-                val word = event.word
-                word.lastRepeated = Date()
-                word.bucket = 0
-                wordsRepository.update(word)
+                viewModelScope.launch(Dispatchers.IO) {
+                    val word = event.word
+                    word.lastRepeated = Date()
+                    word.bucket = 0
+                    wordsRepository.update(word)
 
-                wordsToLearn.remove(currentWord.value)
-                currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null
-                currentWordIndex.value = currentWordIndex.value + 1
-                learnProgress.value =
-                    currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
-                notLearnedWordsCount.value = notLearnedWordsCount.value + 1
+                    wordsToLearn.remove(currentWord.value)
+                    currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null
+                    currentWordIndex.value = currentWordIndex.value + 1
+                    learnProgress.value =
+                        currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
+                    notLearnedWordsCount.value = notLearnedWordsCount.value + 1
+                }
             }
         }
     }

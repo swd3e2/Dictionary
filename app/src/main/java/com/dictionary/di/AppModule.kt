@@ -44,7 +44,7 @@ object AppModule {
     fun provideDatabase(app: Application): Database {
         return Room.databaseBuilder(
             app, Database::class.java, "dictionary"
-        ).allowMainThreadQueries().build()
+        ).build()
     }
 
 

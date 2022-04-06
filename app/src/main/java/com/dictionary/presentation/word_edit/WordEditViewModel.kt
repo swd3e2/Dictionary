@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.WordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -25,13 +26,13 @@ class WordEditViewModel @Inject constructor(
     init {
         val id = savedStateHandle.get<Int>("id")!!
         if(id != -1) {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 wordRepository.get(id)?.let { w -> word = w }
             }
         }
     }
 
-    fun onEvent(event: WordEditEvent): Unit {
+    fun onEvent(event: WordEditEvent) {
         when (event) {
             is WordEditEvent.OnMenuClick -> {
                 menuExpanded.value = true

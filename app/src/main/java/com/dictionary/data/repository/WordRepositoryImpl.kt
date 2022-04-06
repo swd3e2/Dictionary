@@ -13,27 +13,27 @@ class WordRepositoryImpl @Inject constructor(
         return dao.byCategory(category)
     }
 
-    override fun categoryWordsAsList(category: Int): List<Word> {
+    override suspend fun categoryWordsAsList(category: Int): List<Word> {
         return dao.byCategoryAsList(category)
     }
 
-    override fun get(id: Int): Word? {
+    override suspend fun get(id: Int): Word? {
         return dao.get(id)
     }
 
-    override fun delete(id: Int) {
+    override suspend fun delete(id: Int) {
         dao.delete(id)
     }
 
-    override fun deleteByCategory(category: Int) {
+    override suspend fun deleteByCategory(category: Int) {
         dao.deleteByCategory(category)
     }
 
-    override fun create(word: Word): Long {
+    override suspend fun create(word: Word): Long {
         return dao.create(word)
     }
 
-    override fun update(word: Word) {
+    override suspend fun update(word: Word) {
         dao.update(word)
     }
 }

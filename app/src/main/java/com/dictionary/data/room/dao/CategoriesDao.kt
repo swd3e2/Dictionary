@@ -21,5 +21,5 @@ interface CategoriesDao {
 
     @Transaction
     @Query("select * from ${Category.TABLE_NAME}")
-    fun listWithWords(): List<CategoryWithWords>
+    fun listWithWords(): Flow<List<CategoryWithWords>>
 }

@@ -15,6 +15,7 @@ import com.dictionary.domain.repository.WordRepository
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -64,7 +65,7 @@ class CategoryEditViewModel @Inject constructor(
     init {
         val id = savedStateHandle.get<Int>("id")!!
         if(id != -1) {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 categoryRepository.get(id)?.let { c ->
                     category = c
                     words = wordRepository.categoryWords(c.id)
@@ -73,7 +74,7 @@ class CategoryEditViewModel @Inject constructor(
         }
     }
 
-    fun onEvent(event: CategoryEditEvent): Unit {
+    fun onEvent(event: CategoryEditEvent) {
         when (event) {
             is CategoryEditEvent.OnMenuClick -> {
                 menuExpanded.value = true
@@ -88,7 +89,7 @@ class CategoryEditViewModel @Inject constructor(
                 newWordDefinition.value = event.definition
             }
             is CategoryEditEvent.OnDeleteWord -> {
-                viewModelScope.launch {
+                viewModelScope.launch(Dispatchers.IO) {
                     wordRepository.delete(event.id)
                 }
             }
@@ -102,17 +103,17 @@ class CategoryEditViewModel @Inject constructor(
                     return
                 }
 
-                viewModelScope.launch {
-                    var definition = ""
-                    if (!newWordDefinition.value.isEmpty()) {
-                        definition = newWordDefinition.value
-                    } else {
-                        for (translation in wordTranslations) {
-                            definition += "$translation, "
-                        }
-                        definition = definition.dropLast(2)
+                var definition = ""
+                if (!newWordDefinition.value.isEmpty()) {
+                    definition = newWordDefinition.value
+                } else {
+                    for (translation in wordTranslations) {
+                        definition += "$translation, "
                     }
+                    definition = definition.dropLast(2)
+                }
 
+                viewModelScope.launch(Dispatchers.IO) {
                     wordRepository.create(Word(
                         id = 0,
                         term = newWordTerm.value,
@@ -121,13 +122,13 @@ class CategoryEditViewModel @Inject constructor(
                         created = Date(),
                         lastRepeated = Date(),
                     ))
-                }
 
-                newWordTerm.value = ""
-                newWordDefinition.value = ""
-                openDialog.value = false
-                _state.value = WordTranslationState(translation = null)
-                wordTranslations.clear()
+                    newWordTerm.value = ""
+                    newWordDefinition.value = ""
+                    openDialog.value = false
+                    _state.value = WordTranslationState(translation = null)
+                    wordTranslations.clear()
+                }
             }
             is CategoryEditEvent.OnOpenAddWordDialog -> {
                 openDialog.value = true
