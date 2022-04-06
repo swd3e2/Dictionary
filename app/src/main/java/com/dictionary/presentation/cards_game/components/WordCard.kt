@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.dictionary.domain.entity.Word
 import com.dictionary.presentation.cards_game.CardsGameEvent
 import com.dictionary.presentation.common.DisabledInteractionSource
-import com.dictionary.presentation.utils.FlipCard
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -31,25 +30,21 @@ fun WordCard(
     val coroutineScope = rememberCoroutineScope()
     val offset = remember { Animatable(Offset(0f, 0f), Offset.VectorConverter) }
 
-    var flipCard by remember { mutableStateOf(FlipCard.Forward) }
-    val rotation = animateFloatAsState(
-        targetValue = flipCard.angle,
-        animationSpec = tween(
-            durationMillis = 400,
-            easing = FastOutSlowInEasing
-        )
-    )
+    val rotation = remember { Animatable(0f) }
     Card(
         modifier = Modifier
             .offset {
-                IntOffset(offset.value.x.roundToInt(), offset.value.y.roundToInt())
+                IntOffset(
+                    offset.value.x.roundToInt(),
+                    offset.value.y.roundToInt()
+                )
             }
             .padding(10.dp, 10.dp)
             .height(520.dp)
             .width(330.dp)
             .graphicsLayer {
                 rotationY = rotation.value
-                cameraDistance = 12f * density
+                cameraDistance = 18f * density
             }
             .pointerInput(Unit) {
                 detectDragGestures(
@@ -76,7 +71,6 @@ fun WordCard(
                     onDragEnd = {
                         when {
                             offset.value.x < -260.0f -> {
-                                println("POSITION NOT LEARNED")
                                 onEvent(CardsGameEvent.WordNotLearned(word))
                                 coroutineScope.launch {
                                     offset.animateTo(
@@ -86,11 +80,13 @@ fun WordCard(
                                             delayMillis = 0
                                         )
                                     )
+                                    if (rotation.value >= 90f) {
+                                        rotation.snapTo(0f)
+                                    }
                                     offset.snapTo(Offset(0f, 0f))
                                 }
                             }
                             offset.value.x > 260.0f -> {
-                                println("POSITION LEARNED")
                                 onEvent(CardsGameEvent.WordLearned(word))
                                 coroutineScope.launch {
                                     offset.animateTo(
@@ -100,6 +96,9 @@ fun WordCard(
                                             delayMillis = 0
                                         )
                                     )
+                                    if (rotation.value >= 90f) {
+                                        rotation.snapTo(0f)
+                                    }
                                     offset.snapTo(Offset(0f, 0f))
                                 }
                             }
@@ -118,8 +117,19 @@ fun WordCard(
                     },
                 )
             },
-        onClick = { flipCard = flipCard.next },
-        interactionSource = remember { DisabledInteractionSource() }
+        onClick = {
+            coroutineScope.launch {
+                rotation.animateTo(
+                    targetValue = if (rotation.value == 0f) 180f else 0f,
+                    animationSpec = tween(
+                        durationMillis = 300,
+                        easing = FastOutSlowInEasing
+                    ),
+                )
+            }
+        },
+        interactionSource = remember { DisabledInteractionSource() },
+        elevation = 0.dp
     ) {
         Column(verticalArrangement = Arrangement.SpaceBetween) {
             Box(
