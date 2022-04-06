@@ -36,4 +36,8 @@ class WordRepositoryImpl @Inject constructor(
     override suspend fun update(word: Word) {
         dao.update(word)
     }
+
+    override suspend fun exists(term: String): Boolean {
+        return dao.exists(term)
+    }
 }

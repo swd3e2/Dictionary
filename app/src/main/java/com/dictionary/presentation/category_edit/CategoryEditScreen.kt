@@ -56,6 +56,7 @@ fun CategoryEditScreen(
                 viewModel,
                 viewModel.newWordTerm,
                 viewModel.newWordDefinition,
+                viewModel.wordWithTermExists,
                 viewModel.state,
                 viewModel::onEvent,
             )

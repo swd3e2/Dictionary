@@ -11,4 +11,5 @@ interface WordRepository {
     suspend fun deleteByCategory(category: Int)
     suspend fun create(word: Word): Long
     suspend fun update(word: Word)
+    suspend fun exists(term: String): Boolean
 }

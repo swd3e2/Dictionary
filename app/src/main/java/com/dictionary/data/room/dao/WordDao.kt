@@ -26,4 +26,7 @@ interface WordDao {
 
     @Update(entity = Word::class)
     fun update(word: Word)
+
+    @Query("SELECT EXISTS(SELECT 1 FROM ${Word.TABLE_NAME} WHERE term = :term)")
+    fun exists(term: String): Boolean
 }

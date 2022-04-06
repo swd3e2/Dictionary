@@ -57,6 +57,9 @@ class CategoryEditViewModel @Inject constructor(
     var menuExpanded = mutableStateOf(false)
         private set
 
+    var wordWithTermExists = mutableStateOf(false)
+        private set
+
     private val _state = mutableStateOf(WordTranslationState(translation = null, isLoading = false))
     val state: State<WordTranslationState> = _state
 
@@ -83,6 +86,9 @@ class CategoryEditViewModel @Inject constructor(
                 menuExpanded.value = false
             }
             is CategoryEditEvent.OnTermChange -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    wordWithTermExists.value = wordRepository.exists(event.term)
+                }
                 newWordTerm.value = event.term
             }
             is CategoryEditEvent.OnDefinitionChange -> {
@@ -132,6 +138,7 @@ class CategoryEditViewModel @Inject constructor(
             }
             is CategoryEditEvent.OnOpenAddWordDialog -> {
                 openDialog.value = true
+                wordWithTermExists.value = false
             }
             is CategoryEditEvent.OnCloseAddWordDialog -> {
                 newWordTerm.value = ""

@@ -26,13 +26,13 @@ import com.dictionary.presentation.category_edit.CategoryEditViewModel
 import com.dictionary.presentation.category_edit.WordTranslationState
 import com.dictionary.ui.theme.SecondaryTextColor
 
-//@Preview
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun AddWordDialog(
     viewModel: CategoryEditViewModel,
     wordTerm: MutableState<String>,
     wordDefinition: MutableState<String>,
+    wordWithTermExists: MutableState<Boolean>,
     wordTranslationState: State<WordTranslationState>,
     onEvent: (CategoryEditEvent) -> Unit
 ) {
@@ -65,6 +65,9 @@ fun AddWordDialog(
                             { onEvent(CategoryEditEvent.OnTermChange(it)) },
                             { onEvent(CategoryEditEvent.OnTermChange("")) },
                         )
+                        if (wordWithTermExists.value) {
+                            Text(text = "Word already exists", color = Color(0xFFCF3A3F))
+                        }
                         CustomTextField(
                             "Definition",
                             wordDefinition,
@@ -102,16 +105,26 @@ fun AddWordDialog(
                                             Text(
                                                 modifier = Modifier
                                                     .background(
-                                                        color = if (!viewModel.wordTranslations.contains(translation))
+                                                        color = if (!viewModel.wordTranslations.contains(
+                                                                translation
+                                                            )
+                                                        )
                                                             Color(0xffE1ECFB) else Color(0xFF87AAD5),
                                                         shape = RoundedCornerShape(50)
                                                     )
                                                     .clip(RoundedCornerShape(50))
                                                     .clickable {
-                                                        if (!viewModel.wordTranslations.contains(translation)) {
-                                                            viewModel.wordTranslations.add(translation)
+                                                        if (!viewModel.wordTranslations.contains(
+                                                                translation
+                                                            )
+                                                        ) {
+                                                            viewModel.wordTranslations.add(
+                                                                translation
+                                                            )
                                                         } else {
-                                                            viewModel.wordTranslations.remove(translation)
+                                                            viewModel.wordTranslations.remove(
+                                                                translation
+                                                            )
                                                         }
                                                     },
                                                 text = translation,
