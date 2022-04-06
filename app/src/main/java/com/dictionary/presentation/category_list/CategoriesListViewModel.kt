@@ -2,12 +2,14 @@ package com.dictionary.presentation.category_list
 
 import android.app.Application
 import android.net.Uri
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Category
+import com.dictionary.domain.entity.CategoryWithWords
 import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.WordRepository
@@ -35,13 +37,13 @@ class CategoriesListViewModel @Inject constructor(
     var title = mutableStateOf("")
         private set
 
-    val categories = mutableStateOf(emptyList<Category>())
+    val categories = mutableStateListOf<CategoryWithWords>()
 
     private val _uiEvent =  Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
     init {
-        categories.value = categoryRepository.list()
+        categories.addAll(categoryRepository.listWithWords())
     }
 
     fun onEvent(event: CategoryListEvent) {
@@ -50,18 +52,21 @@ class CategoriesListViewModel @Inject constructor(
                 if (title.value.isEmpty()) {
                     return
                 }
-                categoryRepository.create(Category(id = null, name = title.value))
+                val newCategory = Category(id = 0, name = title.value)
+                val newCategoryId = categoryRepository.create(newCategory)
+                newCategory.id = newCategoryId.toInt()
+
                 title.value = ""
                 openDialog.value = false
-                categories.value = categoryRepository.list()
+                categories.add(CategoryWithWords(category = newCategory, words = emptyList()))
             }
             is CategoryListEvent.OnChangeTitle -> {
                 title.value = event.title
             }
             is CategoryListEvent.OnDeleteCategory -> {
-                categoryRepository.delete(event.id)
-                wordsRepository.deleteByCategory(event.id)
-                categories.value = categoryRepository.list()
+                categoryRepository.delete(event.category.category.id)
+                wordsRepository.deleteByCategory(event.category.category.id)
+                categories.remove(event.category)
             }
             is CategoryListEvent.OnCategoryClick -> {
                 sendUiEvent(UiEvent.Navigate(Routes.CATEGORY_EDIT + "?id=${event.id}"))
@@ -107,14 +112,15 @@ class CategoriesListViewModel @Inject constructor(
             return
         }
 
-        val categoryId = categoryRepository.create(Category(id = null, name = getFilename(uri)))
+        val categoryId = categoryRepository.create(Category(id = 0, name = getFilename(uri)))
 
         for (word in words) {
             word.category = categoryId.toInt()
             wordsRepository.create(word)
         }
 
-        categories.value = categoryRepository.list()
+        categories.clear()
+        categories.addAll(categoryRepository.listWithWords())
     }
 
     private fun sendUiEvent(event: UiEvent) {

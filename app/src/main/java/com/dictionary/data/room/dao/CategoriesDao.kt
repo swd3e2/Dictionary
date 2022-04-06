@@ -2,6 +2,7 @@ package com.dictionary.data.room.dao
 
 import androidx.room.*
 import com.dictionary.domain.entity.Category
+import com.dictionary.domain.entity.CategoryWithWords
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -17,4 +18,8 @@ interface CategoriesDao {
 
     @Query("delete from ${Category.TABLE_NAME} where id = :id")
     fun delete(id: Int)
+
+    @Transaction
+    @Query("select * from ${Category.TABLE_NAME}")
+    fun listWithWords(): List<CategoryWithWords>
 }

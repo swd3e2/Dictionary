@@ -51,7 +51,7 @@ class CardsGameViewModel @Inject constructor(
             viewModelScope.launch {
                 categoryRepository.get(id)?.let { c ->
                     category = c
-                    words = wordsRepository.categoryWordsAsList(c.id!!)
+                    words = wordsRepository.categoryWordsAsList(c.id)
 
                     for (word in words) {
                         if (word.shouldBeLearned()) {

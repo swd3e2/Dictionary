@@ -67,7 +67,7 @@ class CategoryEditViewModel @Inject constructor(
             viewModelScope.launch {
                 categoryRepository.get(id)?.let { c ->
                     category = c
-                    words = wordRepository.categoryWords(c.id!!)
+                    words = wordRepository.categoryWords(c.id)
                 }
             }
         }

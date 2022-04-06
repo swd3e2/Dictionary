@@ -22,6 +22,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.sp
 import com.dictionary.R
+import com.dictionary.domain.entity.CategoryWithWords
 import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.presentation.common.DisabledInteractionSource
 import com.dictionary.ui.theme.PrimaryTextColor
@@ -29,14 +30,14 @@ import com.dictionary.ui.theme.SecondaryTextColor
 
 @Composable
 fun CategoryListItem(
-    category: Category,
+    category: CategoryWithWords,
     onEvent: (CategoryListEvent) -> Unit
 ) {
     Card(
         modifier = Modifier
             .padding(15.dp, 5.dp)
             .clip(RoundedCornerShape(30))
-            .clickable { onEvent(CategoryListEvent.OnCategoryClick(category.id!!)) },
+            .clickable { onEvent(CategoryListEvent.OnCategoryClick(category.category.id)) },
         elevation = 0.dp
     ) {
         Row(
@@ -58,7 +59,7 @@ fun CategoryListItem(
                     modifier = Modifier.padding(10.dp, 0.dp)
                 ){
                     Text(
-                        text = category.name,
+                        text = category.category.name,
                         style = MaterialTheme.typography.body1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 18.sp,
@@ -66,7 +67,7 @@ fun CategoryListItem(
                     )
                     Text(
                         modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
-                        text = "3 terms",
+                        text = "${category.words.size} terms",
                         style = MaterialTheme.typography.body1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 12.sp,
@@ -79,7 +80,7 @@ fun CategoryListItem(
             ) {
                 IconButton(
                     onClick = {
-                        onEvent(CategoryListEvent.OnGameClick(category.id!!))
+                        onEvent(CategoryListEvent.OnGameClick(category.category.id))
                     },
                     interactionSource = remember { DisabledInteractionSource() }
                 ) {
@@ -91,7 +92,7 @@ fun CategoryListItem(
                 }
                 IconButton(
                     onClick = {
-                        onEvent(CategoryListEvent.OnDeleteCategory(category.id!!))
+                        onEvent(CategoryListEvent.OnDeleteCategory(category))
                     },
                     interactionSource = remember { DisabledInteractionSource() }
                 ) {

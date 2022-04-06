@@ -18,7 +18,7 @@ import com.dictionary.domain.entity.Word
     version = 1,
     exportSchema = true,
     autoMigrations = [
-//        AutoMigration (from = 2, to = 3)
+//        AutoMigration (from = 1, to = 2)
     ]
 )
 @TypeConverters(Converters::class)
