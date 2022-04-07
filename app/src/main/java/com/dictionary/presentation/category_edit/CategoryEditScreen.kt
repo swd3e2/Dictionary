@@ -26,7 +26,7 @@ fun CategoryEditScreen(
     onPopBackStack: () -> Unit,
     viewModel: CategoryEditViewModel = hiltViewModel()
 ) {
-    val words = viewModel.words?.collectAsState(initial = emptyList())
+    val words = viewModel.wordsState.collectAsState(initial = emptyList())
     val scaffoldState = rememberScaffoldState()
 
     LaunchedEffect(key1 = true) {
@@ -85,7 +85,7 @@ fun CategoryEditScreen(
                         .padding(15.dp, 5.dp, 20.dp, 0.dp),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    TextField(value = "", onValueChange = {}, label = { Text(text = "Search") })
+                    TextField(value = viewModel.termSearch.value, onValueChange = { viewModel.onEvent(CategoryEditEvent.OnSearchTermChange(it)) }, label = { Text(text = "Search") })
                     IconButton(
                         onClick = { viewModel.onEvent(CategoryEditEvent.OnOpenAddWordDialog) }
                     ) {
@@ -97,10 +97,8 @@ fun CategoryEditScreen(
                     }
                 }
             }
-            words?.let {
-                items(words.value) { word ->
-                    WordListItem(word, viewModel::onEvent)
-                }
+            items(words.value) { word ->
+                WordListItem(word, viewModel::onEvent)
             }
         }
     }

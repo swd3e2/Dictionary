@@ -43,13 +43,16 @@ class CardsGameViewModel @Inject constructor(
     var notLearnedWordsCount = mutableStateOf(0)
         private set
 
+    var isLoading = mutableStateOf(true)
+        private set
+
     private var words: List<Word> = emptyList()
     private var wordsToLearn = mutableStateListOf<Word>()
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
         if (id != -1) {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
                 categoryRepository.get(id)?.let { c ->
                     category = c
                     words = wordsRepository.categoryWordsAsList(c.id)
@@ -61,10 +64,12 @@ class CardsGameViewModel @Inject constructor(
                     }
 
                     if (!wordsToLearn.isEmpty()) {
+                        wordsToLearn.shuffle()
                         currentWord.value = wordsToLearn.first()
                         currentWordIndex.value = 0
                         countOfWords.value = wordsToLearn.size
                     }
+                    isLoading.value = false
                 }
             }
         }
@@ -76,7 +81,7 @@ class CardsGameViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     val word = event.word
                     word.lastRepeated = Date()
-//                word.bucket = word.bucket+1
+                    word.bucket = word.bucket+1
                     wordsRepository.update(word)
 
                     wordsToLearn.remove(currentWord.value)

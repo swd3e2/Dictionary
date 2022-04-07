@@ -67,7 +67,15 @@ fun CategoryListItem(
                     )
                     Text(
                         modifier = Modifier.padding(0.dp, 4.dp, 0.dp, 0.dp),
-                        text = "${category.words.size} terms",
+                        text = "${category.words.size} words",
+                        style = MaterialTheme.typography.body1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 12.sp,
+                        color = SecondaryTextColor
+                    )
+                    Text(
+                        modifier = Modifier.padding(0.dp, 2.dp, 0.dp, 0.dp),
+                        text = "${category.countWordsToLearn()} words to learn",
                         style = MaterialTheme.typography.body1,
                         overflow = TextOverflow.Ellipsis,
                         fontSize = 12.sp,

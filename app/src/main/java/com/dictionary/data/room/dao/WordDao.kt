@@ -9,6 +9,9 @@ interface WordDao {
     @Query("select * from ${Word.TABLE_NAME} where category = :category")
     fun byCategory(category: Int): Flow<List<Word>>
 
+    @Query("select * from ${Word.TABLE_NAME} where category = :category and term like '%' || :term || '%'")
+    fun byCategoryLike(category: Int, term: String): Flow<List<Word>>
+
     @Query("select * from ${Word.TABLE_NAME} where category = :category")
     fun byCategoryAsList(category: Int): List<Word>
 
@@ -29,4 +32,7 @@ interface WordDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM ${Word.TABLE_NAME} WHERE term = :term)")
     fun exists(term: String): Boolean
+
+    @Insert(entity = Word::class, onConflict = OnConflictStrategy.REPLACE)
+    fun batchCreate(words: List<Word>)
 }

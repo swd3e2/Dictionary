@@ -16,12 +16,10 @@ import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -37,16 +35,28 @@ class CategoryEditViewModel @Inject constructor(
     private val _uiEvent =  Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
+    var category: Category = Category(0, "")
+        private set
+
     var openDialog = mutableStateOf(false)
         private set
 
     var wordTranslations = mutableStateListOf<String>()
         private set
 
-    var words: Flow<List<Word>>? = null
-
-    var category: Category = Category(0, "")
+    var termSearch = mutableStateOf("")
         private set
+
+    private var words =  MutableStateFlow("")
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    var wordsState = words.flatMapLatest {
+        if (it.isEmpty()) {
+            wordRepository.categoryWords(category.id)
+        } else {
+            wordRepository.categoryWordsLike(category.id, it)
+        }
+    }
 
     var newWordTerm = mutableStateOf("test")
         private set
@@ -71,7 +81,6 @@ class CategoryEditViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 categoryRepository.get(id)?.let { c ->
                     category = c
-                    words = wordRepository.categoryWords(c.id)
                 }
             }
         }
@@ -147,6 +156,10 @@ class CategoryEditViewModel @Inject constructor(
                 _state.value = WordTranslationState(translation = null)
                 wordTranslations.clear()
             }
+            is CategoryEditEvent.OnSearchTermChange -> {
+                termSearch.value = event.term
+                words.value = event.term
+            }
             is CategoryEditEvent.GetTranslation -> {
                 searchJob?.cancel()
                 searchJob = viewModelScope.launch {
@@ -158,13 +171,11 @@ class CategoryEditViewModel @Inject constructor(
                                         translation = result.data,
                                         isLoading = false
                                     )
-                                    println("APIYANDEX: loaded")
                                 }
                                 is Resource.Error -> {
                                     _state.value = state.value.copy(
                                         isLoading = false
                                     )
-                                    println("APIYANDEX: " + (result.message ?: "Unknown error"))
                                 }
                                 is Resource.Loading -> {
                                     _state.value = state.value.copy(

@@ -8,6 +8,7 @@ sealed class CategoryEditEvent {
     object OnWordSaveClick: CategoryEditEvent()
     data class OnDeleteWord(val id: Int) : CategoryEditEvent()
     data class OnWordClick(val id: Int) : CategoryEditEvent()
+    data class OnSearchTermChange(val term: String) : CategoryEditEvent()
     object OnOpenAddWordDialog: CategoryEditEvent()
     object OnCloseAddWordDialog: CategoryEditEvent()
     object GetTranslation: CategoryEditEvent()

@@ -24,7 +24,6 @@ fun CardsGameList(
 ) {
     val scaffoldState = rememberScaffoldState()
 
-
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
@@ -33,78 +32,87 @@ fun CardsGameList(
             DropDownMenu(onPopBackStack)
         }
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "${viewModel.currentWordIndex.value} / ${viewModel.countOfWords.value}",
-                    letterSpacing = 3.sp,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = PrimaryTextColor
-                )
+        when (viewModel.isLoading.value) {
+            true -> {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
             }
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                LinearProgressIndicator(progress = viewModel.learnProgress.value)
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            if (viewModel.currentWord.value != null) {
-                WordCard(onEvent = viewModel::onEvent, word = viewModel.currentWord.value!!)
-            } else {
-                Text(text = "No words to repeat")
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .offset(0.dp, 250.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Box(
-                    modifier = Modifier
-                        .offset((-5).dp, 0.dp)
-                        .background(
-                            color = Color(0xFFFFDC28),
-                            shape = RoundedCornerShape(10f)
-                        )
-                        .width(26.dp)
-                        .height(28.dp),
-                    contentAlignment = Alignment.Center
+            false -> {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text(
-                        modifier = Modifier.offset(2.dp),
-                        text = viewModel.notLearnedWordsCount.value.toString(),
-                        color = Color(0xffffffff),
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "${viewModel.currentWordIndex.value} / ${viewModel.countOfWords.value}",
+                            letterSpacing = 3.sp,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryTextColor
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        LinearProgressIndicator(progress = viewModel.learnProgress.value)
+                    }
                 }
                 Box(
                     modifier = Modifier
-                        .offset(5.dp, 0.dp)
-                        .background(
-                            color = Color(0xFF16C054),
-                            shape = RoundedCornerShape(10f)
-                        )
-                        .width(26.dp)
-                        .height(28.dp),
+                        .fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        modifier = Modifier.offset((-2).dp),
-                        text = viewModel.learnedWordsCount.value.toString(),
-                        color = Color(0xffffffff)
-                    )
+                    if (viewModel.currentWord.value != null) {
+                        WordCard(onEvent = viewModel::onEvent, word = viewModel.currentWord.value!!)
+                    } else {
+                        Text(text = "No words to repeat")
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .offset(0.dp, 250.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .offset((-5).dp, 0.dp)
+                                .background(
+                                    color = Color(0xFFFFDC28),
+                                    shape = RoundedCornerShape(10f)
+                                )
+                                .width(26.dp)
+                                .height(28.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                modifier = Modifier.offset(2.dp),
+                                text = viewModel.notLearnedWordsCount.value.toString(),
+                                color = Color(0xffffffff),
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .offset(5.dp, 0.dp)
+                                .background(
+                                    color = Color(0xFF16C054),
+                                    shape = RoundedCornerShape(10f)
+                                )
+                                .width(26.dp)
+                                .height(28.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                modifier = Modifier.offset((-2).dp),
+                                text = viewModel.learnedWordsCount.value.toString(),
+                                color = Color(0xffffffff)
+                            )
+                        }
+                    }
                 }
             }
         }

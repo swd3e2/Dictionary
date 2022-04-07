@@ -13,6 +13,10 @@ class WordRepositoryImpl @Inject constructor(
         return dao.byCategory(category)
     }
 
+    override fun categoryWordsLike(category: Int, term: String): Flow<List<Word>> {
+        return dao.byCategoryLike(category, term)
+    }
+
     override suspend fun categoryWordsAsList(category: Int): List<Word> {
         return dao.byCategoryAsList(category)
     }
@@ -31,6 +35,10 @@ class WordRepositoryImpl @Inject constructor(
 
     override suspend fun create(word: Word): Long {
         return dao.create(word)
+    }
+
+    override suspend fun batchCreate(words: List<Word>) {
+        return dao.batchCreate(words)
     }
 
     override suspend fun update(word: Word) {

@@ -116,12 +116,6 @@ fun CategoryListScreen(
                         CategoryListItem(category, viewModel::onEvent)
                     }
                 }
-//                    for (category in viewModel.categories) {
-//                        CategoryListItem(
-//                            category = category,
-//                            onEvent = viewModel::onEvent
-//                        )
-//                    }
             }
         }
     }

@@ -124,8 +124,9 @@ class CategoriesListViewModel @Inject constructor(
 
                     for (word in words) {
                         word.category = category.id
-                        wordsRepository.create(word)
                     }
+
+                    wordsRepository.batchCreate(words)
                 }
             }
         }
