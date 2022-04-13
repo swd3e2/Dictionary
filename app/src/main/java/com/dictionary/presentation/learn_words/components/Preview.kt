@@ -27,9 +27,8 @@ fun Preview(viewModel: LearnWordsViewModel) {
         .verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Top) {
         for (word in viewModel.currentWords) {
             Card(
-                modifier = Modifier
-                    .padding(15.dp, 5.dp)
-                    .clip(shape = RoundedCornerShape(30))
+                modifier = Modifier.padding(15.dp, 5.dp),
+                elevation = 0.dp
             ) {
                 Row(
                     modifier = Modifier
@@ -61,7 +60,7 @@ fun Preview(viewModel: LearnWordsViewModel) {
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            Button(onClick = { viewModel.onEvent(LearnWordsEvent.OnGoToDone) }) {
+            Button(onClick = { viewModel.onEvent(LearnWordsEvent.OnGoToWrite) }) {
                 Text(text = "Next")
             }
         }

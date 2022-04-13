@@ -1,7 +1,7 @@
 package com.dictionary.presentation.learn_words
 
 import com.dictionary.domain.entity.Word
-import com.dictionary.presentation.learn_words.models.LearnWord
+import com.dictionary.presentation.models.LearnWord
 
 sealed class LearnWordsEvent {
     object OnGoToMatch: LearnWordsEvent()

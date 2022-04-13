@@ -48,7 +48,8 @@ fun AddWordDialog(
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .width(300.dp),
-                    backgroundColor = MaterialTheme.colors.surface
+                    backgroundColor = MaterialTheme.colors.surface,
+                    elevation = 0.dp
                 ) {
                     Column(
                         modifier = Modifier

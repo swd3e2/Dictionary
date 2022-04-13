@@ -15,8 +15,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.dictionary.domain.entity.Word
 import com.dictionary.presentation.cards_game.CardsGameEvent
 import com.dictionary.presentation.common.DisabledInteractionSource
@@ -224,7 +226,12 @@ fun WordCard(
                         contentAlignment = Alignment.Center
 
                     ) {
-                        Text(text = if (rotation.value >= 90f) word.definition else word.term)
+                        Text(
+                            text = if (rotation.value >= 90f) word.definition else word.term,
+                            fontSize = 26.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(20.dp)
+                        )
                     }
                 }
             }

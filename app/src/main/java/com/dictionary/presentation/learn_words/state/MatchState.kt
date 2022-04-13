@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
-import com.dictionary.presentation.learn_words.models.LearnWord
+import com.dictionary.presentation.models.LearnWord
 
 class MatchState {
     var currentWordsGroupIndex: Int = 0

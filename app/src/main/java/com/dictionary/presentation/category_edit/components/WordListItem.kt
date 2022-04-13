@@ -26,7 +26,6 @@ fun WordListItem(
     Card(
         modifier = Modifier
             .padding(15.dp, 5.dp)
-            .clip(shape = RoundedCornerShape(30))
             .clickable {
                 onEvent(CategoryEditEvent.OnWordClick(word.id))
             },

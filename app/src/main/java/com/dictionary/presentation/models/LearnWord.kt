@@ -1,4 +1,4 @@
-package com.dictionary.presentation.learn_words.models
+package com.dictionary.presentation.models
 
 data class LearnWord(
     val text: String,

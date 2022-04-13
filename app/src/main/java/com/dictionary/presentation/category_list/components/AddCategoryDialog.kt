@@ -25,10 +25,11 @@ fun AddCategoryDialog(
         content = {
             Box(
                 modifier = Modifier.padding(10.dp)
-            ){
-                Card(modifier = Modifier
-                    .wrapContentHeight(),
-                    backgroundColor = MaterialTheme.colors.surface
+            ) {
+                Card(
+                    modifier = Modifier.wrapContentHeight(),
+                    backgroundColor = MaterialTheme.colors.surface,
+                    elevation = 0.dp
                 ) {
                     Column(
                         modifier = Modifier.padding(10.dp, 20.dp, 10.dp, 10.dp)

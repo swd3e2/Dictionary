@@ -2,13 +2,12 @@ package com.dictionary.presentation.learn_words
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.text.toLowerCase
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.WordRepository
-import com.dictionary.presentation.learn_words.models.LearnWord
+import com.dictionary.presentation.models.LearnWord
 import com.dictionary.presentation.learn_words.state.CardsState
 import com.dictionary.presentation.learn_words.state.MatchState
 import com.dictionary.presentation.learn_words.state.TestState
@@ -136,7 +135,7 @@ class LearnWordsViewModel @Inject constructor(
                 testState.currentWord.value = testState.words[testState.index]
             }
             is LearnWordsEvent.OnTestSelect -> {
-                if (testState.currentWord.value.word.id == event.wordId) {
+                if (testState.currentWord.value!!.word.id == event.wordId) {
                     testState.wordsState[event.index] = "success"
                     testState.index++
                     if (testState.index >= testState.words.size) {
@@ -169,7 +168,7 @@ class LearnWordsViewModel @Inject constructor(
             is LearnWordsEvent.OnCardRightSwipe -> {
                 cardsState.index++
                 if (cardsState.index >= cardsState.words.size) {
-                    currentStep.value = 5
+                    onEvent(LearnWordsEvent.OnGoToWrite)
                     return
                 }
                 cardsState.currentWord.value = cardsState.words[cardsState.index]
@@ -177,7 +176,7 @@ class LearnWordsViewModel @Inject constructor(
             is LearnWordsEvent.OnGoToWrite -> {
                 currentStep.value = 5
                 writeState.words.addAll(currentWords)
-                writeState.currentWord.value = writeState.words[cardsState.index]
+                writeState.currentWord.value = writeState.words[writeState.index]
             }
             is LearnWordsEvent.OnWriteTryDefinition -> {
                 val word = writeState.currentWord.value!!
@@ -189,6 +188,7 @@ class LearnWordsViewModel @Inject constructor(
                 }
 
                 if (guessedRight) {
+                    writeState.hasError.value = false
                     writeState.index++
                     if (writeState.index >= writeState.words.size) {
                         onEvent(LearnWordsEvent.OnGoToDone)
@@ -198,12 +198,15 @@ class LearnWordsViewModel @Inject constructor(
                     writeState.definition.value = ""
                     return
                 } else {
+                    writeState.hasError.value = true
                     if (writeState.lastAddedWordId != word.id) {
                         writeState.lastAddedWordId = word.id
                         writeState.words.add(writeState.words[writeState.index])
                     }
 
+                    writeState.hasDefinition.value = writeState.definition.value
                     writeState.wantDefinition.value = word.definition
+                    writeState.definition.value = ""
                 }
             }
             is LearnWordsEvent.OnGoToDone -> {

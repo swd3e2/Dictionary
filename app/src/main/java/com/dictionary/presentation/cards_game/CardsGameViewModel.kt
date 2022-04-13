@@ -18,13 +18,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CardsGameViewModel @Inject constructor(
-    private val categoryRepository: CategoryRepository,
     private val wordsRepository: WordRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
-
-    var category: Category = Category(0, "")
-        private set
 
     var currentWord = mutableStateOf<Word?>(null)
         private set
@@ -54,24 +50,21 @@ class CardsGameViewModel @Inject constructor(
         val id = savedStateHandle.get<Int>("id")!!
         if (id != -1) {
             viewModelScope.launch(Dispatchers.IO) {
-                categoryRepository.get(id)?.let { c ->
-                    category = c
-                    words = wordsRepository.categoryWordsAsList(c.id)
-                    withContext(Dispatchers.Main) {
-                        for (word in words) {
-                            if (word.shouldBeLearned()) {
-                                wordsToLearn.add(word)
-                            }
+                words = wordsRepository.categoryWordsAsList(id)
+                withContext(Dispatchers.Main) {
+                    for (word in words) {
+                        if (word.bucket == 0) {
+                            wordsToLearn.add(word)
                         }
-
-                        if (!wordsToLearn.isEmpty()) {
-                            wordsToLearn.shuffle()
-                            currentWord.value = wordsToLearn.first()
-                            currentWordIndex.value = 0
-                            countOfWords.value = wordsToLearn.size
-                        }
-                        isLoading.value = false
                     }
+
+                    if (!wordsToLearn.isEmpty()) {
+                        wordsToLearn.shuffle()
+                        currentWord.value = wordsToLearn.first()
+                        currentWordIndex.value = 0
+                        countOfWords.value = wordsToLearn.size
+                    }
+                    isLoading.value = false
                 }
             }
         }

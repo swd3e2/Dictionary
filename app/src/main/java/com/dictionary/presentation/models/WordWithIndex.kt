@@ -1,4 +1,4 @@
-package com.dictionary.presentation.learn_words.models
+package com.dictionary.presentation.models
 
 import com.dictionary.domain.entity.Word
 

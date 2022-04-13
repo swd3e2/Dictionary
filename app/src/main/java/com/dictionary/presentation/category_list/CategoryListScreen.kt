@@ -1,21 +1,24 @@
 package com.dictionary.presentation.category_list
 
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
@@ -45,80 +48,77 @@ fun CategoryListScreen(
             }
         }
     }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        scaffoldState = scaffoldState,
+        bottomBar = {
+            BottomBar()
+        }
     ) {
-        Scaffold(
-            scaffoldState = scaffoldState,
-            bottomBar = {
-                BottomBar()
-            }
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .wrapContentHeight()
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(it)
-                    .wrapContentHeight()
+            if (viewModel.openDialog.value) {
+                AddCategoryDialog(
+                    viewModel.title,
+                    viewModel::onEvent
+                )
+            }
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                if (viewModel.openDialog.value) {
-                    AddCategoryDialog(
-                        viewModel.title,
-                        viewModel::onEvent
-                    )
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(30.dp, 30.dp, 30.dp, 0.dp),
+                    ) {
+                        Text(
+                            text = "Welcome home, Master",
+                            color = SecondaryTextColor,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Your categories",
+                            fontSize = 30.sp,
+                            color = PrimaryTextColor,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    item {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(30.dp, 30.dp, 30.dp, 0.dp),
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        IconButton(
+                            onClick = launchFileIntent
                         ) {
-                            Text(
-                                text = "Welcome home, Master",
-                                color = SecondaryTextColor,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Import",
+                                tint = MaterialTheme.colors.primary
                             )
-                            Text(
-                                text = "Your categories",
-                                fontSize = 30.sp,
-                                color = PrimaryTextColor,
-                                fontWeight = FontWeight.Bold
+                        }
+                        IconButton(
+                            modifier = Modifier.padding(0.dp, 0.dp, 20.dp, 0.dp),
+                            onClick = {
+                                viewModel.onEvent(CategoryListEvent.OnOpenAddCategoryDialog)
+                            }) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add",
+                                tint = MaterialTheme.colors.primary
                             )
                         }
                     }
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.End
-                        ) {
-                            IconButton(
-                                onClick = launchFileIntent
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowDown,
-                                    contentDescription = "Import",
-                                    tint = MaterialTheme.colors.primary
-                                )
-                            }
-                            IconButton(
-                                modifier = Modifier.padding(0.dp, 0.dp, 20.dp, 0.dp),
-                                onClick = {
-                                    viewModel.onEvent(CategoryListEvent.OnOpenAddCategoryDialog)
-                                }) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Add",
-                                    tint = MaterialTheme.colors.primary
-                                )
-                            }
-                        }
-                    }
-                    items(categories.value) { category ->
-                        CategoryListItem(category, viewModel::onEvent)
-                    }
+                }
+                items(categories.value) { category ->
+                    CategoryListItem(category, viewModel::onEvent)
                 }
             }
         }

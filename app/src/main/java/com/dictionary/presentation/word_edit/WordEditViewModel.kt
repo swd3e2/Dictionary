@@ -8,7 +8,10 @@ import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.WordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,17 +20,48 @@ class WordEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
+    private val _eventFlow = MutableSharedFlow<UIEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
+
     var menuExpanded = mutableStateOf(false)
         private set
 
     var word: Word? = null
         private set
 
+    var newTerm = mutableStateOf("")
+        private set
+
+    var newDefinition = mutableStateOf("")
+        private set
+
+    var newSynonyms = mutableStateOf("")
+        private set
+
+    var newAntonyms = mutableStateOf("")
+        private set
+
+    var newTranscription = mutableStateOf("")
+        private set
+
+    var newSimilar = mutableStateOf("")
+        private set
+
     init {
         val id = savedStateHandle.get<Int>("id")!!
         if(id != -1) {
             viewModelScope.launch(Dispatchers.IO) {
-                wordRepository.get(id)?.let { w -> word = w }
+                wordRepository.get(id)?.let { w ->
+                    withContext(Dispatchers.Main) {
+                        word = w
+                        newTerm.value = w.term
+                        newDefinition.value = w.definition
+                        newSynonyms.value = w.synonyms
+                        newAntonyms.value = w.antonyms
+                        newTranscription.value = w.transcription
+                        newSimilar.value = w.similar
+                    }
+                }
             }
         }
     }
@@ -40,6 +74,43 @@ class WordEditViewModel @Inject constructor(
             is WordEditEvent.OnCloseMenu -> {
                 menuExpanded.value = false
             }
+            is WordEditEvent.OnTermChange -> {
+                newTerm.value = event.term
+            }
+            is WordEditEvent.OnDefinitionChange -> {
+                newDefinition.value = event.definition
+            }
+            is WordEditEvent.OnSynonymsChange -> {
+                newSynonyms.value = event.synonyms
+            }
+            is WordEditEvent.OnAntonymsChange -> {
+                newAntonyms.value = event.antonyms
+            }
+            is WordEditEvent.OnSimilarChange -> {
+                newSimilar.value = event.similar
+            }
+            is WordEditEvent.OnTranscriptionChange -> {
+                newTranscription.value = event.transcription
+            }
+            is WordEditEvent.OnSaveClick -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    wordRepository.create(word!!.apply {
+                        term = newTerm.value
+                        definition =  newDefinition.value
+                        synonyms = newSynonyms.value
+                        antonyms = newAntonyms.value
+                        transcription = newTranscription.value
+                        similar =  newSimilar.value
+                    })
+                    _eventFlow.emit(UIEvent.ShowSnackbar(
+                        "Saved"
+                    ))
+                }
+            }
         }
+    }
+
+    sealed class UIEvent {
+        data class ShowSnackbar(val message: String): UIEvent()
     }
 }

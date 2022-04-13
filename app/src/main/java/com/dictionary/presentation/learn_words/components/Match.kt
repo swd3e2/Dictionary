@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.dictionary.presentation.components.MatchGame
 import com.dictionary.presentation.learn_words.LearnWordsEvent
 import com.dictionary.presentation.learn_words.LearnWordsViewModel
 import com.dictionary.ui.theme.PrimaryTextColor
@@ -24,58 +25,11 @@ import com.google.accompanist.flowlayout.FlowRow
 fun Match(
     viewModel: LearnWordsViewModel
 ) {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-    val padding = PaddingValues(5.dp)
-
     Column(modifier = Modifier.fillMaxSize()) {
-        FlowRow(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(5.dp),
-        ) {
-            for (word in viewModel.matchState.currentWordsGroup) {
-                Box(
-                    modifier = Modifier
-                        .width(screenWidth / 3 - padding.calculateStartPadding(LayoutDirection.Ltr))
-                        .padding(5.dp)
-                        .height(150.dp)
-                ) {
-                    androidx.compose.animation.AnimatedVisibility(
-                        visible = viewModel.matchState.wordsState[word.index] != "success",
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        Card(
-                            modifier = Modifier
-                                .clickable { viewModel.onEvent(LearnWordsEvent.OnMatchSelect(word)) }
-                                .fillMaxSize(),
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = when (viewModel.matchState.wordsState[word.index]) {
-                                            "selected" -> MaterialTheme.colors.primary
-                                            "error" -> Color(0xFFD53F3F)
-                                            "success" -> Color(0xFF61CF54)
-                                            else -> MaterialTheme.colors.surface
-                                        }
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = word.text,
-                                    color = when (viewModel.matchState.wordsState[word.index]) {
-                                        "selected" -> Color.White
-                                        "error" -> Color.White
-                                        "success" -> Color.White
-                                        else -> PrimaryTextColor
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        MatchGame(
+            words = viewModel.matchState.currentWordsGroup,
+            onItemClick = { viewModel.onEvent(LearnWordsEvent.OnMatchSelect(it)) },
+            stateMap = viewModel.matchState.wordsState
+        )
     }
 }

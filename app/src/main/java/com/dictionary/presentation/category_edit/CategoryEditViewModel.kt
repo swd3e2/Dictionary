@@ -59,6 +59,9 @@ class CategoryEditViewModel @Inject constructor(
         }
     }
 
+    var wordsCount = mutableStateOf(0)
+        private set
+
     var newWordTerm = mutableStateOf("test")
         private set
 

@@ -11,9 +11,9 @@ data class Word(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id")
     val id: Int = 0,
     @ColumnInfo(name = "term")
-    val term: String = "",
+    var term: String = "",
     @ColumnInfo(name = "definition")
-    val definition: String = "",
+    var definition: String = "",
     @ColumnInfo(name = "category")
     var category: Int? = null,
     @ColumnInfo(name = "created")
@@ -23,13 +23,13 @@ data class Word(
     @ColumnInfo(name = "bucket")
     var bucket: Int = 0,
     @ColumnInfo(name = "synonyms")
-    val synonyms: String = "",
+    var synonyms: String = "",
     @ColumnInfo(name = "antonyms")
-    val antonyms: String = "",
+    var antonyms: String = "",
     @ColumnInfo(name = "transcription")
-    val transcription: String = "",
+    var transcription: String = "",
     @ColumnInfo(name = "similar")
-    val similar: String = "",
+    var similar: String = "",
 ) {
     companion object {
         const val TABLE_NAME = "words"

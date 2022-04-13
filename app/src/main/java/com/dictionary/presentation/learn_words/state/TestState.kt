@@ -5,17 +5,12 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.toMutableStateList
 import com.dictionary.domain.entity.Word
-import com.dictionary.presentation.learn_words.models.WordWithIndex
-import com.dictionary.presentation.learn_words.models.WordsWithSuggest
+import com.dictionary.presentation.models.WordWithIndex
+import com.dictionary.presentation.models.WordsWithSuggest
 import java.util.*
 
 class TestState {
-    var currentWord = mutableStateOf(
-        WordsWithSuggest(
-            word = Word(created = Date(), lastRepeated = Date()),
-            suggested = mutableStateListOf()
-        )
-    )
+    var currentWord = mutableStateOf<WordsWithSuggest?>(null)
     var words = mutableStateListOf<WordsWithSuggest>()
     var wordsState = mutableStateMapOf<Int, String>()
     var index: Int = 0
