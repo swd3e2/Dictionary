@@ -33,6 +33,9 @@ class CategoryEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
+    var showDeleteDialog = mutableStateOf(false)
+        private set
+
     private val _uiEvent =  Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
@@ -49,6 +52,7 @@ class CategoryEditViewModel @Inject constructor(
         private set
 
     private var words =  MutableStateFlow("")
+    private var selectedWordId: Int? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
     var wordsState = words.flatMapLatest {
@@ -109,7 +113,10 @@ class CategoryEditViewModel @Inject constructor(
             }
             is CategoryEditEvent.OnDeleteWord -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordRepository.delete(event.id)
+                    selectedWordId?.let {
+                        wordRepository.delete(it)
+                    }
+                    showDeleteDialog.value = false
                 }
             }
             is CategoryEditEvent.OnGameClick -> {
@@ -199,6 +206,13 @@ class CategoryEditViewModel @Inject constructor(
                             }
                         }.launchIn(this)
                 }
+            }
+            is CategoryEditEvent.OnShowDeleteDialog -> {
+                showDeleteDialog.value = true
+                selectedWordId = event.id
+            }
+            is CategoryEditEvent.OnHideDeleteDialog -> {
+                showDeleteDialog.value = false
             }
         }
     }

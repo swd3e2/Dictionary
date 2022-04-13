@@ -16,17 +16,12 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dictionary.presentation.category_edit.components.WordListItem
 import com.dictionary.presentation.category_list.components.AddCategoryDialog
 import com.dictionary.presentation.category_list.components.CategoryListItem
-import com.dictionary.presentation.common.BottomBar
+import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
 import com.dictionary.utils.UiEvent
@@ -51,11 +46,15 @@ fun CategoryListScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        scaffoldState = scaffoldState,
-        bottomBar = {
-            BottomBar()
-        }
+        scaffoldState = scaffoldState
     ) {
+        if (viewModel.showDeleteDialog.value) {
+            DeleteDialog(
+                text = "Are you sure you want to delete category?",
+                onClose = { viewModel.onEvent(CategoryListEvent.OnHideDeleteDialog) },
+                onSuccess = { viewModel.onEvent(CategoryListEvent.OnDeleteCategory)}
+            )
+        }
         Column(
             modifier = Modifier
                 .padding(it)

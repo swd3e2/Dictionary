@@ -74,7 +74,7 @@ fun CategoryListItem(
             ) {
                 IconButton(
                     onClick = {
-                        onEvent(CategoryListEvent.OnDeleteCategory(category))
+                        onEvent(CategoryListEvent.OnShowDeleteDialog(category))
                     },
                     interactionSource = remember { DisabledInteractionSource() }
                 ) {

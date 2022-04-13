@@ -39,6 +39,11 @@ class CategoriesListViewModel @Inject constructor(
     var openDialog = mutableStateOf(false)
         private set
 
+    var showDeleteDialog = mutableStateOf(false)
+        private set
+
+    private var selectedCategory: CategoryWithWords? = null
+
     var title = mutableStateOf("")
         private set
 
@@ -66,9 +71,20 @@ class CategoriesListViewModel @Inject constructor(
             }
             is CategoryListEvent.OnDeleteCategory -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    categoryRepository.delete(event.category.category.id)
-                    wordsRepository.deleteByCategory(event.category.category.id)
+                    selectedCategory?.let { category ->
+                        categoryRepository.delete(category.category.id)
+                        wordsRepository.deleteByCategory(category.category.id)
+                    }
+
+                    showDeleteDialog.value = false
                 }
+            }
+            is CategoryListEvent.OnShowDeleteDialog -> {
+                showDeleteDialog.value = true
+                selectedCategory = event.category
+            }
+            is CategoryListEvent.OnHideDeleteDialog -> {
+                showDeleteDialog.value = false
             }
             is CategoryListEvent.OnCategoryClick -> {
                 sendUiEvent(UiEvent.Navigate(Routes.CATEGORY_EDIT + "?id=${event.id}"))

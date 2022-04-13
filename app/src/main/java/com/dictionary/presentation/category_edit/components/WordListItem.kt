@@ -59,7 +59,7 @@ fun WordListItem(
             IconButton(
                 modifier = Modifier.padding(4.dp),
                 onClick = {
-                    onEvent(CategoryEditEvent.OnDeleteWord(word.id))
+                    onEvent(CategoryEditEvent.OnShowDeleteDialog(word.id))
                 }
             ) {
                 Icon(

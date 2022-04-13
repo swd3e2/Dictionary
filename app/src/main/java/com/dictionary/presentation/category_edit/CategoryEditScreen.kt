@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -19,6 +20,9 @@ import com.dictionary.domain.entity.Category
 import com.dictionary.presentation.category_edit.components.AddWordDialog
 import com.dictionary.presentation.category_edit.components.DropDownMenu
 import com.dictionary.presentation.category_edit.components.WordListItem
+import com.dictionary.presentation.category_list.CategoryListEvent
+import com.dictionary.presentation.components.DeleteDialog
+import com.dictionary.presentation.word_edit.WordEditEvent
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.utils.UiEvent
 
@@ -51,8 +55,23 @@ fun CategoryEditScreen(
                 viewModel.menuExpanded,
                 viewModel::onEvent
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                viewModel.onEvent(CategoryEditEvent.OnOpenAddWordDialog)
+            }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
+            }
         }
     ) { padding ->
+        if (viewModel.showDeleteDialog.value) {
+            DeleteDialog(
+                text = "Are you sure you want to delete word?",
+                onClose = { viewModel.onEvent(CategoryEditEvent.OnHideDeleteDialog) },
+                onSuccess = { viewModel.onEvent(CategoryEditEvent.OnDeleteWord)}
+            )
+        }
+
         if (viewModel.openDialog.value) {
             AddWordDialog(
                 viewModel,
@@ -67,6 +86,7 @@ fun CategoryEditScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(padding)
         ) {
             item {
                 Title(category = viewModel.category, wordsCount = viewModel.wordsCount)
@@ -257,16 +277,15 @@ fun SearchAndAdd(
             .padding(15.dp, 5.dp, 20.dp, 0.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        TextField(value = search.value, onValueChange = { onEvent(CategoryEditEvent.OnSearchTermChange(it)) }, label = { Text(text = "Search") })
-        IconButton(
-            onClick = { onEvent(CategoryEditEvent.OnOpenAddWordDialog) }
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add",
-                tint = MaterialTheme.colors.primary
-            )
-        }
+        TextField(
+            value = search.value,
+            onValueChange = { onEvent(CategoryEditEvent.OnSearchTermChange(it)) },
+            label = { Text(text = "Search") },
+            modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = Color.Transparent,
+            ),
+        )
     }
     Spacer(modifier = Modifier.height(10.dp))
 }

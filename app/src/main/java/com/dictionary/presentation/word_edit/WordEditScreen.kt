@@ -59,12 +59,12 @@ fun WordEditScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(padding)
         ) {
             TextField(
                 value = viewModel.newTerm.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnTermChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(0.dp, 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
                 label = { Text(text = "Term")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -73,7 +73,7 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newDefinition.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnDefinitionChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(0.dp, 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
                 label = { Text(text = "Definition")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -82,7 +82,7 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newAntonyms.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnAntonymsChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(0.dp, 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
                 label = { Text(text = "Antonyms")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -91,7 +91,7 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newSynonyms.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnSynonymsChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(0.dp, 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
                 label = { Text(text = "Synonyms")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -100,7 +100,7 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newSimilar.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnSimilarChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(0.dp, 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
                 label = { Text(text = "Similar")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -109,7 +109,7 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newTranscription.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnTranscriptionChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(0.dp, 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
                 label = { Text(text = "Transcription")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
