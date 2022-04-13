@@ -18,7 +18,7 @@ import com.dictionary.ui.theme.PrimaryTextColor
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun CardsGameList(
+fun CardsGameScreen(
     onPopBackStack: () -> Unit = {},
     viewModel: CardsGameViewModel = hiltViewModel()
 ) {
@@ -27,11 +27,12 @@ fun CardsGameList(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .padding(0.dp),
         topBar = {
             DropDownMenu(onPopBackStack)
         }
-    ) {
+    ) { padding ->
         when (viewModel.isLoading.value) {
             true -> {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -68,7 +69,11 @@ fun CardsGameList(
                     contentAlignment = Alignment.Center
                 ) {
                     if (viewModel.currentWord.value != null) {
-                        WordCard(onEvent = viewModel::onEvent, word = viewModel.currentWord.value!!)
+                        WordCard(
+                            onLeftSwipe = { viewModel.onEvent(CardsGameEvent.WordNotLearned(viewModel.currentWord.value!!)) },
+                            onRightSwipe = { viewModel.onEvent(CardsGameEvent.WordLearned(viewModel.currentWord.value!!)) },
+                            word = viewModel.currentWord.value!!
+                        )
                     } else {
                         Text(text = "No words to repeat")
                     }

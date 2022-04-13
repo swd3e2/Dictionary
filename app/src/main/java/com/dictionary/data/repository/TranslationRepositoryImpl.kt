@@ -34,7 +34,7 @@ class TranslationRepositoryImpl @Inject constructor(
         } catch (e: IOException) {
             emit(
                 Resource.Error<Translation>(
-                    message = e.localizedMessage,
+                    message = e.localizedMessage ?: "An unexpected error occured",
                 )
             )
         }

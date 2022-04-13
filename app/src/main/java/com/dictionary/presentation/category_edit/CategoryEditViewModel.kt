@@ -12,6 +12,7 @@ import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.TranslationRepository
 import com.dictionary.domain.repository.WordRepository
+import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -106,6 +107,16 @@ class CategoryEditViewModel @Inject constructor(
             is CategoryEditEvent.OnDeleteWord -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     wordRepository.delete(event.id)
+                }
+            }
+            is CategoryEditEvent.OnGameClick -> {
+                viewModelScope.launch {
+                    _uiEvent.send(UiEvent.Navigate(Routes.CARDS_GAME + "?id=${event.id}"))
+                }
+            }
+            is CategoryEditEvent.OnLearnClick -> {
+                viewModelScope.launch {
+                    _uiEvent.send(UiEvent.Navigate(Routes.LEARN_WORDS + "?id=${event.id}"))
                 }
             }
             is CategoryEditEvent.OnWordClick -> {

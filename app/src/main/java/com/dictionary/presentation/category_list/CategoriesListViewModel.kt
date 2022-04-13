@@ -42,17 +42,10 @@ class CategoriesListViewModel @Inject constructor(
     var title = mutableStateOf("")
         private set
 
-//    val categories = mutableStateListOf<CategoryWithWords>()
     val categories = categoryRepository.listWithWords()
 
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
-
-//    init {
-//        viewModelScope.launch {
-//            categories.addAll(categoryRepository.listWithWords())
-//        }
-//    }
 
     fun onEvent(event: CategoryListEvent) {
         when (event) {
@@ -79,9 +72,6 @@ class CategoriesListViewModel @Inject constructor(
             }
             is CategoryListEvent.OnCategoryClick -> {
                 sendUiEvent(UiEvent.Navigate(Routes.CATEGORY_EDIT + "?id=${event.id}"))
-            }
-            is CategoryListEvent.OnGameClick -> {
-                sendUiEvent(UiEvent.Navigate(Routes.CARDS_GAME + "?id=${event.id}"))
             }
             is CategoryListEvent.OnOpenAddCategoryDialog -> {
                 openDialog.value = true

@@ -33,7 +33,7 @@ fun WordEditScreen(
         topBar = {
             DropDownMenu(viewModel.word?.term ?: "", onPopBackStack, viewModel.menuExpanded, viewModel::onEvent)
         }
-    ) {
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()

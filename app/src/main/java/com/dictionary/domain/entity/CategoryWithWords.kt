@@ -8,10 +8,19 @@ data class CategoryWithWords(
     @Relation(parentColumn = "id", entityColumn = "category")
     val words: List<Word>
 ){
-    fun countWordsToLearn(): Int {
+    fun countWordsToRepeat(): Int {
         var count = 0
         for (word in words) {
             if (word.shouldBeLearned()) {
+                count++
+            }
+        }
+        return count
+    }
+    fun countWordsToLearn(): Int {
+        var count = 0
+        for (word in words) {
+            if (word.bucket == 0) {
                 count++
             }
         }

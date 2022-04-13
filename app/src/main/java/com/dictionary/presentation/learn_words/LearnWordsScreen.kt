@@ -1,16 +1,13 @@
 package com.dictionary.presentation.learn_words
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Scaffold
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dictionary.presentation.cards_game.components.DropDownMenu
+import com.dictionary.presentation.learn_words.components.*
 
 @Composable
 fun LearnWordsScreen(
@@ -26,7 +23,7 @@ fun LearnWordsScreen(
         topBar = {
             DropDownMenu(onPopBackStack)
         }
-    ) {
+    ) { padding ->
         when (viewModel.isLoading.value) {
             true -> {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -34,9 +31,18 @@ fun LearnWordsScreen(
                 }
             }
             false -> {
-
+                Box(
+                    modifier = Modifier.fillMaxSize().padding(padding),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    AnimatedPage(viewModel.currentStep, 1) { Preview(viewModel = viewModel) }
+                    AnimatedPage(viewModel.currentStep, 2) { Match(viewModel = viewModel) }
+                    AnimatedPage(viewModel.currentStep, 3) { Test(viewModel = viewModel) }
+                    AnimatedPage(viewModel.currentStep, 4) { Cards(viewModel = viewModel) }
+                    AnimatedPage(viewModel.currentStep, 5) { Write(viewModel = viewModel) }
+                    AnimatedPage(viewModel.currentStep, 6) { Done(viewModel = viewModel) }
+                }
             }
         }
     }
-
 }

@@ -9,13 +9,13 @@ import java.util.*
 @Entity(tableName = Word.TABLE_NAME)
 data class Word(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id")
-    val id: Int,
+    val id: Int = 0,
     @ColumnInfo(name = "term")
-    val term: String,
+    val term: String = "",
     @ColumnInfo(name = "definition")
-    val definition: String,
+    val definition: String = "",
     @ColumnInfo(name = "category")
-    var category: Int?,
+    var category: Int? = null,
     @ColumnInfo(name = "created")
     val created: Date,
     @ColumnInfo(name = "last_repeated")

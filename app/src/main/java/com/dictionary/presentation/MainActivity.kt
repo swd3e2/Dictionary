@@ -12,17 +12,19 @@ import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.graphics.Color
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.dictionary.presentation.cards_game.CardsGameList
+import com.dictionary.presentation.cards_game.CardsGameScreen
 import com.dictionary.presentation.category_edit.CategoryEditScreen
 import com.dictionary.presentation.category_list.CategoriesListViewModel
 import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.presentation.category_list.CategoryListScreen
+import com.dictionary.presentation.learn_words.LearnWordsScreen
 import com.dictionary.presentation.word_edit.WordEditScreen
 import com.dictionary.utils.Routes
 import dagger.hilt.android.AndroidEntryPoint
@@ -50,6 +52,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+//        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         lifecycleScope.launchWhenStarted {
             categoriesListViewModel.filenameStateFlow.collectLatest {
@@ -127,7 +131,20 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         ) {
-                            CardsGameList(onPopBackStack = {
+                            CardsGameScreen(onPopBackStack = {
+                                navController.popBackStack()
+                            })
+                        }
+                        composable(
+                            route = Routes.LEARN_WORDS + "?id={id}",
+                            arguments = listOf(
+                                navArgument(name = "id") {
+                                    type = NavType.IntType
+                                    defaultValue = -1
+                                }
+                            )
+                        ) {
+                            LearnWordsScreen(onPopBackStack = {
                                 navController.popBackStack()
                             })
                         }

@@ -12,6 +12,7 @@ import com.dictionary.domain.repository.WordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
 
@@ -56,20 +57,21 @@ class CardsGameViewModel @Inject constructor(
                 categoryRepository.get(id)?.let { c ->
                     category = c
                     words = wordsRepository.categoryWordsAsList(c.id)
-
-                    for (word in words) {
-                        if (word.shouldBeLearned()) {
-                            wordsToLearn.add(word)
+                    withContext(Dispatchers.Main) {
+                        for (word in words) {
+                            if (word.shouldBeLearned()) {
+                                wordsToLearn.add(word)
+                            }
                         }
-                    }
 
-                    if (!wordsToLearn.isEmpty()) {
-                        wordsToLearn.shuffle()
-                        currentWord.value = wordsToLearn.first()
-                        currentWordIndex.value = 0
-                        countOfWords.value = wordsToLearn.size
+                        if (!wordsToLearn.isEmpty()) {
+                            wordsToLearn.shuffle()
+                            currentWord.value = wordsToLearn.first()
+                            currentWordIndex.value = 0
+                            countOfWords.value = wordsToLearn.size
+                        }
+                        isLoading.value = false
                     }
-                    isLoading.value = false
                 }
             }
         }
