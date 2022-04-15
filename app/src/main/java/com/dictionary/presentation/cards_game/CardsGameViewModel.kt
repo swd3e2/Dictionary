@@ -5,9 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dictionary.domain.entity.Category
 import com.dictionary.domain.entity.Word
-import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.WordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -43,17 +41,17 @@ class CardsGameViewModel @Inject constructor(
     var isLoading = mutableStateOf(true)
         private set
 
-    private var words: List<Word> = emptyList()
     private var wordsToLearn = mutableStateListOf<Word>()
+    private var forgottenWords = mutableSetOf<Int>()
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
         if (id != -1) {
             viewModelScope.launch(Dispatchers.IO) {
-                words = wordsRepository.categoryWordsAsList(id)
+                val words = wordsRepository.categoryWordsAsList(id)
                 withContext(Dispatchers.Main) {
                     for (word in words) {
-                        if (word.bucket == 0) {
+                        if (word.shouldBeRepeated()) {
                             wordsToLearn.add(word)
                         }
                     }
@@ -74,34 +72,42 @@ class CardsGameViewModel @Inject constructor(
         when (event) {
             is CardsGameEvent.WordLearned -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val word = event.word
-                    word.lastRepeated = Date()
-                    word.bucket = word.bucket+1
-                    wordsRepository.update(word)
+                    wordsRepository.update(event.word.apply {
+                        lastRepeated = Date()
+                        bucket++
+                    })
 
-                    wordsToLearn.remove(currentWord.value)
-                    currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null
-                    currentWordIndex.value = currentWordIndex.value + 1
-                    learnProgress.value =
-                        currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
-                    learnedWordsCount.value = learnedWordsCount.value + 1
+                    updateNextWord()
+                    updateProgress()
                 }
             }
             is CardsGameEvent.WordNotLearned -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val word = event.word
-                    word.lastRepeated = Date()
-                    word.bucket = 0
-                    wordsRepository.update(word)
+                    if (!forgottenWords.contains(event.word.id)) {
+                        forgottenWords.add(event.word.id)
+                        wordsToLearn.add(event.word)
+                    }
 
-                    wordsToLearn.remove(currentWord.value)
-                    currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null
-                    currentWordIndex.value = currentWordIndex.value + 1
-                    learnProgress.value =
-                        currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
-                    notLearnedWordsCount.value = notLearnedWordsCount.value + 1
+                    wordsRepository.update(event.word.apply {
+                        lastRepeated = Date()
+                        bucket = 1
+                    })
+
+                    updateNextWord()
+                    updateProgress()
                 }
             }
         }
+    }
+
+    private fun updateNextWord() {
+        wordsToLearn.remove(currentWord.value)
+        currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null
+        currentWordIndex.value = currentWordIndex.value + 1
+    }
+
+    private fun updateProgress() {
+        learnProgress.value = currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
+        notLearnedWordsCount.value = notLearnedWordsCount.value + 1
     }
 }

@@ -2,11 +2,8 @@ package com.dictionary.presentation.category_list
 
 import android.app.Application
 import android.net.Uri
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Category
 import com.dictionary.domain.entity.CategoryWithWords
@@ -36,7 +33,7 @@ class CategoriesListViewModel @Inject constructor(
     val _filenameStateFlow = MutableStateFlow<Uri?>(null)
     val filenameStateFlow = _filenameStateFlow.asStateFlow()
 
-    var openDialog = mutableStateOf(false)
+    var showAddCategoryDialog = mutableStateOf(false)
         private set
 
     var showDeleteDialog = mutableStateOf(false)
@@ -63,7 +60,7 @@ class CategoriesListViewModel @Inject constructor(
                     val newCategoryId = categoryRepository.create(newCategory)
                     newCategory.id = newCategoryId.toInt()
                     title.value = ""
-                    openDialog.value = false
+                    showAddCategoryDialog.value = false
                 }
             }
             is CategoryListEvent.OnChangeTitle -> {
@@ -89,12 +86,12 @@ class CategoriesListViewModel @Inject constructor(
             is CategoryListEvent.OnCategoryClick -> {
                 sendUiEvent(UiEvent.Navigate(Routes.CATEGORY_EDIT + "?id=${event.id}"))
             }
-            is CategoryListEvent.OnOpenAddCategoryDialog -> {
-                openDialog.value = true
+            is CategoryListEvent.OnShowAddCategoryDialog -> {
+                showAddCategoryDialog.value = true
             }
-            is CategoryListEvent.OnCloseAddCategoryDialog -> {
+            is CategoryListEvent.OnHideAddCategoryDialog -> {
                 title.value = ""
-                openDialog.value = false
+                showAddCategoryDialog.value = false
             }
             is CategoryListEvent.OnImportFile -> {
                 viewModelScope.launch(Dispatchers.IO) {

@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.WordRepository
+import com.dictionary.presentation.category_edit.CategoryEditViewModel
+import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +22,7 @@ class WordEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
-    private val _eventFlow = MutableSharedFlow<UIEvent>()
+    private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
 
     var menuExpanded = mutableStateOf(false)
@@ -102,15 +104,12 @@ class WordEditViewModel @Inject constructor(
                         transcription = newTranscription.value
                         similar =  newSimilar.value
                     })
-                    _eventFlow.emit(UIEvent.ShowSnackbar(
+                    _eventFlow.emit(UiEvent.ShowSnackbar(
                         "Saved"
                     ))
+                    _eventFlow.emit(UiEvent.PopBackStack)
                 }
             }
         }
-    }
-
-    sealed class UIEvent {
-        data class ShowSnackbar(val message: String): UIEvent()
     }
 }

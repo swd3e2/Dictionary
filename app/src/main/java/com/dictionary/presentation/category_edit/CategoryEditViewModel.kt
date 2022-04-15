@@ -12,16 +12,12 @@ import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.TranslationRepository
 import com.dictionary.domain.repository.WordRepository
-import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
 
@@ -33,6 +29,9 @@ class CategoryEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
+    var categoryTitle = mutableStateOf("")
+        private set
+
     var showDeleteDialog = mutableStateOf(false)
         private set
 
@@ -42,7 +41,10 @@ class CategoryEditViewModel @Inject constructor(
     var category: Category = Category(0, "")
         private set
 
-    var openDialog = mutableStateOf(false)
+    var showAddWordDialog = mutableStateOf(false)
+        private set
+
+    var showSortDialog = mutableStateOf(false)
         private set
 
     var wordTranslations = mutableStateListOf<String>()
@@ -66,7 +68,7 @@ class CategoryEditViewModel @Inject constructor(
     var wordsCount = mutableStateOf(0)
         private set
 
-    var newWordTerm = mutableStateOf("test")
+    var newWordTerm = mutableStateOf("")
         private set
 
     var newWordDefinition = mutableStateOf("")
@@ -89,6 +91,10 @@ class CategoryEditViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 categoryRepository.get(id)?.let { c ->
                     category = c
+
+                    withContext(Dispatchers.Main) {
+                        categoryTitle.value = c.name
+                    }
                 }
             }
         }
@@ -122,6 +128,11 @@ class CategoryEditViewModel @Inject constructor(
             is CategoryEditEvent.OnGameClick -> {
                 viewModelScope.launch {
                     _uiEvent.send(UiEvent.Navigate(Routes.CARDS_GAME + "?id=${event.id}"))
+                }
+            }
+            is CategoryEditEvent.OnMatchGameClick -> {
+                viewModelScope.launch {
+                    _uiEvent.send(UiEvent.Navigate(Routes.MATCH_GAME + "?id=${event.id}"))
                 }
             }
             is CategoryEditEvent.OnLearnClick -> {
@@ -161,19 +172,21 @@ class CategoryEditViewModel @Inject constructor(
 
                     newWordTerm.value = ""
                     newWordDefinition.value = ""
-                    openDialog.value = false
+                    showAddWordDialog.value = false
                     _state.value = WordTranslationState(translation = null)
                     wordTranslations.clear()
+                    _uiEvent.send(UiEvent.ShowSnackbar("Word created"))
                 }
             }
-            is CategoryEditEvent.OnOpenAddWordDialog -> {
-                openDialog.value = true
+            is CategoryEditEvent.OnShowAddWordDialog -> {
+                showAddWordDialog.value = true
                 wordWithTermExists.value = false
             }
             is CategoryEditEvent.OnCloseAddWordDialog -> {
                 newWordTerm.value = ""
                 newWordDefinition.value = ""
-                openDialog.value = false
+                showAddWordDialog.value = false
+                searchJob?.cancel()
                 _state.value = WordTranslationState(translation = null)
                 wordTranslations.clear()
             }
@@ -197,6 +210,7 @@ class CategoryEditViewModel @Inject constructor(
                                     _state.value = state.value.copy(
                                         isLoading = false
                                     )
+                                    _uiEvent.send(UiEvent.ShowSnackbar(result.message ?: "Unexpected error occurred"))
                                 }
                                 is Resource.Loading -> {
                                     _state.value = state.value.copy(
@@ -214,6 +228,33 @@ class CategoryEditViewModel @Inject constructor(
             is CategoryEditEvent.OnHideDeleteDialog -> {
                 showDeleteDialog.value = false
             }
+            is CategoryEditEvent.OnTitleSave -> {
+                if (categoryTitle.value.isEmpty()) {
+                    return
+                }
+
+                viewModelScope.launch(Dispatchers.IO) {
+                    category.name = categoryTitle.value
+                    categoryRepository.create(category)
+                    _uiEvent.send(UiEvent.ShowSnackbar("Title changed"))
+                }
+            }
+            is CategoryEditEvent.OnTitleChange -> {
+                categoryTitle.value = event.title
+            }
+            is CategoryEditEvent.OnShowSortDialog -> {
+                showSortDialog.value = true
+            }
+            is CategoryEditEvent.OnHideSortDialog -> {
+                showSortDialog.value = false
+            }
+            is CategoryEditEvent.OnSortChange -> {
+                showSortDialog.value = false
+            }
         }
+    }
+
+    sealed class UIEvent {
+        data class ShowSnackbar(val message: String): UIEvent()
     }
 }

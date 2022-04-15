@@ -1,4 +1,4 @@
-package com.dictionary.presentation.cards_game.components
+package com.dictionary.presentation.match_game.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*

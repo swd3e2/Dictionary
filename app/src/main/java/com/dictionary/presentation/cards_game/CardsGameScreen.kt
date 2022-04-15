@@ -12,11 +12,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.dictionary.presentation.cards_game.components.DropDownMenu
-import com.dictionary.presentation.cards_game.components.WordCard
+import com.dictionary.presentation.match_game.components.DropDownMenu
+import com.dictionary.presentation.components.WordCard
 import com.dictionary.ui.theme.PrimaryTextColor
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CardsGameScreen(
     onPopBackStack: () -> Unit = {},
@@ -32,7 +31,7 @@ fun CardsGameScreen(
         topBar = {
             DropDownMenu(onPopBackStack)
         }
-    ) { padding ->
+    ) { _ ->
         when (viewModel.isLoading.value) {
             true -> {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -40,28 +39,8 @@ fun CardsGameScreen(
                 }
             }
             false -> {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "${viewModel.currentWordIndex.value} / ${viewModel.countOfWords.value}",
-                            letterSpacing = 3.sp,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = PrimaryTextColor
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        LinearProgressIndicator(progress = viewModel.learnProgress.value)
-                    }
+                if (viewModel.currentWordIndex.value < viewModel.countOfWords.value) {
+                    Progress(viewModel)
                 }
                 Box(
                     modifier = Modifier
@@ -75,51 +54,93 @@ fun CardsGameScreen(
                             word = viewModel.currentWord.value!!
                         )
                     } else {
-                        Text(text = "No words to repeat")
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "No words to repeat")
+                            Button(onClick = { onPopBackStack() }) {
+                                Text(text = "Back")
+                            }
+                        }
                     }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .offset(0.dp, 250.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .offset((-5).dp, 0.dp)
-                                .background(
-                                    color = Color(0xFFFFDC28),
-                                    shape = RoundedCornerShape(10f)
-                                )
-                                .width(26.dp)
-                                .height(28.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                modifier = Modifier.offset(2.dp),
-                                text = viewModel.notLearnedWordsCount.value.toString(),
-                                color = Color(0xffffffff),
-                            )
-                        }
-                        Box(
-                            modifier = Modifier
-                                .offset(5.dp, 0.dp)
-                                .background(
-                                    color = Color(0xFF16C054),
-                                    shape = RoundedCornerShape(10f)
-                                )
-                                .width(26.dp)
-                                .height(28.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                modifier = Modifier.offset((-2).dp),
-                                text = viewModel.learnedWordsCount.value.toString(),
-                                color = Color(0xffffffff)
-                            )
-                        }
+                    if (viewModel.currentWordIndex.value < viewModel.countOfWords.value) {
+                        Counter(viewModel)
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun Counter(viewModel: CardsGameViewModel) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .offset(0.dp, 250.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Box(
+            modifier = Modifier
+                .offset((-5).dp, 0.dp)
+                .background(
+                    color = Color(0xFFFFDC28),
+                    shape = RoundedCornerShape(10f)
+                )
+                .width(26.dp)
+                .height(28.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                modifier = Modifier.offset(2.dp),
+                text = viewModel.notLearnedWordsCount.value.toString(),
+                color = Color(0xffffffff),
+            )
+        }
+        Box(
+            modifier = Modifier
+                .offset(5.dp, 0.dp)
+                .background(
+                    color = Color(0xFF16C054),
+                    shape = RoundedCornerShape(10f)
+                )
+                .width(26.dp)
+                .height(28.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                modifier = Modifier.offset((-2).dp),
+                text = viewModel.learnedWordsCount.value.toString(),
+                color = Color(0xffffffff)
+            )
+        }
+    }
+}
+
+@Composable
+private fun Progress(viewModel: CardsGameViewModel) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "${viewModel.currentWordIndex.value} / ${viewModel.countOfWords.value}",
+                letterSpacing = 3.sp,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = PrimaryTextColor
+            )
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            LinearProgressIndicator(progress = viewModel.learnProgress.value)
         }
     }
 }

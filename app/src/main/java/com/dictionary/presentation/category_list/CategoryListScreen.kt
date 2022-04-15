@@ -1,15 +1,8 @@
 package com.dictionary.presentation.category_list
 
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.*
@@ -46,7 +39,14 @@ fun CategoryListScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        scaffoldState = scaffoldState
+        scaffoldState = scaffoldState,
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                viewModel.onEvent(CategoryListEvent.OnShowAddCategoryDialog)
+            }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
+            }
+        }
     ) {
         if (viewModel.showDeleteDialog.value) {
             DeleteDialog(
@@ -60,7 +60,7 @@ fun CategoryListScreen(
                 .padding(it)
                 .wrapContentHeight()
         ) {
-            if (viewModel.openDialog.value) {
+            if (viewModel.showAddCategoryDialog.value) {
                 AddCategoryDialog(
                     viewModel.title,
                     viewModel::onEvent
@@ -100,17 +100,6 @@ fun CategoryListScreen(
                             Icon(
                                 imageVector = Icons.Default.KeyboardArrowDown,
                                 contentDescription = "Import",
-                                tint = MaterialTheme.colors.primary
-                            )
-                        }
-                        IconButton(
-                            modifier = Modifier.padding(0.dp, 0.dp, 20.dp, 0.dp),
-                            onClick = {
-                                viewModel.onEvent(CategoryListEvent.OnOpenAddCategoryDialog)
-                            }) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add",
                                 tint = MaterialTheme.colors.primary
                             )
                         }

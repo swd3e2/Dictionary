@@ -5,8 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -15,7 +19,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -36,10 +42,13 @@ fun AddWordDialog(
     wordTranslationState: State<WordTranslationState>,
     onEvent: (CategoryEditEvent) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
+
     Dialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
         onDismissRequest = {
             onEvent(CategoryEditEvent.OnCloseAddWordDialog)
+            focusManager.clearFocus()
         },
         content = {
             Box {
@@ -60,23 +69,31 @@ fun AddWordDialog(
                             text = "Creating new word",
                         )
                         Spacer(modifier = Modifier.height(30.dp))
-                        CustomTextField(
-                            "Term",
-                            wordTerm,
-                            { onEvent(CategoryEditEvent.OnTermChange(it)) },
-                            { onEvent(CategoryEditEvent.OnTermChange("")) },
+                        TextField(
+                            label = { Text(text = "Term") },
+                            modifier = Modifier.fillMaxWidth(),
+                            value = wordTerm.value,
+                            onValueChange = { onEvent(CategoryEditEvent.OnTermChange(it)) },
+                            colors = TextFieldDefaults.textFieldColors(
+                                backgroundColor = Color.Transparent,
+                            ),
                         )
                         if (wordWithTermExists.value) {
                             Text(text = "Word already exists", color = Color(0xFFCF3A3F))
                         }
-                        CustomTextField(
-                            "Definition",
-                            wordDefinition,
-                            { onEvent(CategoryEditEvent.OnDefinitionChange(it)) },
-                            { onEvent(CategoryEditEvent.OnDefinitionChange("")) },
+                        TextField(
+                            label = { Text(text = "Definition") },
+                            modifier = Modifier.fillMaxWidth(),
+                            value = wordDefinition.value,
+                            onValueChange = { onEvent(CategoryEditEvent.OnDefinitionChange(it)) },
+                            colors = TextFieldDefaults.textFieldColors(
+                                backgroundColor = Color.Transparent,
+                            ),
                         )
                         if (wordTranslationState.value.isLoading) {
-                            Box(modifier = Modifier.fillMaxWidth()) {
+                            Box(
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
                                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                             }
                         }
@@ -137,14 +154,20 @@ fun AddWordDialog(
                             }
                         }
                         Spacer(modifier = Modifier.height(30.dp))
-                        Button(onClick = { onEvent(CategoryEditEvent.GetTranslation) }) {
+                        Button(onClick = {
+                            onEvent(CategoryEditEvent.GetTranslation)
+                            focusManager.clearFocus()
+                        }) {
                             Text(text = "Translate")
                         }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Button(onClick = { onEvent(CategoryEditEvent.OnCloseAddWordDialog) }) {
+                            Button(onClick = {
+                                onEvent(CategoryEditEvent.OnCloseAddWordDialog)
+                                focusManager.clearFocus()
+                            }) {
                                 Text(text = "Cancel")
                             }
                             Button(onClick = {

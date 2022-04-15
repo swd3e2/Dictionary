@@ -7,11 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.WordRepository
-import com.dictionary.presentation.models.LearnWord
 import com.dictionary.presentation.learn_words.state.CardsState
 import com.dictionary.presentation.learn_words.state.MatchState
 import com.dictionary.presentation.learn_words.state.TestState
 import com.dictionary.presentation.learn_words.state.WriteState
+import com.dictionary.presentation.models.WordWithIndex
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -43,7 +43,7 @@ class LearnWordsViewModel @Inject constructor(
             viewModelScope.launch(Dispatchers.IO) {
                 val words = wordsRepository.categoryWordsAsList(id)
                 withContext(Dispatchers.Main) {
-                    wordsToLearn.addAll(words)
+                    wordsToLearn.addAll(words.filter { it.bucket == 0 })
                     if (wordsToLearn.isNotEmpty()) {
                         wordsToLearn.shuffle()
                         val currentWordsToLearn = wordsToLearn.take(18)
@@ -60,28 +60,8 @@ class LearnWordsViewModel @Inject constructor(
         when (event) {
             is LearnWordsEvent.OnGoToMatch -> {
                 currentStep.value = 2
-                val listSize = currentWords.size
+                matchState.createGroupsFromWordList(currentWords)
 
-                var group = mutableListOf<LearnWord>()
-                for ((index, word) in currentWords.withIndex()) {
-                    if (group.size == 12) {
-                        group.shuffle()
-                        matchState.wordsGroups.add(group)
-                        group = mutableListOf()
-                    }
-                    group.add(LearnWord(text = word.term, wordId = word.id, index = index))
-                    group.add(LearnWord(text = word.definition, wordId = word.id, index = index + listSize))
-
-                    matchState.wordsState[index] = "unselected"
-                    matchState.wordsState[index + listSize] = "unselected"
-                }
-
-                if (group.size > 0) {
-                    group.shuffle()
-                    matchState.wordsGroups.add(group)
-                }
-                matchState.currentWordsGroupIndex = 0
-                matchState.currentWordsGroup.addAll(matchState.wordsGroups[matchState.currentWordsGroupIndex])
             }
             is LearnWordsEvent.OnMatchSelect -> {
                 if (matchState.wordsState[event.word.index] == "selected") {
@@ -97,7 +77,7 @@ class LearnWordsViewModel @Inject constructor(
                     val second = matchState.wordsSelected[1]
                     matchState.wordsSelected.clear()
 
-                    val isOK = first.wordId == second.wordId
+                    val isOK = first.word.id == second.word.id
 
                     if (isOK) {
                         matchState.wordsState[first.index] = "success"
@@ -188,12 +168,18 @@ class LearnWordsViewModel @Inject constructor(
                 }
 
                 if (guessedRight) {
+                    word.bucket++
+                    viewModelScope.launch(Dispatchers.IO) {
+                        wordsRepository.create(word)
+                    }
+
                     writeState.hasError.value = false
                     writeState.index++
                     if (writeState.index >= writeState.words.size) {
                         onEvent(LearnWordsEvent.OnGoToDone)
                         return
                     }
+
                     writeState.currentWord.value = writeState.words[writeState.index]
                     writeState.definition.value = ""
                     return

@@ -10,7 +10,7 @@ sealed class CategoryListEvent {
     object OnDeleteCategory: CategoryListEvent()
     data class OnShowDeleteDialog(val category: CategoryWithWords): CategoryListEvent()
     object OnHideDeleteDialog: CategoryListEvent()
-    object OnOpenAddCategoryDialog: CategoryListEvent()
-    object OnCloseAddCategoryDialog: CategoryListEvent()
+    object OnShowAddCategoryDialog: CategoryListEvent()
+    object OnHideAddCategoryDialog: CategoryListEvent()
     data class OnImportFile(val uri: Uri): CategoryListEvent()
 }

@@ -30,4 +30,8 @@ class CategoryRepositoryImpl @Inject constructor(
         return dao.get(id)
     }
 
+    override suspend fun getWithWords(id: Int): CategoryWithWords? {
+        return dao.getWithWords(id)
+    }
+
 }

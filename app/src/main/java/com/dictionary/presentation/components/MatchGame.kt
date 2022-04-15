@@ -14,19 +14,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.dictionary.presentation.models.LearnWord
+import com.dictionary.presentation.models.WordWithIndex
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.google.accompanist.flowlayout.FlowRow
 
 @Composable
 fun MatchGame(
-    words: MutableList<LearnWord>,
-    onItemClick: (LearnWord) -> Unit,
+    words: MutableList<WordWithIndex>,
+    onItemClick: (WordWithIndex) -> Unit,
     stateMap: MutableMap<Int, String>,
+    totalCount: Int
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val padding = PaddingValues(5.dp)
 
     FlowRow(
@@ -39,7 +42,7 @@ fun MatchGame(
                 modifier = Modifier
                     .width(screenWidth / 3 - padding.calculateStartPadding(LayoutDirection.Ltr))
                     .padding(5.dp)
-                    .height(150.dp)
+                    .height(screenHeight / 4 - padding.calculateTopPadding() - 20.dp)
             ) {
                 AnimatedVisibility(
                     visible = stateMap[word.index] != "success",
@@ -63,7 +66,8 @@ fun MatchGame(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = word.text,
+                                text = if (totalCount > word.index) word.word.term else word.word.definition,
+                                textAlign = TextAlign.Center,
                                 color = when (stateMap[word.index]) {
                                     "selected" -> Color.White
                                     "error" -> Color.White

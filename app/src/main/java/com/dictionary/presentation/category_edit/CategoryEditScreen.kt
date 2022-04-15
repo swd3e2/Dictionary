@@ -4,25 +4,29 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dictionary.domain.entity.Category
 import com.dictionary.presentation.category_edit.components.AddWordDialog
 import com.dictionary.presentation.category_edit.components.DropDownMenu
+import com.dictionary.presentation.category_edit.components.SortDialog
 import com.dictionary.presentation.category_edit.components.WordListItem
-import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.presentation.components.DeleteDialog
-import com.dictionary.presentation.word_edit.WordEditEvent
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.utils.UiEvent
 
@@ -39,7 +43,11 @@ fun CategoryEditScreen(
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.Navigate -> onNavigate(event)
-                else -> Unit
+                is UiEvent.ShowSnackbar -> {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        message = event.message
+                    )
+                }
             }
         }
     }
@@ -50,7 +58,6 @@ fun CategoryEditScreen(
             .fillMaxSize(),
         topBar = {
             DropDownMenu(
-                viewModel.category.name,
                 onPopBackStack,
                 viewModel.menuExpanded,
                 viewModel::onEvent
@@ -58,7 +65,7 @@ fun CategoryEditScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                viewModel.onEvent(CategoryEditEvent.OnOpenAddWordDialog)
+                viewModel.onEvent(CategoryEditEvent.OnShowAddWordDialog)
             }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
             }
@@ -68,11 +75,11 @@ fun CategoryEditScreen(
             DeleteDialog(
                 text = "Are you sure you want to delete word?",
                 onClose = { viewModel.onEvent(CategoryEditEvent.OnHideDeleteDialog) },
-                onSuccess = { viewModel.onEvent(CategoryEditEvent.OnDeleteWord)}
+                onSuccess = { viewModel.onEvent(CategoryEditEvent.OnDeleteWord) }
             )
         }
 
-        if (viewModel.openDialog.value) {
+        if (viewModel.showAddWordDialog.value) {
             AddWordDialog(
                 viewModel,
                 viewModel.newWordTerm,
@@ -83,40 +90,119 @@ fun CategoryEditScreen(
             )
         }
 
+        if (viewModel.showSortDialog.value) {
+            SortDialog(
+                viewModel::onEvent,
+            )
+        }
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
             item {
-                Title(category = viewModel.category, wordsCount = viewModel.wordsCount)
+                Title(
+                    category = viewModel.category,
+                    wordsCount = viewModel.wordsCount,
+                    categoryTitle = viewModel.categoryTitle,
+                    onEvent = viewModel::onEvent
+                )
                 GameButtons(category = viewModel.category, onEvent = viewModel::onEvent)
                 SearchAndAdd(viewModel.termSearch, onEvent = viewModel::onEvent)
             }
             items(words.value) { word ->
-                WordListItem(word, viewModel::onEvent)
+                key(word.id) {
+                    WordListItem(word, viewModel::onEvent)
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Title(
     category: Category,
-    wordsCount: MutableState<Int>
+    categoryTitle: MutableState<String>,
+    wordsCount: MutableState<Int>,
+    onEvent: (CategoryEditEvent) -> Unit
 ) {
+    val showTextField = remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(15.dp, 0.dp)
     ) {
         Spacer(modifier = Modifier.height(20.dp))
-        Text(
-            text = category.name,
-            fontSize = 30.sp,
-            color = PrimaryTextColor,
-            fontWeight = FontWeight.Bold
-        )
+        Row(modifier = Modifier.fillMaxWidth()) {
+            if (!showTextField.value) {
+                Text(
+                    text = category.name,
+                    fontSize = 30.sp,
+                    color = PrimaryTextColor,
+                    fontWeight = FontWeight.Bold
+                )
+                IconButton(
+                    modifier = Modifier.offset((-4).dp, (-18).dp),
+                    onClick = { showTextField.value = !showTextField.value }
+                ) {
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colors.primary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+            } else {
+                TextField(
+                    label = { Text(text = "Title") },
+                    modifier = Modifier.fillMaxWidth(),
+                    value = categoryTitle.value,
+                    onValueChange = { onEvent(CategoryEditEvent.OnTitleChange(it)) },
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            onEvent(CategoryEditEvent.OnTitleSave)
+                            showTextField.value = !showTextField.value
+                            focusManager.clearFocus()
+                        }
+                    ),
+                    leadingIcon = {
+                        IconButton(
+                            onClick = {
+                                showTextField.value = !showTextField.value
+                            }) {
+                            Icon(
+                                Icons.Default.Clear,
+                                contentDescription = "Edit",
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                onEvent(CategoryEditEvent.OnTitleSave)
+                                showTextField.value = !showTextField.value
+                                focusManager.clearFocus()
+                            }) {
+                            Icon(
+                                Icons.Default.Done,
+                                contentDescription = "Edit",
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = Color.Transparent,
+                    ),
+                )
+            }
+
+        }
         Text(
             modifier = Modifier.padding(0.dp, 20.dp),
             text = "${wordsCount.value} terms",
@@ -198,7 +284,7 @@ fun GameButtons(
             modifier = Modifier
                 .width(cardWidth)
                 .clickable {
-                    onEvent(CategoryEditEvent.OnLearnClick(category.id))
+                    onEvent(CategoryEditEvent.OnMatchGameClick(category.id))
                 },
             elevation = 0.dp
         ) {
@@ -281,11 +367,22 @@ fun SearchAndAdd(
             value = search.value,
             onValueChange = { onEvent(CategoryEditEvent.OnSearchTermChange(it)) },
             label = { Text(text = "Search") },
-            modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
+            modifier = Modifier
+                .padding(16.dp, 10.dp),
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
             ),
         )
+        IconButton(
+            modifier = Modifier.offset(0.dp, 20.dp),
+            onClick = { onEvent(CategoryEditEvent.OnShowSortDialog) }
+        ) {
+            Icon(
+                Icons.Default.Search,
+                contentDescription = "Edit",
+                tint = MaterialTheme.colors.primary
+            )
+        }
     }
     Spacer(modifier = Modifier.height(10.dp))
 }

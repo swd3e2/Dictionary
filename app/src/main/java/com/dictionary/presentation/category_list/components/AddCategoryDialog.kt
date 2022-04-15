@@ -7,10 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.dictionary.presentation.category_edit.CategoryEditEvent
 import com.dictionary.presentation.category_list.CategoryListEvent
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -21,7 +23,7 @@ fun AddCategoryDialog(
 ) {
     Dialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
-        onDismissRequest = { onEvent(CategoryListEvent.OnCloseAddCategoryDialog) },
+        onDismissRequest = { onEvent(CategoryListEvent.OnHideAddCategoryDialog) },
         content = {
             Box(
                 modifier = Modifier.padding(10.dp)
@@ -39,23 +41,20 @@ fun AddCategoryDialog(
                         )
                         Spacer(modifier = Modifier.height(30.dp))
                         TextField(
+                            label = { Text(text = "Definition") },
                             modifier = Modifier.fillMaxWidth(),
                             value = categoryTitle.value,
-                            textStyle = LocalTextStyle.current.copy(
-                                fontSize = MaterialTheme.typography.body2.fontSize
+                            onValueChange = { onEvent(CategoryListEvent.OnChangeTitle(it)) },
+                            colors = TextFieldDefaults.textFieldColors(
+                                backgroundColor = Color.Transparent,
                             ),
-                            onValueChange = {
-                                onEvent(CategoryListEvent.OnChangeTitle(it))
-                            },
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                            label = { Text(text = "Category name") }
                         )
                         Spacer(modifier = Modifier.height(30.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Button(onClick = { onEvent(CategoryListEvent.OnCloseAddCategoryDialog) }) {
+                            Button(onClick = { onEvent(CategoryListEvent.OnHideAddCategoryDialog) }) {
                                 Text(text = "Cancel")
                             }
                             Button(onClick = {

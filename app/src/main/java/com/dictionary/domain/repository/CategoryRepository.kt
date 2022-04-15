@@ -10,4 +10,5 @@ interface CategoryRepository {
     suspend fun create(category: Category): Long
     suspend fun delete(id: Int)
     suspend fun get(id: Int): Category?
+    suspend fun getWithWords(id: Int): CategoryWithWords?
 }

@@ -9,21 +9,9 @@ data class CategoryWithWords(
     val words: List<Word>
 ){
     fun countWordsToRepeat(): Int {
-        var count = 0
-        for (word in words) {
-            if (word.shouldBeLearned()) {
-                count++
-            }
-        }
-        return count
+        return words.filter { it.shouldBeRepeated() }.count()
     }
     fun countWordsToLearn(): Int {
-        var count = 0
-        for (word in words) {
-            if (word.bucket == 0) {
-                count++
-            }
-        }
-        return count
+        return words.filter { it.bucket == 0 }.count()
     }
 }

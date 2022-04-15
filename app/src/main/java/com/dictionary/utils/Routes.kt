@@ -6,4 +6,5 @@ object Routes {
     const val WORD_EDIT = "edit_word"
     const val CARDS_GAME = "card_game"
     const val LEARN_WORDS = "learn_words"
+    const val MATCH_GAME = "match_game"
 }

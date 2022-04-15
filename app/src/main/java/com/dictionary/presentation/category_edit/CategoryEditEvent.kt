@@ -1,8 +1,5 @@
 package com.dictionary.presentation.category_edit
 
-import com.dictionary.domain.entity.CategoryWithWords
-import com.dictionary.presentation.category_list.CategoryListEvent
-
 sealed class CategoryEditEvent {
     object OnMenuClick: CategoryEditEvent()
     object OnCloseMenu: CategoryEditEvent()
@@ -13,10 +10,16 @@ sealed class CategoryEditEvent {
     data class OnWordClick(val id: Int) : CategoryEditEvent()
     data class OnSearchTermChange(val term: String) : CategoryEditEvent()
     data class OnGameClick(val id: Int) : CategoryEditEvent()
+    data class OnMatchGameClick(val id: Int) : CategoryEditEvent()
     data class OnLearnClick(val id: Int) : CategoryEditEvent()
     data class OnShowDeleteDialog(val id: Int): CategoryEditEvent()
+    data class OnTitleChange(var title: String) : CategoryEditEvent()
+    data class OnSortChange(var field: String, var direction: String) : CategoryEditEvent()
+    object OnTitleSave : CategoryEditEvent()
     object OnHideDeleteDialog: CategoryEditEvent()
-    object OnOpenAddWordDialog: CategoryEditEvent()
+    object OnShowAddWordDialog: CategoryEditEvent()
     object OnCloseAddWordDialog: CategoryEditEvent()
     object GetTranslation: CategoryEditEvent()
+    object OnShowSortDialog: CategoryEditEvent()
+    object OnHideSortDialog: CategoryEditEvent()
 }

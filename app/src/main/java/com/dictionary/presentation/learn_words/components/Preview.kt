@@ -21,47 +21,63 @@ import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
 
 @Composable
-fun Preview(viewModel: LearnWordsViewModel) {
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Top) {
-        for (word in viewModel.currentWords) {
-            Card(
-                modifier = Modifier.padding(15.dp, 5.dp),
-                elevation = 0.dp
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(15.dp, 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+fun Preview(viewModel: LearnWordsViewModel, onPopBackStack: () -> Unit) {
+    if (viewModel.currentWords.size == 0) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(text = "No words to learn")
+            Button(onClick = { onPopBackStack() }) {
+                Text(text = "Back")
+            }
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.Top
+        ) {
+            for (word in viewModel.currentWords) {
+                Card(
+                    modifier = Modifier.padding(15.dp, 5.dp),
+                    elevation = 0.dp
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth()
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(15.dp, 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            text = word.term,
-                            style = MaterialTheme.typography.body1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = PrimaryTextColor
-                        )
-                        Text(
-                            text = word.definition,
-                            style = MaterialTheme.typography.body1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = SecondaryTextColor,
-                            fontSize = 12.sp
-                        )
+                        Column(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = word.term,
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = PrimaryTextColor
+                            )
+                            Text(
+                                text = word.definition,
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = SecondaryTextColor,
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
             }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Button(onClick = { viewModel.onEvent(LearnWordsEvent.OnGoToWrite) }) {
-                Text(text = "Next")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Button(onClick = { viewModel.onEvent(LearnWordsEvent.OnGoToMatch) }) {
+                    Text(text = "Next")
+                }
             }
         }
     }

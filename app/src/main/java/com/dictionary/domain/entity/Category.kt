@@ -9,7 +9,7 @@ class Category (
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name="id")
     var id: Int,
     @ColumnInfo(name="name")
-    val name: String,
+    var name: String,
 ){
     companion object {
         const val TABLE_NAME = "categories"

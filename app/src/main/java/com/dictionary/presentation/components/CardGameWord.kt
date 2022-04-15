@@ -1,4 +1,4 @@
-package com.dictionary.presentation.cards_game.components
+package com.dictionary.presentation.components
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dictionary.domain.entity.Word
-import com.dictionary.presentation.cards_game.CardsGameEvent
 import com.dictionary.presentation.common.DisabledInteractionSource
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

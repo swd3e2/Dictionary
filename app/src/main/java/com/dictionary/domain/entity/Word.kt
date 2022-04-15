@@ -35,12 +35,9 @@ data class Word(
         const val TABLE_NAME = "words"
     }
 
-    fun shouldBeLearned(): Boolean {
+    fun shouldBeRepeated(): Boolean {
         val currentDate = Date()
         when (bucket) {
-            0 -> {
-                return true
-            }
             1 -> {
                 if (Date(lastRepeated.time + Day).before(currentDate)) {
                     return true

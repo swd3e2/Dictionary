@@ -6,7 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.dictionary.presentation.cards_game.components.DropDownMenu
+import com.dictionary.presentation.match_game.components.DropDownMenu
 import com.dictionary.presentation.learn_words.components.*
 
 @Composable
@@ -32,7 +32,7 @@ fun LearnWordsScreen(
                     modifier = Modifier.fillMaxSize().padding(padding),
                     contentAlignment = Alignment.Center,
                 ) {
-                    AnimatedPage(viewModel.currentStep, 1) { Preview(viewModel = viewModel) }
+                    AnimatedPage(viewModel.currentStep, 1) { Preview(onPopBackStack = onPopBackStack, viewModel = viewModel) }
                     AnimatedPage(viewModel.currentStep, 2) { Match(viewModel = viewModel) }
                     AnimatedPage(viewModel.currentStep, 3) { Test(viewModel = viewModel) }
                     AnimatedPage(viewModel.currentStep, 4) { Cards(viewModel = viewModel) }

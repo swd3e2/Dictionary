@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -19,6 +20,8 @@ import com.dictionary.presentation.learn_words.LearnWordsViewModel
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Write(viewModel: LearnWordsViewModel) {
+    val focusManager = LocalFocusManager.current
+
     Column(
         modifier = Modifier,
         horizontalAlignment = Alignment.CenterHorizontally
@@ -56,7 +59,10 @@ fun Write(viewModel: LearnWordsViewModel) {
                 onValueChange = { viewModel.writeState.definition.value = it },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
-                    onDone = { viewModel.onEvent(LearnWordsEvent.OnWriteTryDefinition(viewModel.writeState.definition.value)) }
+                    onDone = {
+                        viewModel.onEvent(LearnWordsEvent.OnWriteTryDefinition(viewModel.writeState.definition.value))
+                        focusManager.clearFocus()
+                    }
                 ),
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,

@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.dictionary.presentation.cards_game.components.WordCard
+import com.dictionary.presentation.components.WordCard
 import com.dictionary.presentation.learn_words.LearnWordsEvent
 import com.dictionary.presentation.learn_words.LearnWordsViewModel
 
