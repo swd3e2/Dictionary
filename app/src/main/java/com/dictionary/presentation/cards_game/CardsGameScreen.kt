@@ -12,7 +12,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.dictionary.presentation.match_game.components.DropDownMenu
+import com.dictionary.presentation.cards_game.components.DropDownMenu
 import com.dictionary.presentation.components.WordCard
 import com.dictionary.ui.theme.PrimaryTextColor
 

@@ -33,12 +33,11 @@ class WriteState {
     }
 
     fun tryGuess(): Boolean {
-        definition.value = ""
-
         val word = currentWord.value!!
         val guessedRight = guessedRight(word, definition.value)
 
         if (guessedRight) {
+            definition.value = ""
             hasError.value = false
             return true
         }
@@ -51,6 +50,7 @@ class WriteState {
 
         hasDefinition.value = definition.value
         wantDefinition.value = word.definition
+        definition.value = ""
         return false
     }
 
@@ -58,6 +58,7 @@ class WriteState {
         if (currentIndex + 1 >= words.size) {
             return false
         }
+        hasError.value = false
         lastAddedWordId = 0
         currentIndex++
         currentWord.value = words[currentIndex]

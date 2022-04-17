@@ -5,6 +5,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import com.dictionary.presentation.learn_words.LearnWordsEvent
 import com.dictionary.presentation.learn_words.LearnWordsViewModel
 
@@ -14,7 +15,11 @@ fun Done(viewModel: LearnWordsViewModel) {
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Congratulations")
+        Text(
+            modifier = Modifier.fillMaxWidth(),
+            text = "Congratulations",
+            textAlign = TextAlign.Center
+        )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Button(onClick = {  }) {
                 Text(text = "Back")

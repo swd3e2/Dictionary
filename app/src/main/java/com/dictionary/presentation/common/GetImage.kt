@@ -25,4 +25,8 @@ class GetImage(private val registry : ActivityResultRegistry): DefaultLifecycleO
     fun selectImage() {
         getContent.launch("image/*")
     }
+
+    fun reset() {
+        _filenameStateFlow.value = null
+    }
 }

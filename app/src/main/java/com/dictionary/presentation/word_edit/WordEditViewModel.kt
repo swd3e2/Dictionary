@@ -1,17 +1,24 @@
 package com.dictionary.presentation.word_edit
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.dictionary.common.Resource
 import com.dictionary.domain.entity.Word
+import com.dictionary.domain.repository.TranslationRepository
 import com.dictionary.domain.repository.WordRepository
-import com.dictionary.presentation.category_edit.CategoryEditViewModel
+import com.dictionary.presentation.category_edit.WordTranslationState
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -19,6 +26,7 @@ import javax.inject.Inject
 @HiltViewModel
 class WordEditViewModel @Inject constructor(
     private val wordRepository: WordRepository,
+    private val translationRepository: TranslationRepository,
     savedStateHandle: SavedStateHandle
 ): ViewModel() {
 
@@ -26,6 +34,12 @@ class WordEditViewModel @Inject constructor(
     val eventFlow = _eventFlow.asSharedFlow()
 
     var menuExpanded = mutableStateOf(false)
+        private set
+
+    var showTranslationDialog = mutableStateOf(false)
+        private set
+
+    var selectedTranslations = mutableStateListOf<String>()
         private set
 
     var word: Word? = null
@@ -48,6 +62,14 @@ class WordEditViewModel @Inject constructor(
 
     var newSimilar = mutableStateOf("")
         private set
+
+    var wordWithTermExists = mutableStateOf(false)
+        private set
+
+    private val _state = mutableStateOf(WordTranslationState(translation = null, isLoading = false))
+    val state: State<WordTranslationState> = _state
+
+    private var searchJob: Job? = null
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
@@ -77,6 +99,9 @@ class WordEditViewModel @Inject constructor(
                 menuExpanded.value = false
             }
             is WordEditEvent.OnTermChange -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    wordWithTermExists.value = wordRepository.exists(event.term)
+                }
                 newTerm.value = event.term
             }
             is WordEditEvent.OnDefinitionChange -> {
@@ -96,19 +121,84 @@ class WordEditViewModel @Inject constructor(
             }
             is WordEditEvent.OnSaveClick -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordRepository.create(word!!.apply {
-                        term = newTerm.value
-                        definition =  newDefinition.value
-                        synonyms = newSynonyms.value
-                        antonyms = newAntonyms.value
-                        transcription = newTranscription.value
-                        similar =  newSimilar.value
-                    })
+                    if (word != null) {
+                        wordRepository.create(word!!.apply {
+                            term = newTerm.value
+                            definition =  newDefinition.value
+                            synonyms = newSynonyms.value
+                            antonyms = newAntonyms.value
+                            transcription = newTranscription.value
+                            similar =  newSimilar.value
+                        })
+                    } else {
+                        wordRepository.create(Word(
+                            term = newTerm.value,
+                            definition =  newDefinition.value,
+                            synonyms = newSynonyms.value,
+                            antonyms = newAntonyms.value,
+                            transcription = newTranscription.value,
+                            similar =  newSimilar.value,
+                        ))
+                    }
                     _eventFlow.emit(UiEvent.ShowSnackbar(
                         "Saved"
                     ))
                     _eventFlow.emit(UiEvent.PopBackStack)
                 }
+            }
+            WordEditEvent.OnShowTranslationDialog -> {
+                if (newTerm.value.isEmpty()) {
+                    viewModelScope.launch(Dispatchers.IO) {
+                        _eventFlow.emit(
+                            UiEvent.ShowSnackbar(
+                                "Term is empty"
+                            )
+                        )
+                    }
+                    return
+                }
+
+                showTranslationDialog.value = true
+                searchJob?.cancel()
+                searchJob = viewModelScope.launch {
+                    translationRepository.getTranslation(newTerm.value)
+                        .onEach { result ->
+                            when (result) {
+                                is Resource.Success -> {
+                                    _state.value = state.value.copy(translation = result.data, isLoading = false)
+                                }
+                                is Resource.Error -> {
+                                    _state.value = state.value.copy(isLoading = false)
+                                    _eventFlow.emit(UiEvent.ShowSnackbar(result.message ?: "Unexpected error occurred"))
+                                }
+                                is Resource.Loading -> {
+                                    _state.value = state.value.copy(isLoading = true)
+                                }
+                            }
+                        }.launchIn(this)
+                }
+            }
+            is WordEditEvent.OnClickOnTranslation -> {
+                if (!selectedTranslations.contains(event.translation)) {
+                    selectedTranslations.add(event.translation)
+                } else {
+                    selectedTranslations.remove(event.translation)
+                }
+            }
+            WordEditEvent.OnApplyTranslation -> {
+                if (selectedTranslations.isEmpty()) {
+                    viewModelScope.launch {
+                        _eventFlow.emit(UiEvent.ShowSnackbar("No definitions selected"))
+                    }
+                    return
+                }
+                newDefinition.value = selectedTranslations.reduce { acc, s -> "$acc, $s" }
+                selectedTranslations.clear()
+                showTranslationDialog.value = false
+            }
+            WordEditEvent.OnHideTranslationDialog -> {
+                searchJob?.cancel()
+                showTranslationDialog.value = false
             }
         }
     }

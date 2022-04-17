@@ -30,16 +30,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import com.dictionary.R
 import com.dictionary.domain.entity.Category
-import com.dictionary.presentation.category_edit.components.AddWordDialog
-import com.dictionary.presentation.category_edit.components.DropDownMenu
-import com.dictionary.presentation.category_edit.components.SortDialog
-import com.dictionary.presentation.category_edit.components.WordListItem
+import com.dictionary.presentation.category_edit.components.*
 import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.presentation.common.GetImage
 import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.io.File
 
 @Composable
@@ -49,6 +47,8 @@ fun CategoryEditScreen(
     onPopBackStack: () -> Unit,
     viewModel: CategoryEditViewModel = hiltViewModel()
 ) {
+    getImage.reset()
+
     val words = viewModel.wordsState.collectAsState(initial = emptyList())
     val scaffoldState = rememberScaffoldState()
 
@@ -64,11 +64,11 @@ fun CategoryEditScreen(
             }
         }
     }
-
     LaunchedEffect(key1 = true) {
         getImage.filenameStateFlow.collectLatest {
-            println(it)
-            it?.let { viewModel.onEvent(CategoryEditEvent.OnImagePickFile(it)) }
+            it?.let {
+                viewModel.onEvent(CategoryEditEvent.OnImagePickFile(it))
+            }
         }
     }
 
@@ -85,7 +85,7 @@ fun CategoryEditScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                viewModel.onEvent(CategoryEditEvent.OnShowAddWordDialog)
+                viewModel.onEvent(CategoryEditEvent.OnAddWord)
             }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
             }
@@ -99,14 +99,10 @@ fun CategoryEditScreen(
             )
         }
 
-        if (viewModel.showAddWordDialog.value) {
-            AddWordDialog(
-                viewModel,
-                viewModel.newWordTerm,
-                viewModel.newWordDefinition,
-                viewModel.wordWithTermExists,
-                viewModel.state,
+        if (viewModel.showMoveToCategoryDialog.value) {
+            MoveToCategoryDialog(
                 viewModel::onEvent,
+                viewModel.categories,
             )
         }
 
@@ -127,6 +123,7 @@ fun CategoryEditScreen(
                     category = viewModel.category,
                     wordsCount = viewModel.wordsCount,
                     categoryTitle = viewModel.categoryTitle,
+                    categoryImage = viewModel.categoryImage,
                     onEvent = viewModel::onEvent
                 )
                 GameButtons(category = viewModel.category, onEvent = viewModel::onEvent)
@@ -147,6 +144,7 @@ fun Title(
     getImage: GetImage,
     category: Category,
     categoryTitle: MutableState<String>,
+    categoryImage: MutableState<String>,
     wordsCount: MutableState<Int>,
     onEvent: (CategoryEditEvent) -> Unit
 ) {
@@ -161,17 +159,34 @@ fun Title(
         Spacer(modifier = Modifier.height(20.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
             Row(modifier = Modifier.fillMaxWidth()) {
+                if (categoryImage.value.isNotEmpty()) {
+                    AsyncImage(
+                        model = categoryImage.value,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .padding(5.dp)
+                            .clip(RoundedCornerShape(30))
+                            .clickable {
+                                getImage.selectImage()
+                            },
+                    )
+                } else {
+                    Image(
+                        modifier = Modifier
+                            .size(50.dp)
+                            .padding(5.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                getImage.selectImage()
+                            },
+                        contentScale = ContentScale.Crop,
+                        painter = painterResource(R.drawable.placeholder),
+                        contentDescription = "Contact profile picture",
+                    )
+                }
+                Spacer(modifier = Modifier.padding(10.dp))
                 if (!showTextField.value) {
-                    if (category.image.isNotEmpty()) {
-                        AsyncImage(
-                            model = category.image,
-                            contentDescription = null,
-                            modifier = Modifier
-                                .size(52.dp)
-                                .clip(RoundedCornerShape(30))
-                                .clickable { getImage.selectImage() },
-                        )
-                    }
                     Text(
                         text = category.name,
                         fontSize = 30.sp,
@@ -193,7 +208,7 @@ fun Title(
                     TextField(
                         label = { Text(text = "Title") },
                         modifier = Modifier.fillMaxWidth(),
-                        value = "${categoryTitle.value}",
+                        value = categoryTitle.value,
                         onValueChange = { onEvent(CategoryEditEvent.OnTitleChange(it)) },
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(
@@ -302,84 +317,7 @@ fun GameButtons(
                     tint = MaterialTheme.colors.primary
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "CARDS", fontSize = 14.sp)
-            }
-        }
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(15.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        val cardWidth = screenWidth / 3 - 9.dp
-        Card(
-            modifier = Modifier
-                .width(cardWidth)
-                .clickable {
-                    onEvent(CategoryEditEvent.OnMatchGameClick(category.id))
-                },
-            elevation = 0.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Add",
-                    tint = MaterialTheme.colors.primary
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "MATCH", fontSize = 14.sp)
-            }
-        }
-        Card(
-            modifier = Modifier
-                .width(cardWidth)
-                .clickable {
-                    onEvent(CategoryEditEvent.OnGameClick(category.id))
-                },
-            elevation = 0.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Add",
-                    tint = MaterialTheme.colors.primary
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "TEST", fontSize = 14.sp)
-            }
-        }
-        Card(
-            modifier = Modifier
-                .width(cardWidth)
-                .clickable {
-                    onEvent(CategoryEditEvent.OnGameClick(category.id))
-                },
-            elevation = 0.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Add",
-                    tint = MaterialTheme.colors.primary
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "WRITE", fontSize = 14.sp)
+                Text(text = "REPEAT", fontSize = 14.sp)
             }
         }
     }

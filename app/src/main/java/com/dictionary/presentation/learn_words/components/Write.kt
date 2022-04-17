@@ -42,10 +42,10 @@ fun Write(viewModel: LearnWordsViewModel) {
                         Column(
                             modifier = Modifier.padding(5.dp, 15.dp)
                         ) {
-                            Text(text = "Ваш ответ", color = Color(0xFFC50A0A), fontSize = 12.sp)
+                            Text(text = "Your answer", color = Color(0xFFC50A0A), fontSize = 12.sp)
                             Text(text = viewModel.writeState.hasDefinition.value)
                             Spacer(modifier = Modifier.height(10.dp))
-                            Text(text = "Правильный ответ", color = Color(0xFF10AC2A), fontSize = 12.sp)
+                            Text(text = "Right answer", color = Color(0xFF10AC2A), fontSize = 12.sp)
                             Text(text = viewModel.writeState.wantDefinition.value)
                         }
                     }

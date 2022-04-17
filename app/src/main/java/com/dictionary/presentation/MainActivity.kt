@@ -14,7 +14,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.dictionary.presentation.cards_game.CardsGameScreen
-import com.dictionary.presentation.match_game.MatchGameScreen
 import com.dictionary.presentation.category_edit.CategoryEditScreen
 import com.dictionary.presentation.category_list.CategoryListScreen
 import com.dictionary.presentation.common.GetFile
@@ -29,14 +28,6 @@ import dagger.hilt.android.AndroidEntryPoint
 //ComponentActivity
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val fileIntent = Intent()
-        .setType("*/*")
-        .setAction(Intent.ACTION_GET_CONTENT)
-
-    private val imageIntent = Intent()
-        .setType("image/*")
-        .setAction(Intent.ACTION_PICK)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -129,19 +120,6 @@ class MainActivity : ComponentActivity() {
                             )
                         ) {
                             LearnWordsScreen(onPopBackStack = {
-                                navController.popBackStack()
-                            })
-                        }
-                        composable(
-                            route = Routes.MATCH_GAME + "?id={id}",
-                            arguments = listOf(
-                                navArgument(name = "id") {
-                                    type = NavType.IntType
-                                    defaultValue = -1
-                                }
-                            )
-                        ) {
-                            MatchGameScreen(onPopBackStack = {
                                 navController.popBackStack()
                             })
                         }

@@ -3,18 +3,22 @@ package com.dictionary.presentation.word_edit
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.dictionary.presentation.category_edit.CategoryEditEvent
 import com.dictionary.presentation.word_edit.componetns.DropDownMenu
+import com.dictionary.presentation.word_edit.componetns.TranslationDialog
 import com.dictionary.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun WordEditScreen(
     onPopBackStack: () -> Unit,
@@ -47,7 +51,7 @@ fun WordEditScreen(
             FloatingActionButton(onClick = {
                 viewModel.onEvent(WordEditEvent.OnSaveClick)
             }) {
-                Icon(imageVector = Icons.Default.Send, contentDescription = "Add")
+                Icon(imageVector = Icons.Default.Done, contentDescription = "Add")
             }
         },
         topBar = {
@@ -57,12 +61,22 @@ fun WordEditScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
+                .padding(15.dp)
         ) {
+            if (viewModel.showTranslationDialog.value) {
+                TranslationDialog(
+                    translationState = viewModel.state,
+                    selectedTranslations = viewModel.selectedTranslations,
+                    onEvent = viewModel::onEvent
+                )
+            }
+
             TextField(
                 value = viewModel.newTerm.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnTermChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 5.dp),
                 label = { Text(text = "Term")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -71,7 +85,22 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newDefinition.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnDefinitionChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 5.dp),
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            viewModel.onEvent(WordEditEvent.OnShowTranslationDialog)
+                            focusManager.clearFocus()
+                        }) {
+                        Icon(
+                            Icons.Default.Send,
+                            contentDescription = "Edit",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                },
                 label = { Text(text = "Definition")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -80,7 +109,9 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newAntonyms.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnAntonymsChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 5.dp),
                 label = { Text(text = "Antonyms")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -89,7 +120,9 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newSynonyms.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnSynonymsChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 5.dp),
                 label = { Text(text = "Synonyms")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -98,7 +131,9 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newSimilar.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnSimilarChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 5.dp),
                 label = { Text(text = "Similar")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
@@ -107,7 +142,9 @@ fun WordEditScreen(
             TextField(
                 value = viewModel.newTranscription.value,
                 onValueChange = { viewModel.onEvent(WordEditEvent.OnTranscriptionChange(it)) },
-                modifier = Modifier.fillMaxWidth().padding(16.dp, 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 5.dp),
                 label = { Text(text = "Transcription")},
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,

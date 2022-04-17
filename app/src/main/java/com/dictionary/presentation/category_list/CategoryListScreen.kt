@@ -160,46 +160,14 @@ private fun Title() {
         )
     }
 }
-//
-//@Composable
-//private fun Buttons(onEvent: (CategoryListEvent) -> Unit) {
-//    Column(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(15.dp),
-//    ) {
-//        Card(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .clickable {
-////                    onEvent(CategoryEditEvent.OnMatchGameClick(category.id))
-//                },
-//            elevation = 0.dp
-//        ) {
-//            Column(
-//                modifier = Modifier
-//                    .padding(10.dp)
-//                    .fillMaxWidth(),
-//                horizontalAlignment = Alignment.CenterHorizontally
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Default.AddCircle,
-//                    contentDescription = "Add",
-//                    tint = MaterialTheme.colors.primary
-//                )
-//                Spacer(modifier = Modifier.height(10.dp))
-//                Text(text = "CARDS", fontSize = 14.sp)
-//            }
-//        }
-//    }
-//}
+
 @Composable
 fun GameButtons(
     onEvent: (CategoryListEvent) -> Unit
 ) {
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp - 15.dp
     Row(
-        modifier = Modifier.padding(15.dp)
+        modifier = Modifier.padding(15.dp, 15.dp, 15.dp, 5.dp)
     ){
         Text(text = "Games", fontSize = 28.sp, color = PrimaryTextColor, fontWeight = FontWeight.Bold)
     }
@@ -253,84 +221,7 @@ fun GameButtons(
                     tint = MaterialTheme.colors.primary
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "CARDS", fontSize = 14.sp)
-            }
-        }
-    }
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(15.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        val cardWidth = screenWidth / 3 - 9.dp
-        Card(
-            modifier = Modifier
-                .width(cardWidth)
-                .clickable {
-                    onEvent(CategoryListEvent.OnGoToMatchGame)
-                },
-            elevation = 0.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Add",
-                    tint = MaterialTheme.colors.primary
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "MATCH", fontSize = 14.sp)
-            }
-        }
-        Card(
-            modifier = Modifier
-                .width(cardWidth)
-                .clickable {
-//                    onEvent(CategoryEditEvent.OnGameClick(category.id))
-                },
-            elevation = 0.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Add",
-                    tint = MaterialTheme.colors.primary
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "TEST", fontSize = 14.sp)
-            }
-        }
-        Card(
-            modifier = Modifier
-                .width(cardWidth)
-                .clickable {
-//                    onEvent(CategoryEditEvent.OnGameClick(category.id))
-                },
-            elevation = 0.dp
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Add",
-                    tint = MaterialTheme.colors.primary
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(text = "WRITE", fontSize = 14.sp)
+                Text(text = "REPEAT", fontSize = 14.sp)
             }
         }
     }

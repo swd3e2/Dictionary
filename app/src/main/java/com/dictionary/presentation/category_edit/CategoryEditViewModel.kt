@@ -34,11 +34,13 @@ import javax.inject.Inject
 class CategoryEditViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val wordRepository: WordRepository,
-    private val translationRepository: TranslationRepository,
+
     savedStateHandle: SavedStateHandle,
     application: Application
 ) : AndroidViewModel(application) {
     var categoryTitle = mutableStateOf("")
+        private set
+    var categoryImage = mutableStateOf("")
         private set
 
     var showDeleteDialog = mutableStateOf(false)
@@ -50,10 +52,10 @@ class CategoryEditViewModel @Inject constructor(
     var category: Category = Category(0, "")
         private set
 
-    var showAddWordDialog = mutableStateOf(false)
+    var showSortDialog = mutableStateOf(false)
         private set
 
-    var showSortDialog = mutableStateOf(false)
+    var showMoveToCategoryDialog = mutableStateOf(false)
         private set
 
     var wordTranslations = mutableStateListOf<String>()
@@ -62,8 +64,11 @@ class CategoryEditViewModel @Inject constructor(
     var termSearch = mutableStateOf("")
         private set
 
+    lateinit var categories: List<Category>
+
     private var words = MutableStateFlow("")
     private var selectedWordId: Int? = null
+    private var selectedWord: Word? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
     var wordsState = words.flatMapLatest {
@@ -77,22 +82,8 @@ class CategoryEditViewModel @Inject constructor(
     var wordsCount = mutableStateOf(0)
         private set
 
-    var newWordTerm = mutableStateOf("")
-        private set
-
-    var newWordDefinition = mutableStateOf("")
-        private set
-
     var menuExpanded = mutableStateOf(false)
         private set
-
-    var wordWithTermExists = mutableStateOf(false)
-        private set
-
-    private val _state = mutableStateOf(WordTranslationState(translation = null, isLoading = false))
-    val state: State<WordTranslationState> = _state
-
-    private var searchJob: Job? = null
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
@@ -103,8 +94,10 @@ class CategoryEditViewModel @Inject constructor(
 
                     withContext(Dispatchers.Main) {
                         categoryTitle.value = c.name
+                        categoryImage.value = c.image
                     }
                 }
+                categories = categoryRepository.list().toCollection(mutableListOf()).filter { it.id != category.id }
             }
         }
     }
@@ -116,15 +109,6 @@ class CategoryEditViewModel @Inject constructor(
             }
             is CategoryEditEvent.OnCloseMenu -> {
                 menuExpanded.value = false
-            }
-            is CategoryEditEvent.OnTermChange -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    wordWithTermExists.value = wordRepository.exists(event.term)
-                }
-                newWordTerm.value = event.term
-            }
-            is CategoryEditEvent.OnDefinitionChange -> {
-                newWordDefinition.value = event.definition
             }
             is CategoryEditEvent.OnDeleteWord -> {
                 viewModelScope.launch(Dispatchers.IO) {
@@ -139,11 +123,6 @@ class CategoryEditViewModel @Inject constructor(
                     _uiEvent.send(UiEvent.Navigate(Routes.CARDS_GAME + "?id=${event.id}"))
                 }
             }
-            is CategoryEditEvent.OnMatchGameClick -> {
-                viewModelScope.launch {
-                    _uiEvent.send(UiEvent.Navigate(Routes.MATCH_GAME + "?id=${event.id}"))
-                }
-            }
             is CategoryEditEvent.OnLearnClick -> {
                 viewModelScope.launch {
                     _uiEvent.send(UiEvent.Navigate(Routes.LEARN_WORDS + "?id=${event.id}"))
@@ -154,91 +133,13 @@ class CategoryEditViewModel @Inject constructor(
                     _uiEvent.send(UiEvent.Navigate(Routes.WORD_EDIT + "?id=${event.id}"))
                 }
             }
-            is CategoryEditEvent.OnWordSaveClick -> {
-                if (newWordTerm.value.isEmpty() || (newWordDefinition.value.isEmpty() && wordTranslations.size == 0)) {
-                    return
-                }
-
-                var definition = ""
-                if (!newWordDefinition.value.isEmpty()) {
-                    definition = newWordDefinition.value
-                } else {
-                    for (translation in wordTranslations) {
-                        definition += "$translation, "
-                    }
-                    definition = definition.dropLast(2)
-                }
-
-                viewModelScope.launch(Dispatchers.IO) {
-                    wordRepository.create(
-                        Word(
-                            id = 0,
-                            term = newWordTerm.value,
-                            definition = definition,
-                            category = category.id,
-                            created = Date(),
-                            lastRepeated = Date(),
-                        )
-                    )
-
-                    newWordTerm.value = ""
-                    newWordDefinition.value = ""
-                    showAddWordDialog.value = false
-                    _state.value = WordTranslationState(translation = null)
-                    wordTranslations.clear()
-                    _uiEvent.send(UiEvent.ShowSnackbar("Word created"))
-                }
-            }
-            is CategoryEditEvent.OnShowAddWordDialog -> {
-                showAddWordDialog.value = true
-                wordWithTermExists.value = false
-            }
-            is CategoryEditEvent.OnCloseAddWordDialog -> {
-                newWordTerm.value = ""
-                newWordDefinition.value = ""
-                showAddWordDialog.value = false
-                searchJob?.cancel()
-                _state.value = WordTranslationState(translation = null)
-                wordTranslations.clear()
-            }
             is CategoryEditEvent.OnSearchTermChange -> {
                 termSearch.value = event.term
                 words.value = event.term
             }
-            is CategoryEditEvent.GetTranslation -> {
-                searchJob?.cancel()
-                searchJob = viewModelScope.launch {
-                    translationRepository.getTranslation(newWordTerm.value)
-                        .onEach { result ->
-                            when (result) {
-                                is Resource.Success -> {
-                                    _state.value = state.value.copy(
-                                        translation = result.data,
-                                        isLoading = false
-                                    )
-                                }
-                                is Resource.Error -> {
-                                    _state.value = state.value.copy(
-                                        isLoading = false
-                                    )
-                                    _uiEvent.send(
-                                        UiEvent.ShowSnackbar(
-                                            result.message ?: "Unexpected error occurred"
-                                        )
-                                    )
-                                }
-                                is Resource.Loading -> {
-                                    _state.value = state.value.copy(
-                                        isLoading = true
-                                    )
-                                }
-                            }
-                        }.launchIn(this)
-                }
-            }
             is CategoryEditEvent.OnShowDeleteDialog -> {
                 showDeleteDialog.value = true
-                selectedWordId = event.id
+                selectedWord = event.word
             }
             is CategoryEditEvent.OnHideDeleteDialog -> {
                 showDeleteDialog.value = false
@@ -254,6 +155,12 @@ class CategoryEditViewModel @Inject constructor(
                     _uiEvent.send(UiEvent.ShowSnackbar("Title changed"))
                 }
             }
+            is CategoryEditEvent.OnDropWordBucket -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    wordRepository.create(event.word.apply { bucket = 1 })
+                    _uiEvent.send(UiEvent.ShowSnackbar("Word sent to bucket 1"))
+                }
+            }
             is CategoryEditEvent.OnTitleChange -> {
                 categoryTitle.value = event.title
             }
@@ -266,31 +173,53 @@ class CategoryEditViewModel @Inject constructor(
             is CategoryEditEvent.OnSortChange -> {
                 showSortDialog.value = false
             }
+            is CategoryEditEvent.OnShowMoveToCategoryDialog -> {
+                selectedWord = event.word
+                showMoveToCategoryDialog.value = true
+            }
+            is CategoryEditEvent.OnHideMoveToCategoryDialog -> {
+                showMoveToCategoryDialog.value = false
+            }
+            is CategoryEditEvent.OnMoveToCategoryDialog -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    wordRepository.create(selectedWord!!.apply { category = event.category.id })
+                }
+                showMoveToCategoryDialog.value = false
+            }
             is CategoryEditEvent.OnImagePickFile -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    val uriPathHelper = URIPathHelper()
                     val app = getApplication<Application>()
-                    val filePath = uriPathHelper.getPath(app.applicationContext, event.uri)
-                    println("FILEPATH $filePath")
-
-                    val input = app.contentResolver.openInputStream(event.uri)
 
                     val wrapper = ContextWrapper(app.applicationContext)
-                    var file = wrapper.getDir("images", Context.MODE_PRIVATE)
-                    val filename = "${UUID.randomUUID()}.jpg"
-                    file = File(file, filename)
+                    val folder = wrapper.getDir("images", Context.MODE_PRIVATE)
+                    val currentFile = File(categoryImage.value)
 
+                    if (categoryImage.value.isNotEmpty() && currentFile.exists()) {
+                        try {
+                            currentFile.delete()
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                        }
+                    }
+
+                    val filename = "${UUID.randomUUID()}.jpg"
+                    val file = File(folder, filename)
                     try {
                         val stream: OutputStream = FileOutputStream(file)
-                        input!!.copyTo(stream)
+                        app.contentResolver.openInputStream(event.uri)!!.copyTo(stream)
                         stream.flush()
                         stream.close()
-                    } catch (e: IOException) { // Catch the exception
+                    } catch (e: IOException) {
                         e.printStackTrace()
                     }
+
                     category.image = file.path
+                    categoryImage.value = file.path
                     categoryRepository.create(category = category)
                 }
+            }
+            CategoryEditEvent.OnAddWord -> viewModelScope.launch {
+                _uiEvent.send(UiEvent.Navigate(Routes.WORD_EDIT))
             }
         }
     }

@@ -17,9 +17,11 @@ data class Word(
     @ColumnInfo(name = "category")
     var category: Int? = null,
     @ColumnInfo(name = "created")
-    val created: Date,
+    val created: Date = Date(),
     @ColumnInfo(name = "last_repeated")
-    var lastRepeated: Date,
+    var lastRepeated: Date? = null,
+    @ColumnInfo(name = "first_repeated")
+    var firstLearned: Date? = null,
     @ColumnInfo(name = "bucket")
     var bucket: Int = 0,
     @ColumnInfo(name = "synonyms")
@@ -36,43 +38,19 @@ data class Word(
     }
 
     fun shouldBeRepeated(): Boolean {
+        if (lastRepeated == null) {
+            return false
+        }
+
         val currentDate = Date()
         when (bucket) {
-            1 -> {
-                if (Date(lastRepeated.time + Day).before(currentDate)) {
-                    return true
-                }
-            }
-            2 -> {
-                if (Date(lastRepeated.time + Day2).before(currentDate)) {
-                    return true
-                }
-            }
-            3 -> {
-                if (Date(lastRepeated.time + Day3).before(currentDate)) {
-                    return true
-                }
-            }
-            4 -> {
-                if (Date(lastRepeated.time + Day7).before(currentDate)) {
-                    return true
-                }
-            }
-            5 -> {
-                if (Date(lastRepeated.time + Day14).before(currentDate)) {
-                    return true
-                }
-            }
-            6 -> {
-                if (Date(lastRepeated.time + Day30).before(currentDate)) {
-                    return true
-                }
-            }
-            7 -> {
-                if (Date(lastRepeated.time + Day90).before(currentDate)) {
-                    return true
-                }
-            }
+            1 -> return Date(lastRepeated!!.time + Day).before(currentDate)
+            2 -> return Date(lastRepeated!!.time + Day2).before(currentDate)
+            3 -> return Date(lastRepeated!!.time + Day3).before(currentDate)
+            4 -> return Date(lastRepeated!!.time + Day7).before(currentDate)
+            5 -> return Date(lastRepeated!!.time + Day14).before(currentDate)
+            6 -> return Date(lastRepeated!!.time + Day30).before(currentDate)
+            7 -> return Date(lastRepeated!!.time + Day90).before(currentDate)
         }
 
         return false

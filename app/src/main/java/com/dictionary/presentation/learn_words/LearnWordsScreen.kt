@@ -6,7 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.dictionary.presentation.match_game.components.DropDownMenu
+import com.dictionary.presentation.learn_words.components.DropDownMenu
 import com.dictionary.presentation.learn_words.components.*
 
 @Composable
