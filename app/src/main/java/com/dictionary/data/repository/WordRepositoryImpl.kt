@@ -21,6 +21,10 @@ class WordRepositoryImpl @Inject constructor(
         return dao.byCategoryAsList(category)
     }
 
+    override suspend fun asList(): List<Word> {
+        return dao.asList()
+    }
+
     override suspend fun get(id: Int): Word? {
         return dao.get(id)
     }

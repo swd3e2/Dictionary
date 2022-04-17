@@ -1,8 +1,12 @@
 package com.dictionary.presentation.category_edit
 
+import android.app.Application
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,12 +16,17 @@ import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.TranslationRepository
 import com.dictionary.domain.repository.WordRepository
+import com.dictionary.presentation.common.URIPathHelper
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.io.OutputStream
 import java.util.*
 import javax.inject.Inject
 
@@ -26,16 +35,16 @@ class CategoryEditViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
     private val wordRepository: WordRepository,
     private val translationRepository: TranslationRepository,
-    savedStateHandle: SavedStateHandle
-): ViewModel() {
-
+    savedStateHandle: SavedStateHandle,
+    application: Application
+) : AndroidViewModel(application) {
     var categoryTitle = mutableStateOf("")
         private set
 
     var showDeleteDialog = mutableStateOf(false)
         private set
 
-    private val _uiEvent =  Channel<UiEvent>()
+    private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
     var category: Category = Category(0, "")
@@ -53,7 +62,7 @@ class CategoryEditViewModel @Inject constructor(
     var termSearch = mutableStateOf("")
         private set
 
-    private var words =  MutableStateFlow("")
+    private var words = MutableStateFlow("")
     private var selectedWordId: Int? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -87,7 +96,7 @@ class CategoryEditViewModel @Inject constructor(
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
-        if(id != -1) {
+        if (id != -1) {
             viewModelScope.launch(Dispatchers.IO) {
                 categoryRepository.get(id)?.let { c ->
                     category = c
@@ -161,14 +170,16 @@ class CategoryEditViewModel @Inject constructor(
                 }
 
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordRepository.create(Word(
-                        id = 0,
-                        term = newWordTerm.value,
-                        definition = definition,
-                        category = category.id,
-                        created = Date(),
-                        lastRepeated = Date(),
-                    ))
+                    wordRepository.create(
+                        Word(
+                            id = 0,
+                            term = newWordTerm.value,
+                            definition = definition,
+                            category = category.id,
+                            created = Date(),
+                            lastRepeated = Date(),
+                        )
+                    )
 
                     newWordTerm.value = ""
                     newWordDefinition.value = ""
@@ -199,7 +210,7 @@ class CategoryEditViewModel @Inject constructor(
                 searchJob = viewModelScope.launch {
                     translationRepository.getTranslation(newWordTerm.value)
                         .onEach { result ->
-                            when(result) {
+                            when (result) {
                                 is Resource.Success -> {
                                     _state.value = state.value.copy(
                                         translation = result.data,
@@ -210,7 +221,11 @@ class CategoryEditViewModel @Inject constructor(
                                     _state.value = state.value.copy(
                                         isLoading = false
                                     )
-                                    _uiEvent.send(UiEvent.ShowSnackbar(result.message ?: "Unexpected error occurred"))
+                                    _uiEvent.send(
+                                        UiEvent.ShowSnackbar(
+                                            result.message ?: "Unexpected error occurred"
+                                        )
+                                    )
                                 }
                                 is Resource.Loading -> {
                                     _state.value = state.value.copy(
@@ -251,10 +266,36 @@ class CategoryEditViewModel @Inject constructor(
             is CategoryEditEvent.OnSortChange -> {
                 showSortDialog.value = false
             }
+            is CategoryEditEvent.OnImagePickFile -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val uriPathHelper = URIPathHelper()
+                    val app = getApplication<Application>()
+                    val filePath = uriPathHelper.getPath(app.applicationContext, event.uri)
+                    println("FILEPATH $filePath")
+
+                    val input = app.contentResolver.openInputStream(event.uri)
+
+                    val wrapper = ContextWrapper(app.applicationContext)
+                    var file = wrapper.getDir("images", Context.MODE_PRIVATE)
+                    val filename = "${UUID.randomUUID()}.jpg"
+                    file = File(file, filename)
+
+                    try {
+                        val stream: OutputStream = FileOutputStream(file)
+                        input!!.copyTo(stream)
+                        stream.flush()
+                        stream.close()
+                    } catch (e: IOException) { // Catch the exception
+                        e.printStackTrace()
+                    }
+                    category.image = file.path
+                    categoryRepository.create(category = category)
+                }
+            }
         }
     }
 
     sealed class UIEvent {
-        data class ShowSnackbar(val message: String): UIEvent()
+        data class ShowSnackbar(val message: String) : UIEvent()
     }
 }

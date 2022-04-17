@@ -19,7 +19,7 @@ class CategoryRepositoryImpl @Inject constructor(
     }
 
     override suspend fun create(category: Category): Long {
-        return dao.create(Category(category.id, category.name))
+        return dao.create(category)
     }
 
     override suspend fun delete(id: Int) {

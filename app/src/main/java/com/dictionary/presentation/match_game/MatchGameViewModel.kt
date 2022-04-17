@@ -25,15 +25,16 @@ class MatchGameViewModel @Inject constructor(
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
-        if (id != -1) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val words = wordsRepository.categoryWordsAsList(id)
-                if (words.isEmpty()) {
-                    return@launch
-                }
-                withContext(Dispatchers.Main) {
-                    matchState.createGroupsFromWordList(words.filter { it.shouldBeRepeated() })
-                }
+        viewModelScope.launch(Dispatchers.IO) {
+            val words = (if (id != -1)
+                wordsRepository.categoryWordsAsList(id)
+            else wordsRepository.asList()).filter { it.shouldBeRepeated() }
+            if (words.isEmpty()) {
+                return@launch
+            }
+
+            withContext(Dispatchers.Main) {
+                matchState.init(words)
             }
         }
     }
@@ -66,7 +67,7 @@ class MatchGameViewModel @Inject constructor(
                         val second = state.second
 
                         matchState.setSuccessState(first.index, second.index)
-                        if (matchState.successCount == matchState.currentWordsGroup.size) {
+                        if (matchState.canGoNextGroup()) {
                             viewModelScope.launch {
                                 delay(300)
                                 matchState.resetSuccessCount()

@@ -5,10 +5,26 @@ import com.dictionary.domain.entity.Word
 
 class CardsState {
     var currentWord = mutableStateOf<Word?>(null)
-    var words = mutableListOf<Word>()
-    var index = 0
+        private set
 
-    fun addAll(allWords: MutableList<Word>) {
+    private var words = mutableListOf<Word>()
+    private var currentWordIndex = 0
+
+    fun init(allWords: MutableList<Word>) {
         words.addAll(allWords)
+        currentWord.value = words[currentWordIndex]
+    }
+
+    fun selectNext() {
+        currentWordIndex++
+        currentWord.value = words[currentWordIndex]
+    }
+
+    fun doesNotKnowWord() {
+        words.add(words[currentWordIndex])
+    }
+
+    fun noMoreWords(): Boolean {
+        return currentWordIndex + 1 >= words.size
     }
 }

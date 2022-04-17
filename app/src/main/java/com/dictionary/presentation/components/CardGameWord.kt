@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.consumeAllChanges
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -38,29 +39,19 @@ fun WordCard(
     val alphaDontKnow = remember { Animatable(0f) }
     val rotation = remember { Animatable(0f) }
     val showBorder = 150f
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp - 15.dp
 
     LaunchedEffect(key1 = offset.value) {
         when {
-            offset.value.x > showBorder -> {
-                alphaKnow.snapTo(1f)
-            }
-            offset.value.x > 0 -> {
-                alphaKnow.snapTo(offset.value.x / showBorder)
-            }
-            else -> {
-                alphaKnow.snapTo(0f)
-            }
+            offset.value.x > showBorder -> alphaKnow.snapTo(1f)
+            offset.value.x > 0 -> alphaKnow.snapTo(offset.value.x / showBorder)
+            else -> alphaKnow.snapTo(0f)
         }
         when {
-            offset.value.x < -showBorder -> {
-                alphaDontKnow.snapTo(1f)
-            }
-            offset.value.x < 0 -> {
-                alphaDontKnow.snapTo(-offset.value.x / showBorder)
-            }
-            else -> {
-                alphaDontKnow.snapTo(0f)
-            }
+            offset.value.x < -showBorder -> alphaDontKnow.snapTo(1f)
+            offset.value.x < 0 -> alphaDontKnow.snapTo(-offset.value.x / showBorder)
+            else -> alphaDontKnow.snapTo(0f)
         }
     }
 
@@ -73,8 +64,8 @@ fun WordCard(
                 )
             }
             .padding(10.dp, 10.dp)
-            .height(550.dp)
-            .width(330.dp)
+            .height((screenHeight / 4) * 3)
+            .width((screenWidth / 5) * 4)
             .graphicsLayer {
                 rotationY = rotation.value
                 cameraDistance = 18f * density

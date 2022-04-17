@@ -1,9 +1,12 @@
 package com.dictionary.presentation.category_edit
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -13,25 +16,35 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import com.dictionary.R
 import com.dictionary.domain.entity.Category
 import com.dictionary.presentation.category_edit.components.AddWordDialog
 import com.dictionary.presentation.category_edit.components.DropDownMenu
 import com.dictionary.presentation.category_edit.components.SortDialog
 import com.dictionary.presentation.category_edit.components.WordListItem
+import com.dictionary.presentation.category_list.CategoryListEvent
+import com.dictionary.presentation.common.GetImage
 import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.utils.UiEvent
+import kotlinx.coroutines.flow.collectLatest
+import java.io.File
 
 @Composable
 fun CategoryEditScreen(
+    getImage: GetImage,
     onNavigate: (UiEvent.Navigate) -> Unit,
     onPopBackStack: () -> Unit,
     viewModel: CategoryEditViewModel = hiltViewModel()
@@ -49,6 +62,13 @@ fun CategoryEditScreen(
                     )
                 }
             }
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
+        getImage.filenameStateFlow.collectLatest {
+            println(it)
+            it?.let { viewModel.onEvent(CategoryEditEvent.OnImagePickFile(it)) }
         }
     }
 
@@ -103,13 +123,14 @@ fun CategoryEditScreen(
         ) {
             item {
                 Title(
+                    getImage = getImage,
                     category = viewModel.category,
                     wordsCount = viewModel.wordsCount,
                     categoryTitle = viewModel.categoryTitle,
                     onEvent = viewModel::onEvent
                 )
                 GameButtons(category = viewModel.category, onEvent = viewModel::onEvent)
-                SearchAndAdd(viewModel.termSearch, onEvent = viewModel::onEvent)
+                SearchAndFilter(viewModel.termSearch, onEvent = viewModel::onEvent)
             }
             items(words.value) { word ->
                 key(word.id) {
@@ -123,6 +144,7 @@ fun CategoryEditScreen(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Title(
+    getImage: GetImage,
     category: Category,
     categoryTitle: MutableState<String>,
     wordsCount: MutableState<Int>,
@@ -138,70 +160,81 @@ fun Title(
     ) {
         Spacer(modifier = Modifier.height(20.dp))
         Row(modifier = Modifier.fillMaxWidth()) {
-            if (!showTextField.value) {
-                Text(
-                    text = category.name,
-                    fontSize = 30.sp,
-                    color = PrimaryTextColor,
-                    fontWeight = FontWeight.Bold
-                )
-                IconButton(
-                    modifier = Modifier.offset((-4).dp, (-18).dp),
-                    onClick = { showTextField.value = !showTextField.value }
-                ) {
-                    Icon(
-                        Icons.Default.Edit,
-                        contentDescription = "Edit",
-                        tint = MaterialTheme.colors.primary,
-                        modifier = Modifier.size(18.dp)
+            Row(modifier = Modifier.fillMaxWidth()) {
+                if (!showTextField.value) {
+                    if (category.image.isNotEmpty()) {
+                        AsyncImage(
+                            model = category.image,
+                            contentDescription = null,
+                            modifier = Modifier
+                                .size(52.dp)
+                                .clip(RoundedCornerShape(30))
+                                .clickable { getImage.selectImage() },
+                        )
+                    }
+                    Text(
+                        text = category.name,
+                        fontSize = 30.sp,
+                        color = PrimaryTextColor,
+                        fontWeight = FontWeight.Bold
                     )
-                }
-            } else {
-                TextField(
-                    label = { Text(text = "Title") },
-                    modifier = Modifier.fillMaxWidth(),
-                    value = categoryTitle.value,
-                    onValueChange = { onEvent(CategoryEditEvent.OnTitleChange(it)) },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            onEvent(CategoryEditEvent.OnTitleSave)
-                            showTextField.value = !showTextField.value
-                            focusManager.clearFocus()
-                        }
-                    ),
-                    leadingIcon = {
-                        IconButton(
-                            onClick = {
-                                showTextField.value = !showTextField.value
-                            }) {
-                            Icon(
-                                Icons.Default.Clear,
-                                contentDescription = "Edit",
-                                tint = MaterialTheme.colors.primary
-                            )
-                        }
-                    },
-                    trailingIcon = {
-                        IconButton(
-                            onClick = {
+                    IconButton(
+                        modifier = Modifier.offset((-4).dp, (-18).dp),
+                        onClick = { showTextField.value = !showTextField.value }
+                    ) {
+                        Icon(
+                            Icons.Default.Edit,
+                            contentDescription = "Edit",
+                            tint = MaterialTheme.colors.primary,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                } else {
+                    TextField(
+                        label = { Text(text = "Title") },
+                        modifier = Modifier.fillMaxWidth(),
+                        value = "${categoryTitle.value}",
+                        onValueChange = { onEvent(CategoryEditEvent.OnTitleChange(it)) },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
                                 onEvent(CategoryEditEvent.OnTitleSave)
                                 showTextField.value = !showTextField.value
                                 focusManager.clearFocus()
-                            }) {
-                            Icon(
-                                Icons.Default.Done,
-                                contentDescription = "Edit",
-                                tint = MaterialTheme.colors.primary
-                            )
-                        }
-                    },
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.Transparent,
-                    ),
-                )
+                            }
+                        ),
+                        leadingIcon = {
+                            IconButton(
+                                onClick = {
+                                    showTextField.value = !showTextField.value
+                                }) {
+                                Icon(
+                                    Icons.Default.Clear,
+                                    contentDescription = "Edit",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            }
+                        },
+                        trailingIcon = {
+                            IconButton(
+                                onClick = {
+                                    onEvent(CategoryEditEvent.OnTitleSave)
+                                    showTextField.value = !showTextField.value
+                                    focusManager.clearFocus()
+                                }) {
+                                Icon(
+                                    Icons.Default.Done,
+                                    contentDescription = "Edit",
+                                    tint = MaterialTheme.colors.primary
+                                )
+                            }
+                        },
+                        colors = TextFieldDefaults.textFieldColors(
+                            backgroundColor = Color.Transparent,
+                        ),
+                    )
+                }
             }
-
         }
         Text(
             modifier = Modifier.padding(0.dp, 20.dp),
@@ -353,7 +386,7 @@ fun GameButtons(
 }
 
 @Composable
-fun SearchAndAdd(
+fun SearchAndFilter(
     search: MutableState<String>,
     onEvent: (CategoryEditEvent) -> Unit
 ) {

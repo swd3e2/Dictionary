@@ -1,18 +1,13 @@
 package com.dictionary.presentation
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.compose.material.Colors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,45 +16,35 @@ import androidx.navigation.navArgument
 import com.dictionary.presentation.cards_game.CardsGameScreen
 import com.dictionary.presentation.match_game.MatchGameScreen
 import com.dictionary.presentation.category_edit.CategoryEditScreen
-import com.dictionary.presentation.category_list.CategoriesListViewModel
-import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.presentation.category_list.CategoryListScreen
+import com.dictionary.presentation.common.GetFile
+import com.dictionary.presentation.common.GetImage
 import com.dictionary.presentation.learn_words.LearnWordsScreen
 import com.dictionary.presentation.word_edit.WordEditScreen
 import com.dictionary.utils.Routes
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collectLatest
 
 
 //AppCompatActivity
 //ComponentActivity
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val categoriesListViewModel: CategoriesListViewModel by viewModels()
-
-    private val launcher: ActivityResultLauncher<Intent> =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                result.data?.let {
-                    categoriesListViewModel._filenameStateFlow.value = it.data
-                }
-            }
-        }
-
     private val fileIntent = Intent()
         .setType("*/*")
         .setAction(Intent.ACTION_GET_CONTENT)
 
+    private val imageIntent = Intent()
+        .setType("image/*")
+        .setAction(Intent.ACTION_PICK)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        lifecycleScope.launchWhenStarted {
-            categoriesListViewModel.filenameStateFlow.collectLatest {
-                it?.let {
-                    categoriesListViewModel.onEvent(CategoryListEvent.OnImportFile(it))
-                }
-            }
-        }
+        val getFileObserver = GetFile(activityResultRegistry)
+        lifecycle.addObserver(getFileObserver)
+
+        val getImageObserver = GetImage(activityResultRegistry)
+        lifecycle.addObserver(getImageObserver)
 
         setContent {
             MaterialTheme(
@@ -89,7 +74,7 @@ class MainActivity : ComponentActivity() {
                             route = Routes.CATEGORY_LIST
                         ) {
                             CategoryListScreen(
-                                launchFileIntent = { launcher.launch(fileIntent) },
+                                getFile = getFileObserver,
                                 onNavigate = { navController.navigate(it.route) },
                             )
                         }
@@ -103,6 +88,7 @@ class MainActivity : ComponentActivity() {
                             )
                         ) {
                             CategoryEditScreen(
+                                getImage = getImageObserver,
                                 onNavigate = { navController.navigate(it.route) },
                                 onPopBackStack = navController::popBackStack
                             )

@@ -10,7 +10,7 @@ sealed class LearnWordsEvent {
     object OnGoToWrite: LearnWordsEvent()
     object OnGoToDone: LearnWordsEvent()
     data class OnMatchSelect(val word: WordWithIndex): LearnWordsEvent()
-    data class OnTestSelect(val word: Word, val wordId: Int, val index: Int): LearnWordsEvent()
+    data class OnTestSelect(val word: Word, val selected: WordWithIndex): LearnWordsEvent()
     data class OnCardLeftSwipe(val word: Word): LearnWordsEvent()
     data class OnCardRightSwipe(val word: Word): LearnWordsEvent()
     object OnStartNew: LearnWordsEvent()

@@ -11,7 +11,6 @@ import com.dictionary.presentation.learn_words.state.CardsState
 import com.dictionary.presentation.learn_words.state.MatchState
 import com.dictionary.presentation.learn_words.state.TestState
 import com.dictionary.presentation.learn_words.state.WriteState
-import com.dictionary.presentation.models.WordWithIndex
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -39,19 +38,20 @@ class LearnWordsViewModel @Inject constructor(
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
-        if (id != -1) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val words = wordsRepository.categoryWordsAsList(id)
-                withContext(Dispatchers.Main) {
-                    wordsToLearn.addAll(words.filter { it.bucket == 0 })
-                    if (wordsToLearn.isNotEmpty()) {
-                        wordsToLearn.shuffle()
-                        val currentWordsToLearn = wordsToLearn.take(18)
-                        wordsToLearn.removeAll(currentWordsToLearn)
-                        currentWords.addAll(currentWordsToLearn)
-                    }
-                    isLoading.value = false
+        viewModelScope.launch(Dispatchers.IO) {
+            val words = (if (id != -1)
+                wordsRepository.categoryWordsAsList(id)
+            else wordsRepository.asList()).filter { it.bucket == 0 }
+
+            withContext(Dispatchers.Main) {
+                wordsToLearn.addAll(words)
+                if (wordsToLearn.isNotEmpty()) {
+                    wordsToLearn.shuffle()
+                    val currentWordsToLearn = wordsToLearn.take(18)
+                    wordsToLearn.removeAll(currentWordsToLearn)
+                    currentWords.addAll(currentWordsToLearn)
                 }
+                isLoading.value = false
             }
         }
     }
@@ -60,139 +60,99 @@ class LearnWordsViewModel @Inject constructor(
         when (event) {
             is LearnWordsEvent.OnGoToMatch -> {
                 currentStep.value = 2
-                matchState.createGroupsFromWordList(currentWords)
-
+                matchState.init(currentWords)
             }
             is LearnWordsEvent.OnMatchSelect -> {
-                if (matchState.wordsState[event.word.index] == "selected") {
-                    matchState.wordsState[event.word.index] = "unselected"
-                    matchState.wordsSelected.remove(event.word)
-                    return
-                }
+                val state = matchState.onWordSelect(event.word)
+                val word = event.word
+                when (state) {
+                    is MatchState.State.WordSelected -> {
+                        matchState.setSelectedState(word.index)
+                    }
+                    is MatchState.State.WordDeselected -> {
+                        matchState.setDeselectedState(word.index)
+                    }
+                    is MatchState.State.MatchWrong -> {
+                        val first = state.first
+                        val second = state.second
 
-                matchState.wordsState[event.word.index] = "selected"
-                matchState.wordsSelected.add(event.word)
-                if (matchState.wordsSelected.size == 2) {
-                    val first = matchState.wordsSelected[0]
-                    val second = matchState.wordsSelected[1]
-                    matchState.wordsSelected.clear()
+                        matchState.setErrorState(first.index, second.index)
 
-                    val isOK = first.word.id == second.word.id
+                        viewModelScope.launch {
+                            delay(500)
+                            matchState.setDeselectedState(first.index, second.index)
+                        }
+                    }
+                    is MatchState.State.MatchRight -> {
+                        val first = state.first
+                        val second = state.second
 
-                    if (isOK) {
-                        matchState.wordsState[first.index] = "success"
-                        matchState.wordsState[second.index] = "success"
-                        matchState.successCount += 2
-
-                        if (matchState.successCount == matchState.currentWordsGroup.size) {
+                        matchState.setSuccessState(first.index, second.index)
+                        if (matchState.canGoNextGroup()) {
                             viewModelScope.launch {
                                 delay(300)
-                                matchState.successCount = 0
+                                matchState.resetSuccessCount()
 
-                                matchState.currentWordsGroupIndex++
-                                if (matchState.wordsGroups.size > matchState.currentWordsGroupIndex) {
-                                    matchState.currentWordsGroup.clear()
-                                    matchState.currentWordsGroup.addAll(matchState.wordsGroups[matchState.currentWordsGroupIndex])
-                                } else {
+                                if (!matchState.selectNextGroup()) {
                                     onEvent(LearnWordsEvent.OnGoToTest)
                                 }
                             }
-                        }
-                    } else {
-                        matchState.wordsState[first.index] = "error"
-                        matchState.wordsState[second.index] = "error"
-                        viewModelScope.launch {
-                            delay(500)
-                            matchState.wordsState[first.index] = "unselected"
-                            matchState.wordsState[second.index] = "unselected"
                         }
                     }
                 }
             }
             is LearnWordsEvent.OnGoToTest -> {
                 currentStep.value = 3
-                testState.addAll(currentWords)
-                testState.currentWord.value = testState.words[testState.index]
+                testState.init(currentWords)
             }
             is LearnWordsEvent.OnTestSelect -> {
-                if (testState.currentWord.value!!.word.id == event.wordId) {
-                    testState.wordsState[event.index] = "success"
-                    testState.index++
-                    if (testState.index >= testState.words.size) {
+                when (testState.onSelect(event.selected)) {
+                    is TestState.State.SelectRight -> {
+                        testState.setSuccessState(event.selected.index)
+                        viewModelScope.launch {
+                            delay(300)
+                            testState.selectNext()
+                        }
+                    }
+                    is TestState.State.SelectWrong -> {
+                        testState.setErrorState(event.selected.index)
+                        viewModelScope.launch {
+                            delay(400)
+                            testState.setDeselectedState(event.selected.index)
+                        }
+                    }
+                    is TestState.State.GameEnd -> {
                         onEvent(LearnWordsEvent.OnGoToCards)
                         return
                     }
-                    viewModelScope.launch {
-                        delay(300)
-                        testState.currentWord.value = testState.words[testState.index]
-                    }
-                } else {
-                    testState.wordsState[event.index] = "error"
-                    viewModelScope.launch {
-                        delay(400)
-                        testState.wordsState[event.index] = "unselected"
-                    }
-                    testState.addWord(event.word, currentWords)
                 }
             }
             is LearnWordsEvent.OnGoToCards -> {
                 currentStep.value = 4
-                cardsState.addAll(currentWords)
-                cardsState.currentWord.value = cardsState.words[cardsState.index]
+                cardsState.init(currentWords)
             }
             is LearnWordsEvent.OnCardLeftSwipe -> {
-                cardsState.words.add(cardsState.words[cardsState.index])
-                cardsState.index++
-                cardsState.currentWord.value = cardsState.words[cardsState.index]
+                cardsState.doesNotKnowWord()
             }
             is LearnWordsEvent.OnCardRightSwipe -> {
-                cardsState.index++
-                if (cardsState.index >= cardsState.words.size) {
+                if (cardsState.noMoreWords()) {
                     onEvent(LearnWordsEvent.OnGoToWrite)
                     return
                 }
-                cardsState.currentWord.value = cardsState.words[cardsState.index]
+                cardsState.selectNext()
             }
             is LearnWordsEvent.OnGoToWrite -> {
                 currentStep.value = 5
-                writeState.words.addAll(currentWords)
-                writeState.currentWord.value = writeState.words[writeState.index]
+                writeState.init(currentWords)
             }
             is LearnWordsEvent.OnWriteTryDefinition -> {
-                val word = writeState.currentWord.value!!
-                val possibleDefinitions = word.definition.split(',')
-
-                var guessedRight = false
-                for (possibleDefinition in possibleDefinitions) {
-                    guessedRight = guessedRight || possibleDefinition.trim().lowercase() == writeState.definition.value.lowercase()
+                val guessedRight = writeState.tryGuess()
+                viewModelScope.launch(Dispatchers.IO) {
+                    wordsRepository.create(writeState.currentWord.value!!.apply { bucket = 1 })
                 }
-
-                if (guessedRight) {
-                    word.bucket++
-                    viewModelScope.launch(Dispatchers.IO) {
-                        wordsRepository.create(word)
-                    }
-
-                    writeState.hasError.value = false
-                    writeState.index++
-                    if (writeState.index >= writeState.words.size) {
-                        onEvent(LearnWordsEvent.OnGoToDone)
-                        return
-                    }
-
-                    writeState.currentWord.value = writeState.words[writeState.index]
-                    writeState.definition.value = ""
+                if (guessedRight && !writeState.selectNext()) {
+                    onEvent(LearnWordsEvent.OnGoToDone)
                     return
-                } else {
-                    writeState.hasError.value = true
-                    if (writeState.lastAddedWordId != word.id) {
-                        writeState.lastAddedWordId = word.id
-                        writeState.words.add(writeState.words[writeState.index])
-                    }
-
-                    writeState.hasDefinition.value = writeState.definition.value
-                    writeState.wantDefinition.value = word.definition
-                    writeState.definition.value = ""
                 }
             }
             is LearnWordsEvent.OnGoToDone -> {

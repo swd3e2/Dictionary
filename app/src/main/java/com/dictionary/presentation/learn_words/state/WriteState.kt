@@ -1,7 +1,11 @@
 package com.dictionary.presentation.learn_words.state
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Word
+import com.dictionary.presentation.learn_words.LearnWordsEvent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class WriteState {
     var currentWord = mutableStateOf<Word?>(null)
@@ -11,6 +15,7 @@ class WriteState {
         private set
 
     var definition = mutableStateOf("")
+
     var hasError = mutableStateOf(false)
         private set
 
@@ -19,6 +24,55 @@ class WriteState {
     var wantDefinition = mutableStateOf("")
         private set
 
-    var index = 0
-    var lastAddedWordId = 0
+    private var currentIndex = 0
+    private var lastAddedWordId = 0
+
+    fun init(currentWords: List<Word>) {
+        words.addAll(currentWords)
+        currentWord.value = words[currentIndex]
+    }
+
+    fun tryGuess(): Boolean {
+        definition.value = ""
+
+        val word = currentWord.value!!
+        val guessedRight = guessedRight(word, definition.value)
+
+        if (guessedRight) {
+            hasError.value = false
+            return true
+        }
+
+        hasError.value = true
+        if (lastAddedWordId != word.id) {
+            lastAddedWordId = word.id
+            words.add(words[currentIndex])
+        }
+
+        hasDefinition.value = definition.value
+        wantDefinition.value = word.definition
+        return false
+    }
+
+    fun selectNext() : Boolean {
+        if (currentIndex + 1 >= words.size) {
+            return false
+        }
+        lastAddedWordId = 0
+        currentIndex++
+        currentWord.value = words[currentIndex]
+        definition.value = ""
+        return true
+    }
+
+    private fun guessedRight(word: Word, definition: String): Boolean {
+        val possibleDefinitions = word.definition.split(',')
+
+        var guessedRight = false
+        for (possibleDefinition in possibleDefinitions) {
+            guessedRight = guessedRight || possibleDefinition.trim()
+                .lowercase() == definition.lowercase()
+        }
+        return guessedRight
+    }
 }

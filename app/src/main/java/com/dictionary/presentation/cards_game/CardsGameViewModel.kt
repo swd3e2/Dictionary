@@ -46,24 +46,21 @@ class CardsGameViewModel @Inject constructor(
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
-        if (id != -1) {
-            viewModelScope.launch(Dispatchers.IO) {
-                val words = wordsRepository.categoryWordsAsList(id)
-                withContext(Dispatchers.Main) {
-                    for (word in words) {
-                        if (word.shouldBeRepeated()) {
-                            wordsToLearn.add(word)
-                        }
-                    }
+        viewModelScope.launch(Dispatchers.IO) {
+            val words = (if (id != -1)
+                wordsRepository.categoryWordsAsList(id)
+            else wordsRepository.asList()).filter { it.shouldBeRepeated() }
 
-                    if (!wordsToLearn.isEmpty()) {
-                        wordsToLearn.shuffle()
-                        currentWord.value = wordsToLearn.first()
-                        currentWordIndex.value = 0
-                        countOfWords.value = wordsToLearn.size
-                    }
-                    isLoading.value = false
+            withContext(Dispatchers.Main) {
+                wordsToLearn.addAll(words)
+
+                if (!wordsToLearn.isEmpty()) {
+                    wordsToLearn.shuffle()
+                    currentWord.value = wordsToLearn.first()
+                    currentWordIndex.value = 0
+                    countOfWords.value = wordsToLearn.size
                 }
+                isLoading.value = false
             }
         }
     }
@@ -99,6 +96,23 @@ class CardsGameViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+    is LearnWordsEvent.OnGoToCards -> {
+    cardsState.init(currentWords)
+    cardsState.selectNext()
+    }
+    is LearnWordsEvent.OnCardLeftSwipe -> {
+    cardsState.dontKnowWord()
+    }
+    is LearnWordsEvent.OnCardRightSwipe -> {
+    if (!cardsState.hasMoreWords()) {
+    onEvent(LearnWordsEvent.OnGoToWrite)
+    return
+    }
+    cardsState.selectNext()
+    }
+     */
 
     private fun updateNextWord() {
         wordsToLearn.remove(currentWord.value)

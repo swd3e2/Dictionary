@@ -7,6 +7,7 @@ interface WordRepository {
     fun categoryWords(category: Int): Flow<List<Word>>
     fun categoryWordsLike(category: Int, term: String): Flow<List<Word>>
     suspend fun categoryWordsAsList(category: Int): List<Word>
+    suspend fun asList(): List<Word>
     suspend fun get(id: Int): Word?
     suspend fun delete(id: Int)
     suspend fun deleteByCategory(category: Int)

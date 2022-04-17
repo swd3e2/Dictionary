@@ -1,5 +1,7 @@
 package com.dictionary.presentation.category_edit
 
+import android.net.Uri
+
 sealed class CategoryEditEvent {
     object OnMenuClick: CategoryEditEvent()
     object OnCloseMenu: CategoryEditEvent()
@@ -22,4 +24,5 @@ sealed class CategoryEditEvent {
     object GetTranslation: CategoryEditEvent()
     object OnShowSortDialog: CategoryEditEvent()
     object OnHideSortDialog: CategoryEditEvent()
+    data class OnImagePickFile(val uri: Uri): CategoryEditEvent()
 }

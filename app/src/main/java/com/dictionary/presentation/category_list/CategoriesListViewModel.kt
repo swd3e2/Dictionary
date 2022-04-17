@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -30,8 +31,8 @@ class CategoriesListViewModel @Inject constructor(
     private val wordsRepository: WordRepository
 ) : AndroidViewModel(app) {
 
-    val _filenameStateFlow = MutableStateFlow<Uri?>(null)
-    val filenameStateFlow = _filenameStateFlow.asStateFlow()
+    var search = mutableStateOf("")
+        private set
 
     var showAddCategoryDialog = mutableStateOf(false)
         private set
@@ -131,6 +132,18 @@ class CategoriesListViewModel @Inject constructor(
 
                     wordsRepository.batchCreate(words)
                 }
+            }
+            is CategoryListEvent.OnSearchChange -> {
+                search.value = event.search
+            }
+            is CategoryListEvent.OnGoToCardsGame -> {
+                sendUiEvent(UiEvent.Navigate(Routes.CARDS_GAME))
+            }
+            is CategoryListEvent.OnGoToLearnWords -> {
+                sendUiEvent(UiEvent.Navigate(Routes.LEARN_WORDS))
+            }
+            is CategoryListEvent.OnGoToMatchGame -> {
+                sendUiEvent(UiEvent.Navigate(Routes.MATCH_GAME))
             }
         }
     }

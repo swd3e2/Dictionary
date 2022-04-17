@@ -35,4 +35,7 @@ interface WordDao {
 
     @Insert(entity = Word::class, onConflict = OnConflictStrategy.REPLACE)
     fun batchCreate(words: List<Word>)
+
+    @Query("select * from ${Word.TABLE_NAME}")
+    fun asList(): List<Word>
 }

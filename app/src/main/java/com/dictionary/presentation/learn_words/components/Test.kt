@@ -46,8 +46,7 @@ fun Test(viewModel: LearnWordsViewModel) {
                                 viewModel.onEvent(
                                     LearnWordsEvent.OnTestSelect(
                                         wordWithSuggest.word,
-                                        suggestedWord.word.id,
-                                        suggestedWord.index
+                                        suggestedWord
                                     )
                                 )
                             }

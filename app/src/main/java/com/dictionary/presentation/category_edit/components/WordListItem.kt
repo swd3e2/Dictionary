@@ -30,7 +30,7 @@ fun WordListItem(
     word: Word,
     onEvent: (CategoryEditEvent) -> Unit
 ) {
-    val squareSize = -120.dp
+    val squareSize = -60.dp
     val swipeAbleState = SwipeableState(initialValue = 0)
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, sizePx to 1)
@@ -48,16 +48,10 @@ fun WordListItem(
             ),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = { onEvent(CategoryEditEvent.OnWordClick(word.id)) },
-            ) {
-                Icon(imageVector = Icons.Default.Edit, "Edit")
-            }
             IconButton(
                 modifier = Modifier.padding(4.dp),
                 onClick = { onEvent(CategoryEditEvent.OnShowDeleteDialog(word.id)) }
@@ -77,6 +71,7 @@ fun WordListItem(
             Box(
                 Modifier
                     .background(color = MaterialTheme.colors.surface, shape = MaterialTheme.shapes.medium)
+                    .clickable { onEvent(CategoryEditEvent.OnWordClick(word.id)) }
                     .fillMaxSize(),
             ) {
                 Column (modifier = Modifier.padding(10.dp)){

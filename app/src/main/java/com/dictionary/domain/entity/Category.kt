@@ -10,6 +10,8 @@ class Category (
     var id: Int,
     @ColumnInfo(name="name")
     var name: String,
+    @ColumnInfo(name="image")
+    var image: String = "",
 ){
     companion object {
         const val TABLE_NAME = "categories"

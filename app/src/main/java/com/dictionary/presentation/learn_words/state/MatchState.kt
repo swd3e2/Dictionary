@@ -9,20 +9,19 @@ import com.dictionary.presentation.models.WordWithIndex
 
 class MatchState {
     var totalCountWordsCount: Int = 0
-    var currentWordsGroupIndex: Int = 0
     var currentWordsGroup: SnapshotStateList<WordWithIndex> = mutableStateListOf()
-    var wordsGroups: MutableList<MutableList<WordWithIndex>> = mutableListOf()
 
-    var successCount: Int = 0
     var wordsState: SnapshotStateMap<Int, String> = mutableStateMapOf()
-    var wordsSelected: MutableList<WordWithIndex> = mutableListOf()
 
-    fun createGroupsFromWordList(words: List<Word>) {
-        totalCountWordsCount = words.size
-        val groups = getGroups(words)
+    private var wordsSelected: MutableList<WordWithIndex> = mutableListOf()
+    private var wordsGroups: MutableList<MutableList<WordWithIndex>> = mutableListOf()
+    private var currentWordsGroupIndex: Int = 0
+    private var successCount: Int = 0
 
-        wordsGroups = groups
+    fun init(words: List<Word>) {
         currentWordsGroupIndex = 0
+        totalCountWordsCount = words.size
+        wordsGroups = getGroups(words)
         currentWordsGroup.addAll(wordsGroups[currentWordsGroupIndex])
     }
 
@@ -104,6 +103,10 @@ class MatchState {
 
     fun setErrorState(vararg index: Int) {
         index.forEach { wordsState[it] = "error" }
+    }
+
+    fun canGoNextGroup(): Boolean {
+        return successCount == currentWordsGroup.size
     }
 
     sealed class State {
