@@ -38,19 +38,15 @@ data class Word(
     }
 
     fun shouldBeRepeated(): Boolean {
-        if (lastRepeated == null) {
-            return false
-        }
-
         val currentDate = Date()
         when (bucket) {
-            1 -> return Date(lastRepeated!!.time + Day).before(currentDate)
-            2 -> return Date(lastRepeated!!.time + Day2).before(currentDate)
-            3 -> return Date(lastRepeated!!.time + Day3).before(currentDate)
-            4 -> return Date(lastRepeated!!.time + Day7).before(currentDate)
-            5 -> return Date(lastRepeated!!.time + Day14).before(currentDate)
-            6 -> return Date(lastRepeated!!.time + Day30).before(currentDate)
-            7 -> return Date(lastRepeated!!.time + Day90).before(currentDate)
+            1 -> return firstLearned != null && Date(firstLearned!!.time + Day).before(currentDate)
+            2 -> return lastRepeated == null && Date(lastRepeated!!.time + Day2).before(currentDate)
+            3 -> return lastRepeated == null && Date(lastRepeated!!.time + Day3).before(currentDate)
+            4 -> return lastRepeated == null && Date(lastRepeated!!.time + Day7).before(currentDate)
+            5 -> return lastRepeated == null && Date(lastRepeated!!.time + Day14).before(currentDate)
+            6 -> return lastRepeated == null && Date(lastRepeated!!.time + Day30).before(currentDate)
+            7 -> return lastRepeated == null && Date(lastRepeated!!.time + Day90).before(currentDate)
         }
 
         return false

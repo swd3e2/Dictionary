@@ -92,7 +92,11 @@ class CategoriesListViewModel @Inject constructor(
                             when (index) {
                                 0 -> word.term = splitRow
                                 1 -> word.definition = splitRow
-                                2 -> word.created = Date(splitRow.toLong())
+                                2 -> {
+                                    if (splitRow.isNotEmpty()) {
+                                        word.created = Date(splitRow.toLong())
+                                    }
+                                }
                                 3 -> {
                                     if (splitRow.isNotEmpty()) {
                                         word.lastRepeated = Date(splitRow.toLong())

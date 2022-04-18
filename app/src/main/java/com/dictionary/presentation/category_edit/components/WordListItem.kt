@@ -39,16 +39,7 @@ fun WordListItem(
     val anchors = mapOf(0f to 0, sizePx to 1)
 
     Box(
-        modifier = Modifier
-            .padding(15.dp, 5.dp)
-            .swipeable(
-                state = swipeAbleState,
-                anchors = anchors,
-                thresholds = { _, _ ->
-                    FractionalThreshold(0.3f)
-                },
-                orientation = Orientation.Horizontal
-            ),
+        modifier = Modifier.padding(15.dp, 5.dp).wrapContentSize(),
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -86,6 +77,14 @@ fun WordListItem(
                         swipeAbleState.offset.value.roundToInt(), 0
                     )
                 }
+                .swipeable(
+                    state = swipeAbleState,
+                    anchors = anchors,
+                    thresholds = { _, _ ->
+                        FractionalThreshold(0.3f)
+                    },
+                    orientation = Orientation.Horizontal
+                )
         ) {
             Box(
                 Modifier
