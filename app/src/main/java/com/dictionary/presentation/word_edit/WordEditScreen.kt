@@ -6,7 +6,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
@@ -18,7 +21,6 @@ import com.dictionary.presentation.word_edit.componetns.TranslationDialog
 import com.dictionary.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun WordEditScreen(
     onPopBackStack: () -> Unit,
@@ -31,8 +33,8 @@ fun WordEditScreen(
         viewModel.eventFlow.collectLatest { event ->
             when(event) {
                 is UiEvent.PopBackStack -> {
-                    onPopBackStack()
                     focusManager.clearFocus()
+                    onPopBackStack()
                 }
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(

@@ -14,6 +14,10 @@ class CategoryRepositoryImpl @Inject constructor(
         return dao.listWithWords()
     }
 
+    override suspend fun listWithWordsAsList(): List<CategoryWithWords> {
+        return dao.listWithWordsAsList()
+    }
+
     override suspend fun list(): List<Category> {
         return dao.list()
     }

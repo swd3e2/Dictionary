@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface CategoryRepository {
     fun listWithWords(): Flow<List<CategoryWithWords>>
+    suspend fun listWithWordsAsList(): List<CategoryWithWords>
     suspend fun list(): List<Category>
     suspend fun create(category: Category): Long
     suspend fun delete(id: Int)

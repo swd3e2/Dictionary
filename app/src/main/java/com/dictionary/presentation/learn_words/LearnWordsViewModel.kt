@@ -16,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -133,6 +134,7 @@ class LearnWordsViewModel @Inject constructor(
             }
             is LearnWordsEvent.OnCardLeftSwipe -> {
                 cardsState.doesNotKnowWord()
+                cardsState.selectNext()
             }
             is LearnWordsEvent.OnCardRightSwipe -> {
                 if (cardsState.noMoreWords()) {
@@ -148,7 +150,10 @@ class LearnWordsViewModel @Inject constructor(
             is LearnWordsEvent.OnWriteTryDefinition -> {
                 val guessedRight = writeState.tryGuess()
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordsRepository.create(writeState.currentWord.value!!.apply { bucket = 1 })
+                    wordsRepository.create(writeState.currentWord.value!!.apply {
+                        bucket = 1
+                        firstLearned = Date()
+                    })
                 }
                 if (guessedRight && !writeState.selectNext()) {
                     onEvent(LearnWordsEvent.OnGoToDone)

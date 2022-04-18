@@ -7,11 +7,19 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        release {
+        storeFile file('E:\\testkey.jks')
+            storePassword '123456'
+            keyPassword '123456'
+            keyAlias 'tester'
+        }
+    }
     compileSdk 32
 
     defaultConfig {
         applicationId "com.dictionary"
-        minSdk 29
+        minSdk 30
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -29,6 +37,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
         }
     }
     compileOptions {

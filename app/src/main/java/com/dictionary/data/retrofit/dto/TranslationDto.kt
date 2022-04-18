@@ -1,9 +1,13 @@
 package com.dictionary.data.retrofit.dto
 
+import androidx.annotation.Keep
 import com.dictionary.domain.entity.Translation
 import com.dictionary.domain.entity.TranslationWord
+import com.google.gson.annotations.SerializedName
 
+@Keep
 data class TranslationDto(
+    @SerializedName("def")
     val def: List<Definition>,
 ){
     fun toEntity(): Translation {

@@ -1,6 +1,5 @@
 package com.dictionary.presentation
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,13 +15,12 @@ import androidx.navigation.navArgument
 import com.dictionary.presentation.cards_game.CardsGameScreen
 import com.dictionary.presentation.category_edit.CategoryEditScreen
 import com.dictionary.presentation.category_list.CategoryListScreen
-import com.dictionary.presentation.common.GetFile
-import com.dictionary.presentation.common.GetImage
+import com.dictionary.presentation.common.lifecycle_observer.GetFileLifecycleObserver
+import com.dictionary.presentation.common.lifecycle_observer.GetImageLifecycleObserver
 import com.dictionary.presentation.learn_words.LearnWordsScreen
 import com.dictionary.presentation.word_edit.WordEditScreen
 import com.dictionary.utils.Routes
 import dagger.hilt.android.AndroidEntryPoint
-
 
 //AppCompatActivity
 //ComponentActivity
@@ -31,10 +29,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val getFileObserver = GetFile(activityResultRegistry)
+        val getFileObserver = GetFileLifecycleObserver(activityResultRegistry)
+        val getImageObserver = GetImageLifecycleObserver(activityResultRegistry)
         lifecycle.addObserver(getFileObserver)
-
-        val getImageObserver = GetImage(activityResultRegistry)
         lifecycle.addObserver(getImageObserver)
 
         setContent {
@@ -65,7 +62,7 @@ class MainActivity : ComponentActivity() {
                             route = Routes.CATEGORY_LIST
                         ) {
                             CategoryListScreen(
-                                getFile = getFileObserver,
+                                getFileLifecycleObserver = getFileObserver,
                                 onNavigate = { navController.navigate(it.route) },
                             )
                         }
@@ -79,15 +76,19 @@ class MainActivity : ComponentActivity() {
                             )
                         ) {
                             CategoryEditScreen(
-                                getImage = getImageObserver,
+                                getImageLifecycleObserver = getImageObserver,
                                 onNavigate = { navController.navigate(it.route) },
                                 onPopBackStack = navController::popBackStack
                             )
                         }
                         composable(
-                            route = Routes.WORD_EDIT + "?id={id}",
+                            route = Routes.WORD_EDIT + "?id={id}&category={category}",
                             arguments = listOf(
                                 navArgument(name = "id") {
+                                    type = NavType.IntType
+                                    defaultValue = -1
+                                },
+                                navArgument(name = "category") {
                                     type = NavType.IntType
                                     defaultValue = -1
                                 }

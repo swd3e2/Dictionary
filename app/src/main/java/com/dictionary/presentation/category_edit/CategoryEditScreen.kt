@@ -14,7 +14,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -31,23 +30,20 @@ import coil.compose.AsyncImage
 import com.dictionary.R
 import com.dictionary.domain.entity.Category
 import com.dictionary.presentation.category_edit.components.*
-import com.dictionary.presentation.category_list.CategoryListEvent
-import com.dictionary.presentation.common.GetImage
+import com.dictionary.presentation.common.lifecycle_observer.GetImageLifecycleObserver
 import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import java.io.File
 
 @Composable
 fun CategoryEditScreen(
-    getImage: GetImage,
+    getImageLifecycleObserver: GetImageLifecycleObserver,
     onNavigate: (UiEvent.Navigate) -> Unit,
     onPopBackStack: () -> Unit,
     viewModel: CategoryEditViewModel = hiltViewModel()
 ) {
-    getImage.reset()
+    getImageLifecycleObserver.reset()
 
     val words = viewModel.wordsState.collectAsState(initial = emptyList())
     val scaffoldState = rememberScaffoldState()
@@ -61,11 +57,12 @@ fun CategoryEditScreen(
                         message = event.message
                     )
                 }
+                UiEvent.PopBackStack -> onPopBackStack()
             }
         }
     }
     LaunchedEffect(key1 = true) {
-        getImage.filenameStateFlow.collectLatest {
+        getImageLifecycleObserver.filenameStateFlow.collectLatest {
             it?.let {
                 viewModel.onEvent(CategoryEditEvent.OnImagePickFile(it))
             }
@@ -91,10 +88,10 @@ fun CategoryEditScreen(
             }
         }
     ) { padding ->
-        if (viewModel.showDeleteDialog.value) {
+        if (viewModel.showWordDeleteDialog.value) {
             DeleteDialog(
                 text = "Are you sure you want to delete word?",
-                onClose = { viewModel.onEvent(CategoryEditEvent.OnHideDeleteDialog) },
+                onClose = { viewModel.onEvent(CategoryEditEvent.OnHideWordDeleteDialog) },
                 onSuccess = { viewModel.onEvent(CategoryEditEvent.OnDeleteWord) }
             )
         }
@@ -103,6 +100,13 @@ fun CategoryEditScreen(
             MoveToCategoryDialog(
                 viewModel::onEvent,
                 viewModel.categories,
+            )
+        }
+        if (viewModel.showCategoryDeleteDialog.value) {
+            DeleteDialog(
+                text = "Are you sure you want to delete category?",
+                onClose = { viewModel.onEvent(CategoryEditEvent.OnHideDeleteCategoryDialog) },
+                onSuccess = { viewModel.onEvent(CategoryEditEvent.OnDeleteCategory)}
             )
         }
 
@@ -119,7 +123,7 @@ fun CategoryEditScreen(
         ) {
             item {
                 Title(
-                    getImage = getImage,
+                    getImageLifecycleObserver = getImageLifecycleObserver,
                     category = viewModel.category,
                     wordsCount = viewModel.wordsCount,
                     categoryTitle = viewModel.categoryTitle,
@@ -127,21 +131,20 @@ fun CategoryEditScreen(
                     onEvent = viewModel::onEvent
                 )
                 GameButtons(category = viewModel.category, onEvent = viewModel::onEvent)
-                SearchAndFilter(viewModel.termSearch, onEvent = viewModel::onEvent)
+                SearchAndSort(viewModel.termSearch, onEvent = viewModel::onEvent)
             }
             items(words.value) { word ->
                 key(word.id) {
-                    WordListItem(word, viewModel::onEvent)
+                    WordListItem(word, viewModel::onEvent, canMoveWordToCategory = viewModel.categories.isNotEmpty())
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Title(
-    getImage: GetImage,
+    getImageLifecycleObserver: GetImageLifecycleObserver,
     category: Category,
     categoryTitle: MutableState<String>,
     categoryImage: MutableState<String>,
@@ -168,7 +171,7 @@ fun Title(
                             .padding(5.dp)
                             .clip(RoundedCornerShape(30))
                             .clickable {
-                                getImage.selectImage()
+                                getImageLifecycleObserver.selectImage()
                             },
                     )
                 } else {
@@ -178,7 +181,7 @@ fun Title(
                             .padding(5.dp)
                             .clip(CircleShape)
                             .clickable {
-                                getImage.selectImage()
+                                getImageLifecycleObserver.selectImage()
                             },
                         contentScale = ContentScale.Crop,
                         painter = painterResource(R.drawable.placeholder),
@@ -324,14 +327,13 @@ fun GameButtons(
 }
 
 @Composable
-fun SearchAndFilter(
+fun SearchAndSort(
     search: MutableState<String>,
     onEvent: (CategoryEditEvent) -> Unit
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(15.dp, 5.dp, 20.dp, 0.dp),
+            .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         TextField(
@@ -339,13 +341,13 @@ fun SearchAndFilter(
             onValueChange = { onEvent(CategoryEditEvent.OnSearchTermChange(it)) },
             label = { Text(text = "Search") },
             modifier = Modifier
-                .padding(16.dp, 10.dp),
+                .padding(15.dp, 0.dp, 0.dp, 0.dp),
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
             ),
         )
         IconButton(
-            modifier = Modifier.offset(0.dp, 20.dp),
+            modifier = Modifier.padding(15.dp),
             onClick = { onEvent(CategoryEditEvent.OnShowSortDialog) }
         ) {
             Icon(

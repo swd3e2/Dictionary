@@ -1,4 +1,4 @@
-package com.dictionary.presentation.common
+package com.dictionary.presentation.common.activity_contract
 
 import android.app.Activity
 import android.content.Context
@@ -7,7 +7,7 @@ import android.net.Uri
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.CallSuper
 
-class GetContent : ActivityResultContract<String, Uri?>() {
+class GetContentActivity : ActivityResultContract<String, Uri?>() {
     @CallSuper
     override fun createIntent(context: Context, input: String): Intent {
         return Intent(Intent.ACTION_GET_CONTENT)
@@ -15,12 +15,12 @@ class GetContent : ActivityResultContract<String, Uri?>() {
             .putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("text/csv", "text/comma-separated-values"))
     }
 
-    final override fun getSynchronousResult(
+    override fun getSynchronousResult(
         context: Context,
         input: String
     ): SynchronousResult<Uri?>? = null
 
-    final override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
+    override fun parseResult(resultCode: Int, intent: Intent?): Uri? {
         return intent.takeIf { resultCode == Activity.RESULT_OK }?.data
     }
 }

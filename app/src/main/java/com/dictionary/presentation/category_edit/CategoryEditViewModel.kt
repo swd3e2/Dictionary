@@ -3,20 +3,16 @@ package com.dictionary.presentation.category_edit
 import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dictionary.common.Resource
 import com.dictionary.domain.entity.Category
 import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
-import com.dictionary.domain.repository.TranslationRepository
 import com.dictionary.domain.repository.WordRepository
-import com.dictionary.presentation.common.URIPathHelper
+import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,7 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CategoryEditViewModel @Inject constructor(
     private val categoryRepository: CategoryRepository,
-    private val wordRepository: WordRepository,
+    private val wordsRepository: WordRepository,
 
     savedStateHandle: SavedStateHandle,
     application: Application
@@ -43,7 +39,10 @@ class CategoryEditViewModel @Inject constructor(
     var categoryImage = mutableStateOf("")
         private set
 
-    var showDeleteDialog = mutableStateOf(false)
+    var showWordDeleteDialog = mutableStateOf(false)
+        private set
+
+    var showCategoryDeleteDialog = mutableStateOf(false)
         private set
 
     private val _uiEvent = Channel<UiEvent>()
@@ -67,15 +66,14 @@ class CategoryEditViewModel @Inject constructor(
     lateinit var categories: List<Category>
 
     private var words = MutableStateFlow("")
-    private var selectedWordId: Int? = null
     private var selectedWord: Word? = null
 
     @OptIn(ExperimentalCoroutinesApi::class)
     var wordsState = words.flatMapLatest {
         if (it.isEmpty()) {
-            wordRepository.categoryWords(category.id)
+            wordsRepository.categoryWords(category.id)
         } else {
-            wordRepository.categoryWordsLike(category.id, it)
+            wordsRepository.categoryWordsLike(category.id, it)
         }
     }
 
@@ -112,10 +110,10 @@ class CategoryEditViewModel @Inject constructor(
             }
             is CategoryEditEvent.OnDeleteWord -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    selectedWordId?.let {
-                        wordRepository.delete(it)
+                    selectedWord?.let {
+                        wordsRepository.delete(it.id)
                     }
-                    showDeleteDialog.value = false
+                    showWordDeleteDialog.value = false
                 }
             }
             is CategoryEditEvent.OnGameClick -> {
@@ -137,12 +135,12 @@ class CategoryEditViewModel @Inject constructor(
                 termSearch.value = event.term
                 words.value = event.term
             }
-            is CategoryEditEvent.OnShowDeleteDialog -> {
-                showDeleteDialog.value = true
+            is CategoryEditEvent.OnShowWordDeleteDialog -> {
+                showWordDeleteDialog.value = true
                 selectedWord = event.word
             }
-            is CategoryEditEvent.OnHideDeleteDialog -> {
-                showDeleteDialog.value = false
+            is CategoryEditEvent.OnHideWordDeleteDialog -> {
+                showWordDeleteDialog.value = false
             }
             is CategoryEditEvent.OnTitleSave -> {
                 if (categoryTitle.value.isEmpty()) {
@@ -157,7 +155,7 @@ class CategoryEditViewModel @Inject constructor(
             }
             is CategoryEditEvent.OnDropWordBucket -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordRepository.create(event.word.apply { bucket = 1 })
+                    wordsRepository.create(event.word.apply { bucket = 1 })
                     _uiEvent.send(UiEvent.ShowSnackbar("Word sent to bucket 1"))
                 }
             }
@@ -182,7 +180,7 @@ class CategoryEditViewModel @Inject constructor(
             }
             is CategoryEditEvent.OnMoveToCategoryDialog -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordRepository.create(selectedWord!!.apply { category = event.category.id })
+                    wordsRepository.create(selectedWord!!.apply { category = event.category.id })
                 }
                 showMoveToCategoryDialog.value = false
             }
@@ -218,13 +216,33 @@ class CategoryEditViewModel @Inject constructor(
                     categoryRepository.create(category = category)
                 }
             }
-            CategoryEditEvent.OnAddWord -> viewModelScope.launch {
-                _uiEvent.send(UiEvent.Navigate(Routes.WORD_EDIT))
+            is CategoryEditEvent.OnAddWord -> viewModelScope.launch {
+                _uiEvent.send(UiEvent.Navigate(Routes.WORD_EDIT + "?category=${category.id}"))
+            }
+            is CategoryEditEvent.OnShowDeleteCategoryDialog -> {
+                showCategoryDeleteDialog.value = true
+                menuExpanded.value = false
+            }
+            is CategoryEditEvent.OnHideDeleteCategoryDialog -> {
+                showCategoryDeleteDialog.value = false
+                menuExpanded.value = false
+            }
+            is CategoryEditEvent.OnDeleteCategory -> {
+                showCategoryDeleteDialog.value = false
+                viewModelScope.launch(Dispatchers.IO) {
+                    categoryRepository.delete(category.id)
+                    wordsRepository.deleteByCategory(category.id)
+                    if (category.image.isNotEmpty()) {
+                        try {
+                            val currentFile = File(category.image)
+                            currentFile.exists() && currentFile.delete()
+                        } catch (e: IOException) {
+                            e.printStackTrace()
+                        }
+                    }
+                    _uiEvent.send(UiEvent.PopBackStack)
+                }
             }
         }
-    }
-
-    sealed class UIEvent {
-        data class ShowSnackbar(val message: String) : UIEvent()
     }
 }

@@ -26,4 +26,8 @@ interface CategoriesDao {
     @Transaction
     @Query("select * from ${Category.TABLE_NAME} where id = :id")
     fun getWithWords(id: Int): CategoryWithWords?
+
+    @Transaction
+    @Query("select * from ${Category.TABLE_NAME}")
+    fun listWithWordsAsList(): List<CategoryWithWords>
 }

@@ -17,10 +17,10 @@ data class Word(
     @ColumnInfo(name = "category")
     var category: Int? = null,
     @ColumnInfo(name = "created")
-    val created: Date = Date(),
+    var created: Date = Date(),
     @ColumnInfo(name = "last_repeated")
     var lastRepeated: Date? = null,
-    @ColumnInfo(name = "first_repeated")
+    @ColumnInfo(name = "first_learned")
     var firstLearned: Date? = null,
     @ColumnInfo(name = "bucket")
     var bucket: Int = 0,

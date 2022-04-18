@@ -2,8 +2,6 @@ package com.dictionary.presentation.category_list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.*
@@ -16,24 +14,22 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dictionary.domain.entity.Category
-import com.dictionary.presentation.category_edit.CategoryEditEvent
 import com.dictionary.presentation.category_list.components.AddCategoryDialog
 import com.dictionary.presentation.category_list.components.CategoryListItem
-import com.dictionary.presentation.common.GetFile
-import com.dictionary.presentation.components.DeleteDialog
+import com.dictionary.presentation.common.lifecycle_observer.GetFileLifecycleObserver
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
 import com.dictionary.utils.UiEvent
+import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun CategoryListScreen(
     onNavigate: (UiEvent.Navigate) -> Unit,
     viewModel: CategoriesListViewModel = hiltViewModel(),
-    getFile: GetFile
+    getFileLifecycleObserver: GetFileLifecycleObserver
 ) {
-
+    getFileLifecycleObserver.reset()
 
     val scaffoldState = rememberScaffoldState()
     val categories = viewModel.categories.collectAsState(initial = emptyList())
@@ -42,14 +38,22 @@ fun CategoryListScreen(
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.Navigate -> onNavigate(event)
+                is UiEvent.ShowSnackbar -> {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        message = event.message
+                    )
+                }
                 else -> Unit
             }
         }
     }
 
     LaunchedEffect(key1 = true) {
-        getFile.filenameStateFlow.collectLatest {
-            it?.let { viewModel.onEvent(CategoryListEvent.OnImportFile(it)) }
+        getFileLifecycleObserver.filenameStateFlow.collectLatest {
+            it?.let {
+
+                viewModel.onEvent(CategoryListEvent.OnImportFile(it))
+            }
         }
     }
 
@@ -64,13 +68,6 @@ fun CategoryListScreen(
             }
         }
     ) {
-        if (viewModel.showDeleteDialog.value) {
-            DeleteDialog(
-                text = "Are you sure you want to delete category?",
-                onClose = { viewModel.onEvent(CategoryListEvent.OnHideDeleteDialog) },
-                onSuccess = { viewModel.onEvent(CategoryListEvent.OnDeleteCategory)}
-            )
-        }
         Column(
             modifier = Modifier
                 .padding(it)
@@ -82,23 +79,21 @@ fun CategoryListScreen(
                     viewModel::onEvent
                 )
             }
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth()
+            Title()
+            GameButtons(viewModel::onEvent)
+            Search(viewModel::onEvent, viewModel.search, getFileLifecycleObserver)
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(15.dp),
+                mainAxisSpacing = 5.dp,
+                crossAxisSpacing = 5.dp
             ) {
-                item {
-                    Title()
-                    GameButtons(viewModel::onEvent)
-                }
-                item {
-                    Search(viewModel::onEvent, viewModel.search, getFile)
-                }
-                items(categories.value) { category ->
+                categories.value.forEach{ category ->
                     CategoryListItem(category, viewModel::onEvent)
                 }
-                item{
-                    Spacer(modifier = Modifier.padding(25.dp))
-                }
             }
+            Spacer(modifier = Modifier.padding(25.dp))
         }
     }
 }
@@ -107,13 +102,15 @@ fun CategoryListScreen(
 private fun Search(
     onEvent: (CategoryListEvent) -> Unit,
     search: MutableState<String>,
-    getFile: GetFile
+    getFileLifecycleObserver: GetFileLifecycleObserver
 ) {
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier
+        .fillMaxWidth()
+        .padding(0.dp, 10.dp)) {
         Row(
             modifier = Modifier.padding(15.dp)
         ){
-            Text(text = "Categories", fontSize = 28.sp, color = PrimaryTextColor, fontWeight = FontWeight.Bold)
+            Text(text = "Categories", fontSize = 24.sp, color = SecondaryTextColor, fontWeight = FontWeight.Bold)
         }
 
         Row(
@@ -132,8 +129,18 @@ private fun Search(
                 ),
             )
             IconButton(
-                modifier = Modifier.padding(15.dp),
-                onClick = getFile::selectFile
+                modifier = Modifier.padding(0.dp, 15.dp, 0.dp, 15.dp),
+                onClick = { onEvent(CategoryListEvent.OnExportFile) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowUp,
+                    contentDescription = "Export",
+                    tint = MaterialTheme.colors.primary
+                )
+            }
+            IconButton(
+                modifier = Modifier.padding(0.dp, 15.dp, 15.dp, 15.dp),
+                onClick = getFileLifecycleObserver::selectFile
             ) {
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
@@ -150,12 +157,12 @@ private fun Title() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(30.dp, 30.dp, 30.dp, 0.dp),
+            .padding(15.dp, 30.dp, 30.dp, 0.dp),
     ) {
         Text(
             text = "Welcome home, Master",
-            color = SecondaryTextColor,
-            fontSize = 20.sp,
+            color = PrimaryTextColor,
+            fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
     }
@@ -169,7 +176,7 @@ fun GameButtons(
     Row(
         modifier = Modifier.padding(15.dp, 15.dp, 15.dp, 5.dp)
     ){
-        Text(text = "Games", fontSize = 28.sp, color = PrimaryTextColor, fontWeight = FontWeight.Bold)
+        Text(text = "Games", fontSize = 24.sp, color = SecondaryTextColor, fontWeight = FontWeight.Bold)
     }
     Row(
         modifier = Modifier

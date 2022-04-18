@@ -37,7 +37,7 @@ fun LearnWordsScreen(
                     AnimatedPage(viewModel.currentStep, 3) { Test(viewModel = viewModel) }
                     AnimatedPage(viewModel.currentStep, 4) { Cards(viewModel = viewModel) }
                     AnimatedPage(viewModel.currentStep, 5) { Write(viewModel = viewModel) }
-                    AnimatedPage(viewModel.currentStep, 6) { Done(viewModel = viewModel) }
+                    AnimatedPage(viewModel.currentStep, 6) { Done(onPopBackStack = onPopBackStack, viewModel = viewModel) }
                 }
             }
         }

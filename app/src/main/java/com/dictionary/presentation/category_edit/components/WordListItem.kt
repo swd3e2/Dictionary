@@ -29,7 +29,8 @@ import kotlin.math.roundToInt
 @Composable
 fun WordListItem(
     word: Word,
-    onEvent: (CategoryEditEvent) -> Unit
+    onEvent: (CategoryEditEvent) -> Unit,
+    canMoveWordToCategory: Boolean
 ) {
     val coroutineScope = rememberCoroutineScope()
     val squareSize = if (word.bucket > 1) (-140).dp else (-100).dp
@@ -50,7 +51,7 @@ fun WordListItem(
             ),
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -64,13 +65,15 @@ fun WordListItem(
                     Icon(imageVector = Icons.Default.Refresh, "Refresh")
                 }
             }
-            IconButton(
-                onClick = { onEvent(CategoryEditEvent.OnShowMoveToCategoryDialog(word)) }
-            ) {
-                Icon(imageVector = Icons.Default.KeyboardArrowLeft, "Delete")
+            if (canMoveWordToCategory) {
+                IconButton(
+                    onClick = { onEvent(CategoryEditEvent.OnShowMoveToCategoryDialog(word)) }
+                ) {
+                    Icon(imageVector = Icons.Default.KeyboardArrowLeft, "Delete")
+                }
             }
             IconButton(
-                onClick = { onEvent(CategoryEditEvent.OnShowDeleteDialog(word)) }
+                onClick = { onEvent(CategoryEditEvent.OnShowWordDeleteDialog(word)) }
             ) {
                 Icon(imageVector = Icons.Default.Delete, "Delete")
             }
@@ -90,7 +93,7 @@ fun WordListItem(
                     .clickable { onEvent(CategoryEditEvent.OnWordClick(word.id)) }
                     .fillMaxSize(),
             ) {
-                Column (modifier = Modifier.padding(10.dp)){
+                Column (modifier = Modifier.padding(10.dp)) {
                     Text(
                         text = word.term,
                         style = MaterialTheme.typography.body1,

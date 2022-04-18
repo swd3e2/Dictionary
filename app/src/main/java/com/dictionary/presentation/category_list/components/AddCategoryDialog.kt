@@ -8,6 +8,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -21,9 +22,14 @@ fun AddCategoryDialog(
     categoryTitle: MutableState<String>,
     onEvent: (CategoryListEvent) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
+
     Dialog(
         properties = DialogProperties(usePlatformDefaultWidth = false),
-        onDismissRequest = { onEvent(CategoryListEvent.OnHideAddCategoryDialog) },
+        onDismissRequest = {
+            focusManager.clearFocus()
+            onEvent(CategoryListEvent.OnHideAddCategoryDialog)
+        },
         content = {
             Box(
                 modifier = Modifier.padding(10.dp)
@@ -54,7 +60,10 @@ fun AddCategoryDialog(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            Button(onClick = { onEvent(CategoryListEvent.OnHideAddCategoryDialog) }) {
+                            Button(onClick = {
+                                focusManager.clearFocus()
+                                onEvent(CategoryListEvent.OnHideAddCategoryDialog)
+                            }) {
                                 Text(text = "Cancel")
                             }
                             Button(onClick = {

@@ -71,6 +71,8 @@ class WordEditViewModel @Inject constructor(
 
     private var searchJob: Job? = null
 
+    var categoryId: Int? = null
+
     init {
         val id = savedStateHandle.get<Int>("id")!!
         if(id != -1) {
@@ -88,6 +90,7 @@ class WordEditViewModel @Inject constructor(
                 }
             }
         }
+        categoryId = savedStateHandle.get<Int>("category")!!
     }
 
     fun onEvent(event: WordEditEvent) {
@@ -133,6 +136,7 @@ class WordEditViewModel @Inject constructor(
                     } else {
                         wordRepository.create(Word(
                             term = newTerm.value,
+                            category = categoryId,
                             definition =  newDefinition.value,
                             synonyms = newSynonyms.value,
                             antonyms = newAntonyms.value,

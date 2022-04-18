@@ -2,6 +2,7 @@ package com.dictionary.presentation.category_list
 
 import android.app.Application
 import android.net.Uri
+import android.os.Environment
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,13 +17,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
+import java.time.Instant
 import java.util.*
 import javax.inject.Inject
+
 
 @HiltViewModel
 class CategoriesListViewModel @Inject constructor(
@@ -36,11 +38,6 @@ class CategoriesListViewModel @Inject constructor(
 
     var showAddCategoryDialog = mutableStateOf(false)
         private set
-
-    var showDeleteDialog = mutableStateOf(false)
-        private set
-
-    private var selectedCategory: CategoryWithWords? = null
 
     var title = mutableStateOf("")
         private set
@@ -67,23 +64,6 @@ class CategoriesListViewModel @Inject constructor(
             is CategoryListEvent.OnChangeTitle -> {
                 title.value = event.title
             }
-            is CategoryListEvent.OnDeleteCategory -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    selectedCategory?.let { category ->
-                        categoryRepository.delete(category.category.id)
-                        wordsRepository.deleteByCategory(category.category.id)
-                    }
-
-                    showDeleteDialog.value = false
-                }
-            }
-            is CategoryListEvent.OnShowDeleteDialog -> {
-                showDeleteDialog.value = true
-                selectedCategory = event.category
-            }
-            is CategoryListEvent.OnHideDeleteDialog -> {
-                showDeleteDialog.value = false
-            }
             is CategoryListEvent.OnCategoryClick -> {
                 sendUiEvent(UiEvent.Navigate(Routes.CATEGORY_EDIT + "?id=${event.id}"))
             }
@@ -99,38 +79,85 @@ class CategoriesListViewModel @Inject constructor(
                     val readBytes = app.contentResolver.openInputStream(event.uri)!!.readBytes()
                     val data = readBytes.toString(Charsets.UTF_8)
 
+                    var newCategoryId = 0L
                     val words = mutableListOf<Word>()
                     for (line in data.lines()) {
                         val splitLine = line.split(';')
-                        if (splitLine.size < 2) {
+                        if (splitLine[0] == "category") {
+                            newCategoryId = categoryRepository.create(Category(id = 0, name = splitLine[1]))
                             continue
                         }
-
-                        words.add(
-                            Word(
-                                id = 0,
-                                term = splitLine[0],
-                                definition = splitLine[1],
-                                category = 0,
-                                created = Date(),
-                                lastRepeated = Date(),
-                            )
-                        )
+                        val word = Word(category = newCategoryId.toInt())
+                        for ((index, splitRow) in splitLine.withIndex()) {
+                            when (index) {
+                                0 -> word.term = splitRow
+                                1 -> word.definition = splitRow
+                                2 -> word.created = Date(splitRow.toLong())
+                                3 -> {
+                                    if (splitRow.isNotEmpty()) {
+                                        word.lastRepeated = Date(splitRow.toLong())
+                                    }
+                                }
+                                4 -> {
+                                    if (splitRow.isNotEmpty()) {
+                                        word.firstLearned = Date(splitRow.toLong())
+                                    }
+                                }
+                                5 -> word.bucket = splitRow.toInt()
+                                6 -> word.synonyms = splitRow
+                                7 -> word.antonyms = splitRow
+                                8 -> word.similar = splitRow
+                                9 -> word.transcription = splitRow
+                            }
+                        }
+                        words.add(word)
                     }
 
                     if (words.size == 0) {
                         cancel()
                     }
 
-                    val category = Category(id = 0, name = getFilename(event.uri))
-                    val categoryId = categoryRepository.create(category)
-                    category.id = categoryId.toInt()
-
-                    for (word in words) {
-                        word.category = category.id
+                    wordsRepository.batchCreate(words)
+                }
+            }
+            is CategoryListEvent.OnExportFile -> {
+                viewModelScope.launch(Dispatchers.IO) {
+                    val categories = categoryRepository.listWithWordsAsList()
+                    if (categories.isEmpty()) {
+                        sendUiEvent(UiEvent.ShowSnackbar("No data to export"))
+                        return@launch
                     }
 
-                    wordsRepository.batchCreate(words)
+                    val file = File(Environment.getExternalStorageDirectory().path + "/Download/export_data.csv")
+
+                    if (!file.exists() && !file.createNewFile()) {
+                        sendUiEvent(UiEvent.ShowSnackbar("Cant create file"))
+                        return@launch
+                    }
+
+                    FileOutputStream(file).use { output ->
+                        for ((categoryIndex, category) in categories.withIndex()) {
+                            output.write("category;${category.category.name}\n".toByteArray())
+                            for ((wordIndex, word) in category.words.withIndex()) {
+                                output.write(
+                                    (
+                                        "${word.term};" +
+                                        "${word.definition};" +
+                                        "${word.created.toInstant().epochSecond};" +
+                                        "${if (word.lastRepeated != null) word.lastRepeated!!.toInstant().epochSecond else ""};" +
+                                        "${if (word.firstLearned != null) word.firstLearned!!.toInstant().epochSecond else ""};" +
+                                        "${word.bucket};" +
+                                        "${word.synonyms};" +
+                                        "${word.antonyms};" +
+                                        "${word.similar};" +
+                                        "${word.transcription}" +
+                                        if (categoryIndex == categories.size - 1 && wordIndex == category.words.size - 1) "" else "\n"
+                                    ).toByteArray()
+                                )
+                            }
+                        }
+                    }
+                    sendUiEvent(UiEvent.ShowSnackbar("All data exported"))
                 }
             }
             is CategoryListEvent.OnSearchChange -> {
@@ -141,9 +168,6 @@ class CategoriesListViewModel @Inject constructor(
             }
             is CategoryListEvent.OnGoToLearnWords -> {
                 sendUiEvent(UiEvent.Navigate(Routes.LEARN_WORDS))
-            }
-            is CategoryListEvent.OnGoToMatchGame -> {
-                sendUiEvent(UiEvent.Navigate(Routes.MATCH_GAME))
             }
         }
     }

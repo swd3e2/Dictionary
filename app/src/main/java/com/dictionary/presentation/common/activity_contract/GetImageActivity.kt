@@ -1,4 +1,4 @@
-package com.dictionary.presentation.common
+package com.dictionary.presentation.common.activity_contract
 
 import android.app.Activity
 import android.content.Context

@@ -43,10 +43,7 @@ fun DropDownMenu(
                     DropdownMenu(expanded = menuExpanded.value, onDismissRequest = {
                         onEvent(CategoryEditEvent.OnCloseMenu)
                     }) {
-                        DropdownMenuItem(onClick = { }) {
-                            Text(text = "Settings")
-                        }
-                        DropdownMenuItem(onClick = { }) {
+                        DropdownMenuItem(onClick = { onEvent(CategoryEditEvent.OnShowDeleteCategoryDialog) }) {
                             Text(text = "Delete")
                         }
                     }
