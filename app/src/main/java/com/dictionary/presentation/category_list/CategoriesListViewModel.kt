@@ -132,7 +132,7 @@ class CategoriesListViewModel @Inject constructor(
                         return@launch
                     }
 
-                    val file = File(Environment.getExternalStorageDirectory().path + "/Download/export_data.csv")
+                    val file = File(Environment.getExternalStorageDirectory().path + "/Download/export_data1.csv")
 
                     if (!file.exists() && !file.createNewFile()) {
                         sendUiEvent(UiEvent.ShowSnackbar("Cant create file"))
