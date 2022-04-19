@@ -18,6 +18,8 @@ import com.dictionary.presentation.category_list.CategoryListScreen
 import com.dictionary.presentation.common.lifecycle_observer.GetFileLifecycleObserver
 import com.dictionary.presentation.common.lifecycle_observer.GetImageLifecycleObserver
 import com.dictionary.presentation.learn_words.LearnWordsScreen
+import com.dictionary.presentation.search_words.SearchWordsScreen
+import com.dictionary.presentation.settings.SettingsScreen
 import com.dictionary.presentation.word_edit.WordEditScreen
 import com.dictionary.utils.Routes
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,6 +64,7 @@ class MainActivity : ComponentActivity() {
                             route = Routes.CATEGORY_LIST
                         ) {
                             CategoryListScreen(
+                                navController = navController,
                                 getFileLifecycleObserver = getFileObserver,
                                 onNavigate = { navController.navigate(it.route) },
                             )
@@ -78,6 +81,7 @@ class MainActivity : ComponentActivity() {
                             CategoryEditScreen(
                                 getImageLifecycleObserver = getImageObserver,
                                 onNavigate = { navController.navigate(it.route) },
+                                navController = navController,
                                 onPopBackStack = navController::popBackStack
                             )
                         }
@@ -123,6 +127,24 @@ class MainActivity : ComponentActivity() {
                             LearnWordsScreen(onPopBackStack = {
                                 navController.popBackStack()
                             })
+                        }
+                        composable(
+                            route = Routes.SEARCH_WORDS,
+                        ) {
+                            SearchWordsScreen(
+                                onPopBackStack = { navController.popBackStack() },
+                                navController = navController,
+                                onNavigate = { navController.navigate(it.route) }
+                            )
+                        }
+                        composable(
+                            route = Routes.SETTINGS,
+                        ) {
+                            SettingsScreen(
+                                onPopBackStack = { navController.popBackStack() },
+                                navController = navController,
+                                onNavigate = { navController.navigate(it.route) }
+                            )
                         }
                     }
                 }

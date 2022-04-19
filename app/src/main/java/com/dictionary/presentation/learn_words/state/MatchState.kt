@@ -77,7 +77,7 @@ class MatchState {
 
     fun selectNextGroup(): Boolean {
         currentWordsGroupIndex++
-        if (wordsGroups.size >= currentWordsGroupIndex) {
+        if (currentWordsGroupIndex >= wordsGroups.size) {
             return false
         }
         currentWordsGroup.clear()

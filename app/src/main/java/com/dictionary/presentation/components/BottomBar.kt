@@ -1,31 +1,38 @@
 package com.dictionary.presentation.components
 
 import android.graphics.drawable.Icon
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.dictionary.ui.theme.PrimaryTextColor
+import com.dictionary.utils.Routes
 
 @Composable
 fun BottomBar(
     navController: NavHostController
 ) {
-    BottomNavigation {
+    BottomNavigation(
+        backgroundColor = Color(0x00000000),
+        elevation = 0.dp
+    ) {
         val backStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = backStackEntry?.destination?.route
+
         BottomNavigationItem(
-            selected = currentRoute == "asd",
+            selected = currentRoute == Routes.CATEGORY_LIST,
+            selectedContentColor = MaterialTheme.colors.primary,
+            unselectedContentColor = PrimaryTextColor,
             onClick = {
-                navController.navigate("asd") {
+                navController.navigate(Routes.CATEGORY_LIST) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
                     }
@@ -38,13 +45,15 @@ fun BottomBar(
                 Icon(imageVector = Icons.Default.List, contentDescription = "List")
             },
             label = {
-                Text(text = "Test")
+                Text(text = "List")
             },
         )
         BottomNavigationItem(
-            selected = currentRoute == "asd",
+            selected = currentRoute == Routes.SEARCH_WORDS,
+            selectedContentColor = MaterialTheme.colors.primary,
+            unselectedContentColor = PrimaryTextColor,
             onClick = {
-                navController.navigate("asd") {
+                navController.navigate(Routes.SEARCH_WORDS) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
                     }
@@ -54,16 +63,18 @@ fun BottomBar(
             },
 
             icon = {
-                Icon(imageVector = Icons.Default.List, contentDescription = "List")
+                Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
             },
             label = {
-                Text(text = "Test")
+                Text(text = "Search")
             },
         )
         BottomNavigationItem(
-            selected = currentRoute == "asd",
+            selected = currentRoute == Routes.SETTINGS,
+            selectedContentColor = MaterialTheme.colors.primary,
+            unselectedContentColor = PrimaryTextColor,
             onClick = {
-                navController.navigate("asd") {
+                navController.navigate(Routes.SETTINGS) {
                     popUpTo(navController.graph.findStartDestination().id) {
                         saveState = true
                     }
@@ -73,10 +84,10 @@ fun BottomBar(
             },
 
             icon = {
-                Icon(imageVector = Icons.Default.List, contentDescription = "List")
+                Icon(imageVector = Icons.Default.Settings, contentDescription = "Settings")
             },
             label = {
-                Text(text = "Test")
+                Text(text = "Settings")
             },
         )
     }

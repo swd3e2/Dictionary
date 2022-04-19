@@ -42,7 +42,8 @@ fun CategoryListItem(
 
     Box(
         modifier = Modifier
-            .width(screenWidth / 2 - 20.dp)
+            .fillMaxWidth()
+            .padding(15.dp, 5.dp)
             .background(
                 color = MaterialTheme.colors.surface,
                 shape = MaterialTheme.shapes.medium
@@ -51,7 +52,7 @@ fun CategoryListItem(
     ) {
         Row(
             modifier = Modifier
-                .padding(5.dp, 10.dp),
+                .padding(15.dp, 15.dp),
             horizontalArrangement = Arrangement.Start
         ) {
             if (category.category.image.isNotEmpty()) {
@@ -59,7 +60,7 @@ fun CategoryListItem(
                     model = category.category.image,
                     contentDescription = null,
                     modifier = Modifier
-                        .size(38.dp)
+                        .size(50.dp)
                         .clip(RoundedCornerShape(30)),
                 )
             }
@@ -67,7 +68,9 @@ fun CategoryListItem(
                 modifier = Modifier.padding(5.dp, 0.dp)
             ) {
                 Row {
-                    Column {
+                    Column(
+                        modifier = Modifier.padding(15.dp, 0.dp, 0.dp)
+                    ) {
                         Text(
                             text = category.category.name,
                             style = MaterialTheme.typography.body1,

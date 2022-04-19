@@ -9,7 +9,7 @@ interface WordDao {
     @Query("select * from ${Word.TABLE_NAME} where category = :category")
     fun byCategory(category: Int): Flow<List<Word>>
 
-    @Query("select * from ${Word.TABLE_NAME} where category = :category and term like '%' || :term || '%'")
+    @Query("select * from ${Word.TABLE_NAME} where category = :category and (term like '%' || :term || '%' or definition like '%' || :term || '%')")
     fun byCategoryLike(category: Int, term: String): Flow<List<Word>>
 
     @Query("select * from ${Word.TABLE_NAME} where category = :category")

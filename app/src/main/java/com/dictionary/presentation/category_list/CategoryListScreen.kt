@@ -2,6 +2,8 @@ package com.dictionary.presentation.category_list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.*
@@ -15,9 +17,12 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.dictionary.presentation.category_list.components.AddCategoryDialog
 import com.dictionary.presentation.category_list.components.CategoryListItem
 import com.dictionary.presentation.common.lifecycle_observer.GetFileLifecycleObserver
+import com.dictionary.presentation.components.BottomBar
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
 import com.dictionary.utils.UiEvent
@@ -27,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun CategoryListScreen(
     onNavigate: (UiEvent.Navigate) -> Unit,
+    navController: NavHostController,
     viewModel: CategoriesListViewModel = hiltViewModel(),
     getFileLifecycleObserver: GetFileLifecycleObserver
 ) {
@@ -56,7 +62,6 @@ fun CategoryListScreen(
     LaunchedEffect(key1 = true) {
         getFileLifecycleObserver.filenameStateFlow.collectLatest {
             it?.let {
-
                 viewModel.onEvent(CategoryListEvent.OnImportFile(it))
             }
         }
@@ -71,11 +76,14 @@ fun CategoryListScreen(
             }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
             }
+        },
+        bottomBar = {
+            BottomBar(navController)
         }
-    ) {
+    ) { padding ->
         Column(
             modifier = Modifier
-                .padding(it)
+                .padding(padding)
                 .wrapContentHeight()
         ) {
             if (viewModel.showAddCategoryDialog.value) {
@@ -84,21 +92,23 @@ fun CategoryListScreen(
                     viewModel::onEvent
                 )
             }
-            Title()
-            GameButtons(viewModel::onEvent)
-            Search(viewModel::onEvent, viewModel.search, getFileLifecycleObserver)
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(15.dp),
-                mainAxisSpacing = 5.dp,
-                crossAxisSpacing = 5.dp
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth()
             ) {
-                categories.value.forEach{ category ->
+                item {
+                    Title()
+                    GameButtons(viewModel::onEvent)
+                }
+                item {
+                    Search(viewModel::onEvent, viewModel.search, getFileLifecycleObserver)
+                }
+                items(categories.value) { category ->
                     CategoryListItem(category, viewModel::onEvent)
                 }
+                item{
+                    Spacer(modifier = Modifier.padding(25.dp))
+                }
             }
-            Spacer(modifier = Modifier.padding(25.dp))
         }
     }
 }
@@ -132,6 +142,20 @@ private fun Search(
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
                 ),
+                trailingIcon = {
+                    if (search.value.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                search.value = ""
+                            }) {
+                            Icon(
+                                Icons.Default.Clear,
+                                contentDescription = "Clear",
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                    }
+                }
             )
             IconButton(
                 modifier = Modifier.padding(0.dp, 15.dp, 0.dp, 15.dp),

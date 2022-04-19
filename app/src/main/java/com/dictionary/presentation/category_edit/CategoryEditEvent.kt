@@ -20,12 +20,15 @@ sealed class CategoryEditEvent {
     object OnDeleteWord: CategoryEditEvent()
 
     data class OnDropWordBucket(val word: Word): CategoryEditEvent()
-    data class OnTitleChange(var title: String) : CategoryEditEvent()
+    data class OnCategoryNameChange(var name: String) : CategoryEditEvent()
     data class OnSortChange(var field: String, var direction: String) : CategoryEditEvent()
-    object OnTitleSave : CategoryEditEvent()
 
     object OnShowSortDialog: CategoryEditEvent()
     object OnHideSortDialog: CategoryEditEvent()
+
+    object OnShowRenameDialog: CategoryEditEvent()
+    object OnHideRenameDialog: CategoryEditEvent()
+    object OnRenameCategory : CategoryEditEvent()
 
     data class OnImagePickFile(val uri: Uri): CategoryEditEvent()
 

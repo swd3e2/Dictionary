@@ -50,7 +50,9 @@ fun MatchGame(
                     exit = fadeOut()
                 ) {
                     Card(
-                        modifier = Modifier.clickable{ onItemClick(word) }.fillMaxSize(),
+                        modifier = Modifier
+                            .clickable { onItemClick(word) }
+                            .fillMaxSize(),
                         elevation = 0.dp
                     ) {
                         Box(
@@ -60,7 +62,11 @@ fun MatchGame(
                                         "selected" -> MaterialTheme.colors.primary
                                         "error" -> Color(0xFFD53F3F)
                                         "success" -> Color(0xFF61CF54)
-                                        else -> MaterialTheme.colors.surface
+                                        else -> {
+                                            if (totalCount > word.index) Color(0xFFEFF1FC) else Color(
+                                                0xFFECF5F1
+                                            )
+                                        }
                                     }
                                 ),
                             contentAlignment = Alignment.Center

@@ -1,4 +1,4 @@
-package com.dictionary.presentation.category_edit.components
+package com.dictionary.presentation.settings.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -16,8 +16,6 @@ import com.dictionary.presentation.category_edit.CategoryEditEvent
 @Composable
 fun DropDownMenu(
     onPopBackStack: () -> Unit,
-    menuExpanded: MutableState<Boolean>,
-    onEvent: (CategoryEditEvent) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -25,7 +23,7 @@ fun DropDownMenu(
         TopAppBar(backgroundColor = Color(0x00000000), elevation = 0.dp){
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Start,
             ) {
                 IconButton(
                     onClick = {
@@ -33,23 +31,6 @@ fun DropDownMenu(
                         onPopBackStack()
                     }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colors.primary)
-                }
-                Box{
-                    IconButton(onClick = {
-                        onEvent(CategoryEditEvent.OnMenuClick)
-                    }) {
-                        Icon(Icons.Default.MoreVert, contentDescription = "Show menu")
-                    }
-                    DropdownMenu(expanded = menuExpanded.value, onDismissRequest = {
-                        onEvent(CategoryEditEvent.OnCloseMenu)
-                    }) {
-                        DropdownMenuItem(onClick = { onEvent(CategoryEditEvent.OnShowRenameDialog) }) {
-                            Text(text = "Rename")
-                        }
-                        DropdownMenuItem(onClick = { onEvent(CategoryEditEvent.OnShowDeleteCategoryDialog) }) {
-                            Text(text = "Delete")
-                        }
-                    }
                 }
             }
         }

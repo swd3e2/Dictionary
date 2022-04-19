@@ -3,7 +3,6 @@ package com.dictionary.presentation.category_edit
 import android.app.Application
 import android.content.Context
 import android.content.ContextWrapper
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
@@ -12,7 +11,6 @@ import com.dictionary.domain.entity.Category
 import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.WordRepository
-import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +32,7 @@ class CategoryEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     application: Application
 ) : AndroidViewModel(application) {
-    var categoryTitle = mutableStateOf("")
+    var categoryName = mutableStateOf("")
         private set
     var categoryImage = mutableStateOf("")
         private set
@@ -54,10 +52,10 @@ class CategoryEditViewModel @Inject constructor(
     var showSortDialog = mutableStateOf(false)
         private set
 
-    var showMoveToCategoryDialog = mutableStateOf(false)
+    var showRenameDialog = mutableStateOf(false)
         private set
 
-    var wordTranslations = mutableStateListOf<String>()
+    var showMoveToCategoryDialog = mutableStateOf(false)
         private set
 
     var termSearch = mutableStateOf("")
@@ -91,7 +89,7 @@ class CategoryEditViewModel @Inject constructor(
                     category = c
 
                     withContext(Dispatchers.Main) {
-                        categoryTitle.value = c.name
+                        categoryName.value = c.name
                         categoryImage.value = c.image
                     }
                 }
@@ -142,16 +140,17 @@ class CategoryEditViewModel @Inject constructor(
             is CategoryEditEvent.OnHideWordDeleteDialog -> {
                 showWordDeleteDialog.value = false
             }
-            is CategoryEditEvent.OnTitleSave -> {
-                if (categoryTitle.value.isEmpty()) {
+            is CategoryEditEvent.OnRenameCategory -> {
+                if (categoryName.value.isEmpty()) {
                     return
                 }
 
                 viewModelScope.launch(Dispatchers.IO) {
-                    category.name = categoryTitle.value
+                    category.name = categoryName.value
                     categoryRepository.create(category)
-                    _uiEvent.send(UiEvent.ShowSnackbar("Title changed"))
+                    _uiEvent.send(UiEvent.ShowSnackbar("Name changed"))
                 }
+                showRenameDialog.value = false
             }
             is CategoryEditEvent.OnDropWordBucket -> {
                 viewModelScope.launch(Dispatchers.IO) {
@@ -159,8 +158,8 @@ class CategoryEditViewModel @Inject constructor(
                     _uiEvent.send(UiEvent.ShowSnackbar("Word sent to bucket 1"))
                 }
             }
-            is CategoryEditEvent.OnTitleChange -> {
-                categoryTitle.value = event.title
+            is CategoryEditEvent.OnCategoryNameChange -> {
+                categoryName.value = event.name
             }
             is CategoryEditEvent.OnShowSortDialog -> {
                 showSortDialog.value = true
@@ -170,6 +169,12 @@ class CategoryEditViewModel @Inject constructor(
             }
             is CategoryEditEvent.OnSortChange -> {
                 showSortDialog.value = false
+            }
+            is CategoryEditEvent.OnShowRenameDialog -> {
+                showRenameDialog.value = true
+            }
+            is CategoryEditEvent.OnHideRenameDialog -> {
+                showRenameDialog.value = false
             }
             is CategoryEditEvent.OnShowMoveToCategoryDialog -> {
                 selectedWord = event.word
