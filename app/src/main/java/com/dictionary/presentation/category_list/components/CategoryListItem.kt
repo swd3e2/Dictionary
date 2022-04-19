@@ -101,7 +101,7 @@ fun CategoryListItem(
                                 )
                             ) {
                                 Text(
-                                    modifier = Modifier.padding(5.dp, 2.dp),
+                                    modifier = Modifier.padding(8.dp, 5.dp),
                                     text = "$countToLearn",
                                     style = MaterialTheme.typography.body1,
                                     overflow = TextOverflow.Ellipsis,
@@ -123,7 +123,7 @@ fun CategoryListItem(
                                 )
                             ) {
                                 Text(
-                                    modifier = Modifier.padding(5.dp, 2.dp),
+                                    modifier = Modifier.padding(8.dp, 5.dp),
                                     text = "$countToRepeat",
                                     style = MaterialTheme.typography.body1,
                                     overflow = TextOverflow.Ellipsis,

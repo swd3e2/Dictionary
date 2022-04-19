@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.*
@@ -71,12 +72,19 @@ fun CategoryListScreen(
         modifier = Modifier.fillMaxSize(),
         scaffoldState = scaffoldState,
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                viewModel.onEvent(CategoryListEvent.OnShowAddCategoryDialog)
-            }) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
+            FloatingActionButton(
+                onClick = { viewModel.onEvent(CategoryListEvent.OnShowAddCategoryDialog) },
+                contentColor = Color.White,
+                elevation = FloatingActionButtonDefaults.elevation(),
+                shape = RoundedCornerShape(40)
+            ) {
+                Icon(
+                    Icons.Filled.Add, ""
+                )
             }
         },
+        isFloatingActionButtonDocked = true,
+        floatingActionButtonPosition = FabPosition.End,
         bottomBar = {
             BottomBar(navController)
         }

@@ -49,7 +49,7 @@ fun SettingsScreen(
         scaffoldState = scaffoldState,
         topBar = { DropDownMenu(onPopBackStack) },
         bottomBar = {
-            BottomBar(navController)
+            BottomBar(navController, true)
         }
     ) { padding ->
         Column(

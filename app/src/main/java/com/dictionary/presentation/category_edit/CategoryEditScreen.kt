@@ -27,7 +27,9 @@ import coil.compose.AsyncImage
 import com.dictionary.R
 import com.dictionary.domain.entity.Category
 import com.dictionary.presentation.category_edit.components.*
+import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.presentation.common.lifecycle_observer.GetImageLifecycleObserver
+import com.dictionary.presentation.components.BottomBar
 import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.utils.UiEvent
@@ -78,13 +80,22 @@ fun CategoryEditScreen(
                 viewModel::onEvent
             )
         },
+        bottomBar = {
+            BottomBar(navController)
+        },
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                viewModel.onEvent(CategoryEditEvent.OnAddWord)
-            }) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add")
+            FloatingActionButton(
+                onClick = { viewModel.onEvent(CategoryEditEvent.OnAddWord) },
+                elevation = FloatingActionButtonDefaults.elevation(),
+                shape = RoundedCornerShape(40)
+            ) {
+                Icon(
+                    Icons.Filled.Add, ""
+                )
             }
-        }
+        },
+        isFloatingActionButtonDocked = true,
+        floatingActionButtonPosition = FabPosition.End,
     ) { padding ->
         if (viewModel.showWordDeleteDialog.value) {
             DeleteDialog(
@@ -139,6 +150,9 @@ fun CategoryEditScreen(
                 key(word.id) {
                     WordListItem(word, viewModel::onEvent, canMoveWordToCategory = viewModel.categories.isNotEmpty())
                 }
+            }
+            item() {
+                Spacer(modifier = Modifier.padding(15.dp))
             }
         }
     }
