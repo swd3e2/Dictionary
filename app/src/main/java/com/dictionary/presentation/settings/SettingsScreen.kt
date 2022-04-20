@@ -2,20 +2,25 @@ package com.dictionary.presentation.settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.dictionary.presentation.common.Theme
 import com.dictionary.presentation.components.BottomBar
 import com.dictionary.presentation.settings.components.DropDownMenu
 import com.dictionary.utils.UiEvent
 
 @Composable
 fun SettingsScreen(
+    theme: Theme,
     onPopBackStack: () -> Unit,
     onNavigate: (UiEvent.Navigate) -> Unit,
     navController: NavHostController,
@@ -57,7 +62,20 @@ fun SettingsScreen(
                 .padding(padding)
                 .wrapContentHeight()
         ) {
-            Text(text = "Hello there")
+            Row(
+                modifier = Modifier.padding(30.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(text = "Dark theme")
+                Switch(
+                    modifier = Modifier.offset{IntOffset(0, -40)},
+                    checked = viewModel.darkTheme.value,
+                    onCheckedChange = {
+                        theme.switch()
+                        viewModel.onEvent(SettingsEvent.OnChangeDarkTheme)
+                    }
+                )
+            }
         }
     }
 }

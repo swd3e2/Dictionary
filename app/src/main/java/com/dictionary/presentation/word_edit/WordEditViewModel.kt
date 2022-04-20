@@ -204,6 +204,9 @@ class WordEditViewModel @Inject constructor(
                 searchJob?.cancel()
                 showTranslationDialog.value = false
             }
+            WordEditEvent.GoBack -> viewModelScope.launch {
+                _eventFlow.emit(UiEvent.PopBackStack)
+            }
         }
     }
 }

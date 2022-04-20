@@ -58,13 +58,13 @@ fun Preview(viewModel: LearnWordsViewModel, onPopBackStack: () -> Unit) {
                                 text = word.term,
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = PrimaryTextColor
+                                color = MaterialTheme.colors.onSurface
                             )
                             Text(
                                 text = word.definition,
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = SecondaryTextColor,
+                                color = MaterialTheme.colors.onSurface,
                                 fontSize = 12.sp
                             )
                         }

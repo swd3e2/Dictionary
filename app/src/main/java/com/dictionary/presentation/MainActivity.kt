@@ -1,11 +1,12 @@
 package com.dictionary.presentation
 
+import android.app.Application
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.*
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavType
@@ -16,12 +17,15 @@ import androidx.navigation.navArgument
 import com.dictionary.presentation.cards_game.CardsGameScreen
 import com.dictionary.presentation.category_edit.CategoryEditScreen
 import com.dictionary.presentation.category_list.CategoryListScreen
+import com.dictionary.presentation.common.Theme
 import com.dictionary.presentation.common.lifecycle_observer.GetFileLifecycleObserver
 import com.dictionary.presentation.common.lifecycle_observer.GetImageLifecycleObserver
 import com.dictionary.presentation.learn_words.LearnWordsScreen
 import com.dictionary.presentation.search_words.SearchWordsScreen
 import com.dictionary.presentation.settings.SettingsScreen
 import com.dictionary.presentation.word_edit.WordEditScreen
+import com.dictionary.ui.theme.darkTheme
+import com.dictionary.ui.theme.lightTheme
 import com.dictionary.utils.Routes
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -40,22 +44,10 @@ class MainActivity : ComponentActivity() {
         lifecycle.addObserver(getImageObserver)
 
         setContent {
+            val theme = Theme(application)
+
             MaterialTheme(
-                colors = Colors(
-                    primary = Color(0xff617BF4),
-                    primaryVariant = Color(0xff3700b3),
-                    secondary = Color(0xff617BF4),
-                    secondaryVariant = Color(0xff3700b3),
-                    background = Color(0xffF5F8FE),
-                    surface = Color(0xffffffff),
-                    error = Color(0xffb00020),
-                    onPrimary = Color(0xffffffff),
-                    onSecondary = Color(0x00000000),
-                    onBackground = Color(0x00000000),
-                    onSurface = Color(0x00000000),
-                    onError = Color(0xffffffff),
-                    isLight = true
-                )
+                colors = if (theme.theme.collectAsState(false).value) darkTheme else lightTheme
             ) {
                 Surface(color = MaterialTheme.colors.background) {
                     val navController = rememberNavController()
@@ -144,6 +136,7 @@ class MainActivity : ComponentActivity() {
                             route = Routes.SETTINGS,
                         ) {
                             SettingsScreen(
+                                theme = theme,
                                 onPopBackStack = { navController.popBackStack() },
                                 navController = navController,
                                 onNavigate = { navController.navigate(it.route) }

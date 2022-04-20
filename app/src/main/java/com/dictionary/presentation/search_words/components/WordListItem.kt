@@ -46,10 +46,11 @@ fun WordListItem(
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, sizePx to 1)
 
-    Box(
+    Card(
         modifier = Modifier
             .padding(15.dp, 5.dp)
             .wrapContentSize(),
+        elevation = 2.dp
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -102,7 +103,7 @@ fun WordListItem(
                         color = MaterialTheme.colors.surface,
                         shape = MaterialTheme.shapes.medium
                     )
-//                    .clickable { onEvent(CategoryEditEvent.OnWordClick(word.id)) }
+                    .clickable { onEvent(SearchWordsEvent.OnWordClick(word.id)) }
                     .fillMaxSize(),
             ) {
                 Row(
@@ -126,20 +127,20 @@ fun WordListItem(
                             text = word.term,
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
-                            color = PrimaryTextColor
+                            color = MaterialTheme.colors.onSurface
                         )
                         Text(
                             text = word.definition,
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
-                            color = SecondaryTextColor,
+                            color = MaterialTheme.colors.onSurface,
                             fontSize = 12.sp
                         )
                         Text(
                             text = "Created: ${word.created}",
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
-                            color = SecondaryTextColor,
+                            color = MaterialTheme.colors.onSurface,
                             fontSize = 12.sp
                         )
                         if (word.firstLearned != null) {
@@ -147,7 +148,7 @@ fun WordListItem(
                                 text = "First learned: ${word.firstLearned}",
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = SecondaryTextColor,
+                                color = MaterialTheme.colors.onSurface,
                                 fontSize = 12.sp
                             )
                         }
@@ -156,7 +157,7 @@ fun WordListItem(
                                 text = "Last repeated: ${word.lastRepeated}",
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = SecondaryTextColor,
+                                color = MaterialTheme.colors.onSurface,
                                 fontSize = 12.sp
                             )
                         }
@@ -165,7 +166,7 @@ fun WordListItem(
                                 text = "Synonyms: ${word.synonyms}",
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = SecondaryTextColor,
+                                color = MaterialTheme.colors.onSurface,
                                 fontSize = 12.sp
                             )
                         }
@@ -174,7 +175,7 @@ fun WordListItem(
                                 text = "Antonyms: ${word.antonyms}",
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = SecondaryTextColor,
+                                color = MaterialTheme.colors.onSurface,
                                 fontSize = 12.sp
                             )
                         }
@@ -183,7 +184,7 @@ fun WordListItem(
                                 text = "Similar: ${word.similar}",
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = SecondaryTextColor,
+                                color = MaterialTheme.colors.onSurface,
                                 fontSize = 12.sp
                             )
                         }

@@ -77,8 +77,8 @@ fun CategoryListScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.onEvent(CategoryListEvent.OnShowAddCategoryDialog) },
-                contentColor = Color.White,
-                elevation = FloatingActionButtonDefaults.elevation(),
+                contentColor = MaterialTheme.colors.secondary,
+                backgroundColor = MaterialTheme.colors.surface,
                 shape = RoundedCornerShape(40)
             ) {
                 Icon(
@@ -117,7 +117,7 @@ fun CategoryListScreen(
                 items(categories.value) { category ->
                     CategoryListItem(category, viewModel::onEvent)
                 }
-                item{
+                item {
                     Spacer(modifier = Modifier.padding(25.dp))
                 }
             }
@@ -131,13 +131,20 @@ private fun Search(
     search: MutableState<String>,
     getFileLifecycleObserver: GetFileLifecycleObserver
 ) {
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .padding(0.dp, 10.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(0.dp, 10.dp)
+    ) {
         Row(
             modifier = Modifier.padding(15.dp)
-        ){
-            Text(text = "Categories", fontSize = 24.sp, color = SecondaryTextColor, fontWeight = FontWeight.Bold)
+        ) {
+            Text(
+                text = "Categories",
+                fontSize = 24.sp,
+                color = MaterialTheme.colors.onBackground,
+                fontWeight = FontWeight.Bold
+            )
         }
 
         Row(
@@ -202,7 +209,7 @@ private fun Title() {
     ) {
         Text(
             text = "Welcome home, Master",
-            color = PrimaryTextColor,
+            color = MaterialTheme.colors.onBackground,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
@@ -216,8 +223,13 @@ fun GameButtons(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp - 15.dp
     Row(
         modifier = Modifier.padding(15.dp, 15.dp, 15.dp, 5.dp)
-    ){
-        Text(text = "Games", fontSize = 24.sp, color = SecondaryTextColor, fontWeight = FontWeight.Bold)
+    ) {
+        Text(
+            text = "Games",
+            fontSize = 24.sp,
+            color = MaterialTheme.colors.onBackground,
+            fontWeight = FontWeight.Bold
+        )
     }
     Row(
         modifier = Modifier
@@ -232,7 +244,7 @@ fun GameButtons(
                 .clickable {
                     onEvent(CategoryListEvent.OnGoToLearnWords)
                 },
-            elevation = 0.dp
+            elevation = 2.dp
         ) {
             Column(
                 modifier = Modifier
@@ -255,7 +267,7 @@ fun GameButtons(
                 .clickable {
                     onEvent(CategoryListEvent.OnGoToCardsGame)
                 },
-            elevation = 0.dp
+            elevation = 2.dp
         ) {
             Column(
                 modifier = Modifier

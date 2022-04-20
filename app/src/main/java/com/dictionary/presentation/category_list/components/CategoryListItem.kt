@@ -28,12 +28,10 @@ fun CategoryListItem(
     category: CategoryWithWords,
     onEvent: (CategoryListEvent) -> Unit
 ) {
-    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-
     val countToRepeat = category.countWordsToRepeat()
     val countToLearn = category.countWordsToLearn()
 
-    Box(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(15.dp, 5.dp)
@@ -41,7 +39,8 @@ fun CategoryListItem(
                 color = MaterialTheme.colors.surface,
                 shape = MaterialTheme.shapes.medium
             )
-            .clickable { onEvent(CategoryListEvent.OnCategoryClick(category.category.id)) }
+            .clickable { onEvent(CategoryListEvent.OnCategoryClick(category.category.id)) },
+        elevation = 2.dp
     ) {
         Row(
             modifier = Modifier
@@ -69,7 +68,7 @@ fun CategoryListItem(
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
                             fontSize = 18.sp,
-                            color = PrimaryTextColor
+                            color = MaterialTheme.colors.onSurface
                         )
                         Text(
                             modifier = Modifier.padding(0.dp, 2.dp, 0.dp, 0.dp),
@@ -77,7 +76,7 @@ fun CategoryListItem(
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
                             fontSize = 12.sp,
-                            color = SecondaryTextColor
+                            color = MaterialTheme.colors.onSurface
                         )
                     }
                     Row(

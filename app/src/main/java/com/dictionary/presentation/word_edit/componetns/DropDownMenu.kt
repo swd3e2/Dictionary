@@ -17,10 +17,7 @@ import com.dictionary.presentation.word_edit.WordEditEvent
 
 @Composable
 fun DropDownMenu(
-    label: String,
-    onPopBackStack: () -> Unit,
-    menuExpanded: MutableState<Boolean>,
-    onEvent: (WordEditEvent) -> Unit
+    onEvent: (WordEditEvent) -> Unit,
 ) {
     Column {
         TopAppBar(backgroundColor = Color(0x00000000), elevation = 0.dp) {
@@ -29,7 +26,7 @@ fun DropDownMenu(
                 horizontalArrangement = Arrangement.Start,
             ) {
                 IconButton(
-                    onClick = { onPopBackStack() }
+                    onClick = { onEvent(WordEditEvent.GoBack) }
                 ) {
                     Icon(
                         Icons.Default.ArrowBack,

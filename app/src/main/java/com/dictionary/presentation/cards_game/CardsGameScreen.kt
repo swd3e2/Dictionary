@@ -133,7 +133,7 @@ private fun Progress(viewModel: CardsGameViewModel) {
                 letterSpacing = 3.sp,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Bold,
-                color = PrimaryTextColor
+                color = MaterialTheme.colors.onBackground
             )
         }
         Spacer(modifier = Modifier.height(10.dp))

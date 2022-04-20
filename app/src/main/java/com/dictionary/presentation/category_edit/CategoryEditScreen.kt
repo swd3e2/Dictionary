@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,11 +48,15 @@ fun CategoryEditScreen(
 
     val words = viewModel.wordsState.collectAsState(initial = emptyList())
     val scaffoldState = rememberScaffoldState()
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
             when (event) {
-                is UiEvent.Navigate -> onNavigate(event)
+                is UiEvent.Navigate -> {
+                    focusManager.clearFocus()
+                    onNavigate(event)
+                }
                 is UiEvent.ShowSnackbar -> {
                     scaffoldState.snackbarHostState.showSnackbar(
                         message = event.message
@@ -88,7 +93,8 @@ fun CategoryEditScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { viewModel.onEvent(CategoryEditEvent.OnAddWord) },
-                elevation = FloatingActionButtonDefaults.elevation(),
+                contentColor = MaterialTheme.colors.secondary,
+                backgroundColor = MaterialTheme.colors.surface,
                 shape = RoundedCornerShape(40)
             ) {
                 Icon(
@@ -203,7 +209,7 @@ fun Title(
                 Text(
                     text = category.name,
                     fontSize = 30.sp,
-                    color = PrimaryTextColor,
+                    color = MaterialTheme.colors.onBackground,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -212,7 +218,7 @@ fun Title(
             modifier = Modifier.padding(0.dp, 20.dp),
             text = "${wordsCount.value} terms",
             fontSize = 12.sp,
-            color = PrimaryTextColor,
+            color = MaterialTheme.colors.onBackground,
             fontWeight = FontWeight.Bold
         )
     }
@@ -237,7 +243,7 @@ fun GameButtons(
                 .clickable {
                     onEvent(CategoryEditEvent.OnLearnClick(category.id))
                 },
-            elevation = 0.dp
+            elevation = 2.dp
         ) {
             Column(
                 modifier = Modifier
@@ -260,7 +266,7 @@ fun GameButtons(
                 .clickable {
                     onEvent(CategoryEditEvent.OnGameClick(category.id))
                 },
-            elevation = 0.dp
+            elevation = 2.dp
         ) {
             Column(
                 modifier = Modifier

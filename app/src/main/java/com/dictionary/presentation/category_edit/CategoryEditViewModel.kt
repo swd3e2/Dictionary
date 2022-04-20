@@ -171,6 +171,7 @@ class CategoryEditViewModel @Inject constructor(
                 showSortDialog.value = false
             }
             is CategoryEditEvent.OnShowRenameDialog -> {
+                menuExpanded.value = false
                 showRenameDialog.value = true
             }
             is CategoryEditEvent.OnHideRenameDialog -> {

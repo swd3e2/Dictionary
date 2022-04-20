@@ -12,6 +12,7 @@ import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.WordRepository
 import com.dictionary.presentation.category_edit.CategoryEditEvent
+import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -108,6 +109,11 @@ class SearchWordsViewModel @Inject constructor(
                         _uiEvent.send(UiEvent.ShowSnackbar("Word `${it.term}` deleted"))
                     }
                     showWordDeleteDialog.value = false
+                }
+            }
+            is SearchWordsEvent.OnWordClick -> {
+                viewModelScope.launch {
+                    _uiEvent.send(UiEvent.Navigate(Routes.WORD_EDIT + "?id=${event.id}"))
                 }
             }
             is SearchWordsEvent.OnShowMoveWordToCategoryDialog -> {

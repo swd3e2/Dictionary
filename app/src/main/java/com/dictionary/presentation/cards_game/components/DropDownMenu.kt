@@ -14,7 +14,10 @@ fun DropDownMenu(
     onPopBackStack: () -> Unit,
 ) {
     Column {
-        TopAppBar(backgroundColor = Color(0x00000000), elevation = 0.dp){
+        TopAppBar(
+            backgroundColor = Color(0x00000000),
+            elevation = 0.dp
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start,
@@ -23,7 +26,11 @@ fun DropDownMenu(
                     onClick = {
                         onPopBackStack()
                     }) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colors.primary)
+                    Icon(
+                        Icons.Default.ArrowBack,
+                        contentDescription = "Back",
+                        tint = MaterialTheme.colors.primary
+                    )
                 }
             }
         }

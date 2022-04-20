@@ -16,6 +16,8 @@ sealed class SearchWordsEvent {
     data class OnMoveWordToCategory(val category: Category): SearchWordsEvent()
 
     data class OnShowWordDeleteDialog(val word: Word) : SearchWordsEvent()
+    data class OnWordClick(val id: Int) : SearchWordsEvent()
+
     object OnHideWordDeleteDialog : SearchWordsEvent()
     object OnDeleteWord: SearchWordsEvent()
 }

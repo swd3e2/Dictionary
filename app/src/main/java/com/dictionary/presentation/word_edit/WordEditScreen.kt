@@ -1,6 +1,7 @@
 package com.dictionary.presentation.word_edit
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -31,7 +32,7 @@ fun WordEditScreen(
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
-            when(event) {
+            when (event) {
                 is UiEvent.PopBackStack -> {
                     focusManager.clearFocus()
                     onPopBackStack()
@@ -52,14 +53,17 @@ fun WordEditScreen(
             .navigationBarsPadding()
             .systemBarsPadding(),
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                viewModel.onEvent(WordEditEvent.OnSaveClick)
-            }) {
+            FloatingActionButton(
+                onClick = { viewModel.onEvent(WordEditEvent.OnSaveClick) },
+                contentColor = MaterialTheme.colors.secondary,
+                backgroundColor = MaterialTheme.colors.surface,
+                shape = RoundedCornerShape(40)
+            ) {
                 Icon(imageVector = Icons.Default.Done, contentDescription = "Add")
             }
         },
         topBar = {
-            DropDownMenu(viewModel.word?.term ?: "", onPopBackStack, viewModel.menuExpanded, viewModel::onEvent)
+            DropDownMenu(viewModel::onEvent)
         }
     ) { padding ->
         Column(
@@ -81,7 +85,7 @@ fun WordEditScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(0.dp, 5.dp),
-                label = { Text(text = "Term")},
+                label = { Text(text = "Term") },
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
                 ),
@@ -105,7 +109,7 @@ fun WordEditScreen(
                         )
                     }
                 },
-                label = { Text(text = "Definition")},
+                label = { Text(text = "Definition") },
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
                 ),
@@ -116,7 +120,7 @@ fun WordEditScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(0.dp, 5.dp),
-                label = { Text(text = "Antonyms")},
+                label = { Text(text = "Antonyms") },
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
                 ),
@@ -127,7 +131,7 @@ fun WordEditScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(0.dp, 5.dp),
-                label = { Text(text = "Synonyms")},
+                label = { Text(text = "Synonyms") },
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
                 ),
@@ -138,7 +142,7 @@ fun WordEditScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(0.dp, 5.dp),
-                label = { Text(text = "Similar")},
+                label = { Text(text = "Similar") },
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
                 ),
@@ -149,7 +153,7 @@ fun WordEditScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(0.dp, 5.dp),
-                label = { Text(text = "Transcription")},
+                label = { Text(text = "Transcription") },
                 colors = TextFieldDefaults.textFieldColors(
                     backgroundColor = Color.Transparent,
                 ),

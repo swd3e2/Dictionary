@@ -66,9 +66,9 @@ fun Test(viewModel: LearnWordsViewModel) {
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
                             color = when (viewModel.testState.wordsState[suggestedWord.index]) {
-                                "error" -> Color.White
-                                "success" -> Color.White
-                                else -> PrimaryTextColor
+                                "error" -> MaterialTheme.colors.onError
+                                "success" -> MaterialTheme.colors.onError
+                                else -> MaterialTheme.colors.onSurface
                             }
                         )
                     }

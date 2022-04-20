@@ -11,6 +11,7 @@ sealed class WordEditEvent {
     object OnSaveClick: WordEditEvent()
     object OnMenuClick: WordEditEvent()
     object OnCloseMenu: WordEditEvent()
+    object GoBack: WordEditEvent()
     object OnShowTranslationDialog: WordEditEvent()
     object OnHideTranslationDialog: WordEditEvent()
     object OnApplyTranslation: WordEditEvent()
