@@ -1,4 +1,4 @@
-package com.dictionary.presentation.category_edit.components
+package com.dictionary.presentation.search_words.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,15 +12,16 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.dictionary.domain.entity.Category
 import com.dictionary.presentation.category_edit.CategoryEditEvent
+import com.dictionary.presentation.search_words.SearchWordsEvent
 
 @Composable
 fun MoveToCategoryDialog(
-    onEvent: (CategoryEditEvent) -> Unit,
+    onEvent: (SearchWordsEvent) -> Unit,
     categories: List<Category>
 ) {
     Dialog(
         onDismissRequest = {
-            onEvent(CategoryEditEvent.OnHideMoveToCategoryDialog)
+            onEvent(SearchWordsEvent.OnHideMoveWordToCategoryDialog)
         },
         content = {
             Box {
@@ -48,7 +49,7 @@ fun MoveToCategoryDialog(
                             Box(modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    onEvent(CategoryEditEvent.OnMoveWordToCategory(category))
+                                    onEvent(SearchWordsEvent.OnMoveWordToCategory(category))
                                 }
                             ) {
                                 Text(text = category.name, modifier = Modifier

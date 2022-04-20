@@ -17,13 +17,12 @@ import androidx.compose.ui.unit.sp
 import com.dictionary.presentation.learn_words.LearnWordsEvent
 import com.dictionary.presentation.learn_words.LearnWordsViewModel
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Write(viewModel: LearnWordsViewModel) {
     val focusManager = LocalFocusManager.current
 
     Column(
-        modifier = Modifier,
+        modifier = Modifier.imePadding(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         viewModel.writeState.currentWord.value?.let { word ->
@@ -53,7 +52,7 @@ fun Write(viewModel: LearnWordsViewModel) {
             }
             Spacer(Modifier.weight(1f))
             TextField(
-                modifier = Modifier.fillMaxWidth().padding(0.dp, 20.dp),
+                modifier = Modifier.fillMaxWidth().padding(0.dp, 0.dp),
                 label = { Text(text = "Definition")},
                 value = viewModel.writeState.definition.value,
                 onValueChange = { viewModel.writeState.definition.value = it },

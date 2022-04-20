@@ -27,7 +27,8 @@ fun CardsGameScreen(
         scaffoldState = scaffoldState,
         modifier = Modifier
             .fillMaxSize()
-            .padding(0.dp),
+            .navigationBarsPadding()
+            .systemBarsPadding(),
         topBar = {
             DropDownMenu(onPopBackStack)
         }

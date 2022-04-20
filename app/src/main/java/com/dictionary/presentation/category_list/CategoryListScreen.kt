@@ -69,7 +69,10 @@ fun CategoryListScreen(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .systemBarsPadding(),
         scaffoldState = scaffoldState,
         floatingActionButton = {
             FloatingActionButton(
@@ -93,6 +96,7 @@ fun CategoryListScreen(
             modifier = Modifier
                 .padding(padding)
                 .wrapContentHeight()
+                .imePadding()
         ) {
             if (viewModel.showAddCategoryDialog.value) {
                 AddCategoryDialog(

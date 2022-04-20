@@ -18,7 +18,10 @@ fun LearnWordsScreen(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .systemBarsPadding(),
         topBar = { DropDownMenu(onPopBackStack) }
     ) { padding ->
         when (viewModel.isLoading.value) {

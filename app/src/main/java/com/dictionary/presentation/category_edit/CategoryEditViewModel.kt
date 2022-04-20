@@ -32,19 +32,19 @@ class CategoryEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     application: Application
 ) : AndroidViewModel(application) {
+    private val _uiEvent = Channel<UiEvent>()
+    val uiEvent = _uiEvent.receiveAsFlow()
+
     var categoryName = mutableStateOf("")
         private set
+
     var categoryImage = mutableStateOf("")
         private set
 
     var showWordDeleteDialog = mutableStateOf(false)
         private set
-
     var showCategoryDeleteDialog = mutableStateOf(false)
         private set
-
-    private val _uiEvent = Channel<UiEvent>()
-    val uiEvent = _uiEvent.receiveAsFlow()
 
     var category: Category = Category(0, "")
         private set
@@ -62,10 +62,9 @@ class CategoryEditViewModel @Inject constructor(
         private set
 
     lateinit var categories: List<Category>
-
-    private var words = MutableStateFlow("")
     private var selectedWord: Word? = null
 
+    private var words = MutableStateFlow("")
     @OptIn(ExperimentalCoroutinesApi::class)
     var wordsState = words.flatMapLatest {
         if (it.isEmpty()) {
@@ -110,6 +109,7 @@ class CategoryEditViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     selectedWord?.let {
                         wordsRepository.delete(it.id)
+                        _uiEvent.send(UiEvent.ShowSnackbar("Word `${it.term}` deleted"))
                     }
                     showWordDeleteDialog.value = false
                 }
@@ -183,7 +183,7 @@ class CategoryEditViewModel @Inject constructor(
             is CategoryEditEvent.OnHideMoveToCategoryDialog -> {
                 showMoveToCategoryDialog.value = false
             }
-            is CategoryEditEvent.OnMoveToCategoryDialog -> {
+            is CategoryEditEvent.OnMoveWordToCategory -> {
                 viewModelScope.launch(Dispatchers.IO) {
                     wordsRepository.create(selectedWord!!.apply { category = event.category.id })
                 }

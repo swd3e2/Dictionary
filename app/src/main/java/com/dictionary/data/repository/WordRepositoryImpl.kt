@@ -17,6 +17,14 @@ class WordRepositoryImpl @Inject constructor(
         return dao.byCategoryLike(category, term)
     }
 
+    override fun list(): Flow<List<Word>> {
+        return dao.list()
+    }
+
+    override fun listLike(term: String): Flow<List<Word>> {
+        return dao.listLike(term)
+    }
+
     override suspend fun categoryWordsAsList(category: Int): List<Word> {
         return dao.byCategoryAsList(category)
     }

@@ -8,7 +8,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dictionary.domain.entity.Word
 import com.dictionary.presentation.category_edit.CategoryEditEvent
-import com.dictionary.presentation.common.DisabledInteractionSource
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
 import kotlinx.coroutines.launch

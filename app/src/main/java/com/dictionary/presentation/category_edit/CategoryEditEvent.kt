@@ -21,10 +21,10 @@ sealed class CategoryEditEvent {
 
     data class OnDropWordBucket(val word: Word): CategoryEditEvent()
     data class OnCategoryNameChange(var name: String) : CategoryEditEvent()
-    data class OnSortChange(var field: String, var direction: String) : CategoryEditEvent()
 
     object OnShowSortDialog: CategoryEditEvent()
     object OnHideSortDialog: CategoryEditEvent()
+    data class OnSortChange(var field: String, var direction: String) : CategoryEditEvent()
 
     object OnShowRenameDialog: CategoryEditEvent()
     object OnHideRenameDialog: CategoryEditEvent()
@@ -34,10 +34,9 @@ sealed class CategoryEditEvent {
 
     data class OnShowMoveToCategoryDialog(val word: Word): CategoryEditEvent()
     object OnHideMoveToCategoryDialog: CategoryEditEvent()
+    data class OnMoveWordToCategory(val category: Category): CategoryEditEvent()
 
     object OnAddWord : CategoryEditEvent()
-
-    data class OnMoveToCategoryDialog(val category: Category): CategoryEditEvent()
 
     object OnDeleteCategory: CategoryEditEvent()
     object OnShowDeleteCategoryDialog: CategoryEditEvent()

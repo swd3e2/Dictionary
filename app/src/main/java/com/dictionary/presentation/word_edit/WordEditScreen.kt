@@ -48,7 +48,9 @@ fun WordEditScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .systemBarsPadding(),
         floatingActionButton = {
             FloatingActionButton(onClick = {
                 viewModel.onEvent(WordEditEvent.OnSaveClick)

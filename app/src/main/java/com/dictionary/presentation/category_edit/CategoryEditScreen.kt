@@ -72,7 +72,9 @@ fun CategoryEditScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .systemBarsPadding(),
         topBar = {
             DropDownMenu(
                 onPopBackStack,

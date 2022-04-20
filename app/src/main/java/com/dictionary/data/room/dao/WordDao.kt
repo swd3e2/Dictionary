@@ -38,4 +38,10 @@ interface WordDao {
 
     @Query("select * from ${Word.TABLE_NAME}")
     fun asList(): List<Word>
+
+    @Query("select * from ${Word.TABLE_NAME} where term like '%' || :term || '%' or definition like '%' || :term || '%'")
+    fun listLike(term: String): Flow<List<Word>>
+
+    @Query("select * from ${Word.TABLE_NAME}")
+    fun list(): Flow<List<Word>>
 }

@@ -2,7 +2,6 @@ package com.dictionary.presentation.category_list.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,22 +9,16 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.dictionary.domain.entity.CategoryWithWords
 import com.dictionary.presentation.category_list.CategoryListEvent
-import com.dictionary.presentation.common.DisabledInteractionSource
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
 import kotlin.math.roundToInt
