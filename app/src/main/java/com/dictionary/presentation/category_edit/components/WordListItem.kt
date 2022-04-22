@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -11,6 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -18,9 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dictionary.domain.entity.Word
 import com.dictionary.presentation.category_edit.CategoryEditEvent
-import com.dictionary.ui.theme.PrimaryTextColor
-import com.dictionary.ui.theme.SecondaryTextColor
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -36,9 +41,10 @@ fun WordListItem(
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, sizePx to 1)
 
-    Card(
-        modifier = Modifier.padding(15.dp, 5.dp).wrapContentSize(),
-        elevation = 2.dp
+    val dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+
+    Box(
+        modifier = Modifier.padding(15.dp, 5.dp).height(IntrinsicSize.Min)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -71,94 +77,136 @@ fun WordListItem(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .offset {
-                    IntOffset(
-                        swipeAbleState.offset.value.roundToInt(), 0
-                    )
-                }
+                .offset { IntOffset( swipeAbleState.offset.value.roundToInt(), 0 ) }
                 .swipeable(
                     state = swipeAbleState,
                     anchors = anchors,
-                    thresholds = { _, _ ->
-                        FractionalThreshold(0.3f)
-                    },
+                    thresholds = { _, _ -> FractionalThreshold(0.3f) },
                     orientation = Orientation.Horizontal
                 )
         ) {
-            Box(
+            Card(
                 Modifier
-                    .background(color = MaterialTheme.colors.surface, shape = MaterialTheme.shapes.medium)
+                    .background(
+                        color = MaterialTheme.colors.surface,
+                        shape = MaterialTheme.shapes.medium
+                    )
                     .clickable { onEvent(CategoryEditEvent.OnWordClick(word.id)) }
                     .fillMaxSize(),
+                elevation = 2.dp
             ) {
-                Column (modifier = Modifier.padding(10.dp)) {
-                    Text(
-                        text = word.term,
-                        style = MaterialTheme.typography.body1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colors.onSurface
-                    )
-                    Text(
-                        text = word.definition,
-                        style = MaterialTheme.typography.body1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colors.onSurface,
-                        fontSize = 12.sp
-                    )
-                    Text(
-                        text = "Created: ${word.created}",
-                        style = MaterialTheme.typography.body1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colors.onSurface,
-                        fontSize = 12.sp
-                    )
-                    if (word.firstLearned != null) {
-                        Text(
-                            text = "First learned: ${word.firstLearned}",
-                            style = MaterialTheme.typography.body1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = 12.sp
+                Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+                    if (word.bucket > 0) {
+                        VerticalProgress(
+                            modifier = Modifier.fillMaxHeight().width(10.dp),
+                            color = MaterialTheme.colors.primary,
+                            progress = word.bucket.toFloat() / 8f
+                        )
+                    } else {
+                        VerticalProgress(
+                            modifier = Modifier.fillMaxHeight().width(10.dp),
+                            color = if (MaterialTheme.colors.isLight) Color(0xFF3EAF20) else Color(0xFF81B977),
+                            progress = 1f
                         )
                     }
-                    if (word.lastRepeated != null) {
+                    Column (modifier = Modifier.padding(10.dp)) {
                         Text(
-                            text = "Last repeated: ${word.lastRepeated}",
+                            text = word.term,
+                            style = MaterialTheme.typography.body1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colors.primary
+                        )
+                        Text(
+                            text = word.definition,
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colors.onSurface,
                             fontSize = 12.sp
                         )
-                    }
-                    if (word.synonyms.isNotEmpty()) {
                         Text(
-                            text = "Synonyms: ${word.synonyms}",
+                            text = "Created: ${LocalDateTime.ofInstant(word.created.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colors.onSurface,
                             fontSize = 12.sp
                         )
-                    }
-                    if (word.antonyms.isNotEmpty()) {
-                        Text(
-                            text = "Antonyms: ${word.antonyms}",
-                            style = MaterialTheme.typography.body1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = 12.sp
-                        )
-                    }
-                    if (word.similar.isNotEmpty()) {
-                        Text(
-                            text = "Similar: ${word.similar}",
-                            style = MaterialTheme.typography.body1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = 12.sp
-                        )
+                        if (word.firstLearned != null) {
+                            Text(
+                                text = "First learned: ${LocalDateTime.ofInstant(word.firstLearned!!.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = 12.sp
+                            )
+                        }
+                        if (word.lastRepeated != null) {
+                            Text(
+                                text = "Last repeated: ${LocalDateTime.ofInstant(word.lastRepeated!!.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = 12.sp
+                            )
+                        }
+                        if (word.synonyms.isNotEmpty()) {
+                            Text(
+                                text = "Synonyms: ${word.synonyms}",
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = 12.sp
+                            )
+                        }
+                        if (word.antonyms.isNotEmpty()) {
+                            Text(
+                                text = "Antonyms: ${word.antonyms}",
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = 12.sp
+                            )
+                        }
+                        if (word.similar.isNotEmpty()) {
+                            Text(
+                                text = "Similar: ${word.similar}",
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = 12.sp
+                            )
+                        }
                     }
                 }
             }
         }
+    }
+}
+
+
+@Composable
+fun VerticalProgress(
+    progress: Float,
+    modifier: Modifier = Modifier,
+    color: Color
+) {
+    Column(
+        modifier = modifier
+            .width(16.dp)
+    ) {
+        if (progress < 1f) {
+            Box(
+                modifier = Modifier
+                    .weight((if ((1 - progress) == 0f) 0.0001 else 1 - progress) as Float)
+                    .fillMaxWidth()
+            )
+        }
+        Box(
+            modifier = Modifier
+                .weight(progress)
+                .fillMaxWidth()
+                .background(
+                    color = color
+                )
+        )
     }
 }

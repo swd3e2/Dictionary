@@ -1,5 +1,7 @@
 package com.dictionary.presentation.cards_game
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,6 +25,16 @@ fun CardsGameScreen(
     viewModel: CardsGameViewModel = hiltViewModel()
 ) {
     val scaffoldState = rememberScaffoldState()
+    val progress = remember { Animatable(0f) }
+    LaunchedEffect(key1 = viewModel.learnProgress.value) {
+        progress.animateTo(
+            targetValue = viewModel.learnProgress.value,
+            animationSpec = tween(
+                durationMillis = 150,
+                delayMillis = 0
+            )
+        )
+    }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -40,8 +53,22 @@ fun CardsGameScreen(
                 }
             }
             false -> {
-                if (viewModel.currentWordIndex.value < viewModel.countOfWords.value) {
-                    Progress(viewModel)
+                if (viewModel.countOfWords.value != 0) {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            LinearProgressIndicator(
+                                modifier = Modifier
+                                    .height(15.dp)
+                                    .clip(RoundedCornerShape(30f)),
+                                progress = progress.value
+                            )
+                        }
+                    }
                 }
                 Box(
                     modifier = Modifier
@@ -115,33 +142,6 @@ private fun Counter(viewModel: CardsGameViewModel) {
                 text = viewModel.learnedWordsCount.value.toString(),
                 color = Color(0xffffffff)
             )
-        }
-    }
-}
-
-@Composable
-private fun Progress(viewModel: CardsGameViewModel) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = "${viewModel.currentWordIndex.value} / ${viewModel.countOfWords.value}",
-                letterSpacing = 3.sp,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colors.onBackground
-            )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            LinearProgressIndicator(progress = viewModel.learnProgress.value)
         }
     }
 }

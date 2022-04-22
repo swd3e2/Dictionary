@@ -97,23 +97,6 @@ class CardsGameViewModel @Inject constructor(
         }
     }
 
-    /**
-    is LearnWordsEvent.OnGoToCards -> {
-    cardsState.init(currentWords)
-    cardsState.selectNext()
-    }
-    is LearnWordsEvent.OnCardLeftSwipe -> {
-    cardsState.dontKnowWord()
-    }
-    is LearnWordsEvent.OnCardRightSwipe -> {
-    if (!cardsState.hasMoreWords()) {
-    onEvent(LearnWordsEvent.OnGoToWrite)
-    return
-    }
-    cardsState.selectNext()
-    }
-     */
-
     private fun updateNextWord() {
         wordsToLearn.remove(currentWord.value)
         currentWord.value = if (!wordsToLearn.isEmpty()) wordsToLearn.first() else null

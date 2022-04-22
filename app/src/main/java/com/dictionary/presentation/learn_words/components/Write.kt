@@ -3,6 +3,7 @@ package com.dictionary.presentation.learn_words.components
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -41,10 +42,20 @@ fun Write(viewModel: LearnWordsViewModel) {
                         Column(
                             modifier = Modifier.padding(5.dp, 15.dp)
                         ) {
-                            Text(text = "Your answer", color = Color(0xFFC50A0A), fontSize = 12.sp)
+                            Text(
+                                text = "Your answer",
+                                color = MaterialTheme.colors.error,
+                                fontSize = 12.sp
+                            )
                             Text(text = viewModel.writeState.hasDefinition.value)
                             Spacer(modifier = Modifier.height(10.dp))
-                            Text(text = "Right answer", color = Color(0xFF10AC2A), fontSize = 12.sp)
+                            Text(
+                                text = "Right answer",
+                                color = if (MaterialTheme.colors.isLight)
+                                    Color(0xFF61CF54)
+                                else Color(0xFF81B977),
+                                fontSize = 12.sp
+                            )
                             Text(text = viewModel.writeState.wantDefinition.value)
                         }
                     }
@@ -52,8 +63,10 @@ fun Write(viewModel: LearnWordsViewModel) {
             }
             Spacer(Modifier.weight(1f))
             TextField(
-                modifier = Modifier.fillMaxWidth().padding(0.dp, 0.dp),
-                label = { Text(text = "Definition")},
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 0.dp),
+                label = { Text(text = "Definition") },
                 value = viewModel.writeState.definition.value,
                 onValueChange = { viewModel.writeState.definition.value = it },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),

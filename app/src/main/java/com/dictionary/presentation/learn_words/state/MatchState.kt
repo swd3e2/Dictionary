@@ -93,6 +93,10 @@ class MatchState {
         index.forEach { wordsState[it] = "success" }
     }
 
+    fun setHideState(vararg index: Int) {
+        index.forEach { wordsState[it] = "hide" }
+    }
+
     fun setSelectedState(vararg index: Int) {
         index.forEach { wordsState[it] = "selected" }
     }

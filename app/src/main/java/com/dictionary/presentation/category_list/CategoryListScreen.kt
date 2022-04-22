@@ -118,7 +118,7 @@ fun CategoryListScreen(
                     CategoryListItem(category, viewModel::onEvent)
                 }
                 item {
-                    Spacer(modifier = Modifier.padding(25.dp))
+                    Spacer(modifier = Modifier.padding(15.dp))
                 }
             }
         }
@@ -244,7 +244,7 @@ fun GameButtons(
                 .clickable {
                     onEvent(CategoryListEvent.OnGoToLearnWords)
                 },
-            elevation = 2.dp
+            elevation = 4.dp
         ) {
             Column(
                 modifier = Modifier
@@ -267,7 +267,7 @@ fun GameButtons(
                 .clickable {
                     onEvent(CategoryListEvent.OnGoToCardsGame)
                 },
-            elevation = 2.dp
+            elevation = 4.dp
         ) {
             Column(
                 modifier = Modifier

@@ -87,12 +87,15 @@ fun TranslationDialog(
                                                 modifier = Modifier
                                                     .padding(2.dp)
                                                     .background(
-                                                        color = if (!selectedTranslations.contains(
-                                                                trans
-                                                            )
-                                                        )
-                                                            Color(0xffE1ECFB)
-                                                        else Color(0xFF87AAD5),
+                                                        color = if (MaterialTheme.colors.isLight) {
+                                                            if (!selectedTranslations.contains(trans))
+                                                                Color(0xffE1ECFB)
+                                                            else MaterialTheme.colors.primary
+                                                        } else {
+                                                            if (!selectedTranslations.contains(trans))
+                                                                Color(0xFF6E6D79)
+                                                            else MaterialTheme.colors.primary
+                                                        },
                                                         shape = RoundedCornerShape(50)
                                                     )
                                                     .clickable(
@@ -110,6 +113,9 @@ fun TranslationDialog(
                                                 Text(
                                                     modifier = Modifier.padding(8.dp, 3.dp),
                                                     text = trans,
+                                                    color = if (!selectedTranslations.contains(trans))
+                                                        MaterialTheme.colors.onBackground
+                                                    else MaterialTheme.colors.onPrimary,
                                                     maxLines = 1
                                                 )
                                             }
@@ -118,7 +124,10 @@ fun TranslationDialog(
                                 }
                             }
                             Spacer(modifier = Modifier.padding(10.dp))
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
                                 Button(onClick = { onEvent(WordEditEvent.OnHideTranslationDialog) }) {
                                     Text(text = "Cancel")
                                 }

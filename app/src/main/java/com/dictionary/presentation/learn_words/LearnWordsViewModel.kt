@@ -23,7 +23,7 @@ import javax.inject.Inject
 class LearnWordsViewModel @Inject constructor(
     private val wordsRepository: WordRepository,
     savedStateHandle: SavedStateHandle,
-): ViewModel() {
+) : ViewModel() {
 
     val wordsToLearn = mutableListOf<Word>()
     val currentStep = mutableStateOf(1)
@@ -32,10 +32,15 @@ class LearnWordsViewModel @Inject constructor(
     var isLoading = mutableStateOf(true)
         private set
 
+    var learnProgress = mutableStateOf(0f)
+        private set
+
     val matchState = MatchState()
     val testState = TestState()
     val cardsState = CardsState()
     val writeState = WriteState()
+
+    var lastErrorWordId = 0
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
@@ -85,13 +90,16 @@ class LearnWordsViewModel @Inject constructor(
                         }
                     }
                     is MatchState.State.MatchRight -> {
+                        addProgress()
                         val first = state.first
                         val second = state.second
 
                         matchState.setSuccessState(first.index, second.index)
-                        if (matchState.canGoNextGroup()) {
-                            viewModelScope.launch {
-                                delay(300)
+
+                        viewModelScope.launch {
+                            delay(100)
+                            matchState.setHideState(first.index, second.index)
+                            if (matchState.canGoNextGroup()) {
                                 matchState.resetSuccessCount()
 
                                 if (!matchState.selectNextGroup()) {
@@ -111,18 +119,21 @@ class LearnWordsViewModel @Inject constructor(
                     is TestState.State.SelectRight -> {
                         testState.setSuccessState(event.selected.index)
                         viewModelScope.launch {
-                            delay(300)
+                            delay(400)
                             testState.selectNext()
                         }
+                        addProgress()
                     }
                     is TestState.State.SelectWrong -> {
                         testState.setErrorState(event.selected.index)
                         viewModelScope.launch {
-                            delay(400)
+                            delay(200)
                             testState.setDeselectedState(event.selected.index)
                         }
+                        lastErrorWordId = event.selected.word.id
                     }
                     is TestState.State.GameEnd -> {
+                        addProgress()
                         onEvent(LearnWordsEvent.OnGoToCards)
                         return
                     }
@@ -137,6 +148,7 @@ class LearnWordsViewModel @Inject constructor(
                 cardsState.selectNext()
             }
             is LearnWordsEvent.OnCardRightSwipe -> {
+                addProgress()
                 if (cardsState.noMoreWords()) {
                     onEvent(LearnWordsEvent.OnGoToWrite)
                     return
@@ -149,12 +161,19 @@ class LearnWordsViewModel @Inject constructor(
             }
             is LearnWordsEvent.OnWriteTryDefinition -> {
                 val guessedRight = writeState.tryGuess()
-                viewModelScope.launch(Dispatchers.IO) {
-                    wordsRepository.create(writeState.currentWord.value!!.apply {
-                        bucket = 1
-                        firstLearned = Date()
-                    })
+
+                if (guessedRight) {
+                    viewModelScope.launch(Dispatchers.IO) {
+                        wordsRepository.create(writeState.currentWord.value!!.apply {
+                            bucket = 1
+                            firstLearned = Date()
+                        })
+                    }
+                    addProgress()
+                } else {
+                    lastErrorWordId = 1
                 }
+
                 if (guessedRight && !writeState.selectNext()) {
                     onEvent(LearnWordsEvent.OnGoToDone)
                     return
@@ -166,10 +185,19 @@ class LearnWordsViewModel @Inject constructor(
             is LearnWordsEvent.OnStartNew -> {
                 currentWords.clear()
                 val currentWordsToLearn = wordsToLearn.take(18)
+                learnProgress.value = 0f
                 wordsToLearn.removeAll(currentWordsToLearn)
                 currentWords.addAll(currentWordsToLearn)
                 currentStep.value = 1
             }
         }
+    }
+
+    private fun addProgress() {
+        if (lastErrorWordId != 0) {
+            lastErrorWordId = 0
+            return
+        }
+        learnProgress.value += 100f / currentWords.count() / 4f / 100f
     }
 }

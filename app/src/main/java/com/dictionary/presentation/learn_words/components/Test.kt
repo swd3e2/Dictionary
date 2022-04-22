@@ -53,8 +53,8 @@ fun Test(viewModel: LearnWordsViewModel) {
                             .background(
                                 color = when (viewModel.testState.wordsState[suggestedWord.index]) {
                                     "selected" -> MaterialTheme.colors.primary
-                                    "error" -> Color(0xFFD53F3F)
-                                    "success" -> Color(0xFF61CF54)
+                                    "error" -> MaterialTheme.colors.error
+                                    "success" -> if (MaterialTheme.colors.isLight) Color(0xFF61CF54) else Color(0xFF81B977)
                                     else -> MaterialTheme.colors.surface
                                 }
                             ),

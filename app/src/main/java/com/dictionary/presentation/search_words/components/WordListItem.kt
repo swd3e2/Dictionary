@@ -30,6 +30,9 @@ import com.dictionary.presentation.search_words.SearchWordsEvent
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -45,12 +48,12 @@ fun WordListItem(
     val swipeAbleState = SwipeableState(initialValue = 0)
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, sizePx to 1)
+    val dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
 
-    Card(
+    Box(
         modifier = Modifier
             .padding(15.dp, 5.dp)
-            .wrapContentSize(),
-        elevation = 2.dp
+            .wrapContentSize()
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -97,7 +100,7 @@ fun WordListItem(
                     orientation = Orientation.Horizontal
                 )
         ) {
-            Box(
+            Card(
                 Modifier
                     .background(
                         color = MaterialTheme.colors.surface,
@@ -105,29 +108,32 @@ fun WordListItem(
                     )
                     .clickable { onEvent(SearchWordsEvent.OnWordClick(word.id)) }
                     .fillMaxSize(),
+                elevation = 2.dp
             ) {
                 Row(
-                    modifier = Modifier.padding(10.dp)
+                    modifier = Modifier.padding(10.dp).height(IntrinsicSize.Max),
                 ){
-                    if (images.containsKey(word.category)) {
-                        Image(
-                            modifier = Modifier.size(50.dp).clip(RoundedCornerShape(30)),
-                            bitmap = images[word.category]!!,
-                            contentDescription = ""
-                        )
-                    } else {
-                        Image(
-                            modifier = Modifier.size(50.dp).clip(RoundedCornerShape(30)),
-                            painter = painterResource(R.drawable.placeholder),
-                            contentDescription = ""
-                        )
+                    Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        if (images.containsKey(word.category)) {
+                            Image(
+                                modifier = Modifier.size(50.dp).clip(RoundedCornerShape(30)),
+                                bitmap = images[word.category]!!,
+                                contentDescription = ""
+                            )
+                        } else {
+                            Image(
+                                modifier = Modifier.size(50.dp).clip(RoundedCornerShape(30)),
+                                painter = painterResource(R.drawable.placeholder),
+                                contentDescription = ""
+                            )
+                        }
                     }
                     Column(Modifier.padding(10.dp, 0.dp)) {
                         Text(
                             text = word.term,
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colors.onSurface
+                            color = MaterialTheme.colors.primary
                         )
                         Text(
                             text = word.definition,
@@ -137,7 +143,7 @@ fun WordListItem(
                             fontSize = 12.sp
                         )
                         Text(
-                            text = "Created: ${word.created}",
+                            text = "Created: ${LocalDateTime.ofInstant(word.created.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
                             style = MaterialTheme.typography.body1,
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colors.onSurface,
@@ -145,7 +151,7 @@ fun WordListItem(
                         )
                         if (word.firstLearned != null) {
                             Text(
-                                text = "First learned: ${word.firstLearned}",
+                                text = "First learned: ${LocalDateTime.ofInstant(word.firstLearned!!.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
                                 color = MaterialTheme.colors.onSurface,
@@ -154,7 +160,7 @@ fun WordListItem(
                         }
                         if (word.lastRepeated != null) {
                             Text(
-                                text = "Last repeated: ${word.lastRepeated}",
+                                text = "Last repeated: ${LocalDateTime.ofInstant(word.lastRepeated!!.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
                                 color = MaterialTheme.colors.onSurface,

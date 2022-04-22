@@ -35,6 +35,14 @@ import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
+import java.sql.Date
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun CategoryEditScreen(
@@ -159,7 +167,7 @@ fun CategoryEditScreen(
                     WordListItem(word, viewModel::onEvent, canMoveWordToCategory = viewModel.categories.isNotEmpty())
                 }
             }
-            item() {
+            item {
                 Spacer(modifier = Modifier.padding(15.dp))
             }
         }
@@ -243,7 +251,7 @@ fun GameButtons(
                 .clickable {
                     onEvent(CategoryEditEvent.OnLearnClick(category.id))
                 },
-            elevation = 2.dp
+            elevation = 4.dp
         ) {
             Column(
                 modifier = Modifier
@@ -266,7 +274,7 @@ fun GameButtons(
                 .clickable {
                     onEvent(CategoryEditEvent.OnGameClick(category.id))
                 },
-            elevation = 2.dp
+            elevation = 4.dp
         ) {
             Column(
                 modifier = Modifier

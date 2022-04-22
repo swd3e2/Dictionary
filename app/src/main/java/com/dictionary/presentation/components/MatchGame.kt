@@ -45,7 +45,7 @@ fun MatchGame(
                     .height(screenHeight / 4 - padding.calculateTopPadding() - 20.dp)
             ) {
                 AnimatedVisibility(
-                    visible = stateMap[word.index] != "success",
+                    visible = stateMap[word.index] != "hide",
                     enter = fadeIn(),
                     exit = fadeOut()
                 ) {
@@ -59,13 +59,19 @@ fun MatchGame(
                             modifier = Modifier
                                 .background(
                                     color = when (stateMap[word.index]) {
-                                        "selected" -> MaterialTheme.colors.primary
-                                        "error" -> Color(0xFFD53F3F)
-                                        "success" -> Color(0xFF61CF54)
+                                        "selected" -> MaterialTheme.colors.secondary
+                                        "error" -> MaterialTheme.colors.error
+                                        "success" -> if (MaterialTheme.colors.isLight) Color(0xFF61CF54) else Color(0xFF81B977)
                                         else -> {
-                                            if (totalCount > word.index) Color(0xFFEFF1FC) else Color(
-                                                0xFFECF5F1
-                                            )
+                                            if (MaterialTheme.colors.isLight) {
+                                                if (totalCount > word.index)
+                                                    Color(0xFFD1D7FA)
+                                                else Color(0xFFC8ECDC)
+                                            } else {
+                                                if (totalCount > word.index)
+                                                    Color(0xFF59597A)
+                                                else Color(0xFF5C7467)
+                                            }
                                         }
                                     }
                                 ),
@@ -75,10 +81,10 @@ fun MatchGame(
                                 text = if (totalCount > word.index) word.word.term else word.word.definition,
                                 textAlign = TextAlign.Center,
                                 color = when (stateMap[word.index]) {
-                                    "selected" -> Color.White
-                                    "error" -> Color.White
-                                    "success" -> Color.White
-                                    else -> PrimaryTextColor
+                                    "selected" -> MaterialTheme.colors.onSecondary
+                                    "error" -> MaterialTheme.colors.onError
+                                    "success" -> MaterialTheme.colors.onSecondary
+                                    else -> MaterialTheme.colors.onSecondary
                                 }
                             )
                         }
