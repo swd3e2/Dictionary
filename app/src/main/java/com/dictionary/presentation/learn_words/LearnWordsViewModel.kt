@@ -167,6 +167,7 @@ class LearnWordsViewModel @Inject constructor(
                         wordsRepository.create(writeState.currentWord.value!!.apply {
                             bucket = 1
                             firstLearned = Date()
+                            lastRepeated = Date()
                         })
                     }
                     addProgress()

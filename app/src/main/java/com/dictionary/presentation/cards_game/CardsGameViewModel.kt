@@ -69,10 +69,12 @@ class CardsGameViewModel @Inject constructor(
         when (event) {
             is CardsGameEvent.WordLearned -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordsRepository.update(event.word.apply {
-                        lastRepeated = Date()
-                        bucket++
-                    })
+                    if (!forgottenWords.contains(event.word.id)) {
+                        wordsRepository.update(event.word.apply {
+                            lastRepeated = Date()
+                            bucket++
+                        })
+                    }
 
                     updateNextWord()
                     updateProgress()

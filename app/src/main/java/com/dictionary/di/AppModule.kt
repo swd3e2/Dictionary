@@ -2,6 +2,7 @@ package com.dictionary.di
 
 import android.app.Application
 import androidx.room.Room
+import androidx.room.RoomDatabase
 import com.dictionary.common.Constants
 import com.dictionary.data.retrofit.YandexTranslateApi
 import com.dictionary.data.repository.CategoryRepositoryImpl
@@ -17,6 +18,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.Executors
 import javax.inject.Singleton
 
 @Module
@@ -44,7 +46,9 @@ object AppModule {
     fun provideDatabase(app: Application): Database {
         return Room.databaseBuilder(
             app, Database::class.java, "dictionary"
-        ).build()
+        ).setQueryCallback({ sqlQuery, bindArgs ->
+            println("SQL Query: $sqlQuery SQL Args: $bindArgs")
+        }, Executors.newSingleThreadExecutor()).build()
     }
 
 

@@ -15,8 +15,7 @@ fun Match(
         MatchGame(
             words = viewModel.matchState.currentWordsGroup,
             onItemClick = { viewModel.onEvent(LearnWordsEvent.OnMatchSelect(it)) },
-            stateMap = viewModel.matchState.wordsState,
-            totalCount = viewModel.matchState.totalCountWordsCount
+            stateMap = viewModel.matchState.wordsState
         )
     }
 }

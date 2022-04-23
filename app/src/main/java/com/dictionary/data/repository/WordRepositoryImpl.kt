@@ -13,8 +13,32 @@ class WordRepositoryImpl @Inject constructor(
         return dao.byCategory(category)
     }
 
+    override fun categoryWordsSortByTerm(id: Int, asc: Boolean): Flow<List<Word>> {
+        return dao.byCategorySortByTerm(id, asc)
+    }
+
+    override fun categoryWordsSortByCreated(id: Int, asc: Boolean): Flow<List<Word>> {
+        return dao.byCategorySortByCreated(id, asc)
+    }
+
+    override fun categoryWordsSortByLastRepeated(id: Int, asc: Boolean): Flow<List<Word>> {
+        return dao.byCategorySortByLastRepeated(id, asc)
+    }
+
     override fun categoryWordsLike(category: Int, term: String): Flow<List<Word>> {
         return dao.byCategoryLike(category, term)
+    }
+
+    override fun categoryWordsLikeSortByTerm(id: Int, search: String, asc: Boolean): Flow<List<Word>> {
+        return dao.byCategoryLikeSortByTerm(id, search, asc)
+    }
+
+    override fun categoryWordsLikeSortByCreated(id: Int, search: String, asc: Boolean): Flow<List<Word>> {
+        return dao.byCategoryLikeSortByCreated(id, search, asc)
+    }
+
+    override fun categoryWordsLikeSortByLastRepeated(id: Int, search: String, asc: Boolean): Flow<List<Word>> {
+        return dao.byCategoryLikeSortByLastRepeated(id, search, asc)
     }
 
     override fun list(): Flow<List<Word>> {
@@ -57,7 +81,7 @@ class WordRepositoryImpl @Inject constructor(
         dao.update(word)
     }
 
-    override suspend fun exists(term: String): Boolean {
-        return dao.exists(term)
+    override suspend fun category(term: String): String? {
+        return dao.category(term)
     }
 }

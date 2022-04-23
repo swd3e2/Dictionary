@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -34,11 +35,13 @@ fun Test(viewModel: LearnWordsViewModel) {
                 )
             }
             Column(
-                modifier = Modifier.fillMaxSize().padding(0.dp, 0.dp, 0.dp, 25.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(0.dp, 0.dp, 0.dp, 25.dp),
                 verticalArrangement = Arrangement.Bottom
             ) {
                 for (suggestedWord in wordWithSuggest.suggested) {
-                    Box(
+                    Card(
                         modifier = Modifier
                             .padding(15.dp, 5.dp)
                             .fillMaxWidth()
@@ -49,28 +52,33 @@ fun Test(viewModel: LearnWordsViewModel) {
                                         suggestedWord
                                     )
                                 )
-                            }
-                            .background(
-                                color = when (viewModel.testState.wordsState[suggestedWord.index]) {
-                                    "selected" -> MaterialTheme.colors.primary
-                                    "error" -> MaterialTheme.colors.error
-                                    "success" -> if (MaterialTheme.colors.isLight) Color(0xFF61CF54) else Color(0xFF81B977)
-                                    else -> MaterialTheme.colors.surface
-                                }
-                            ),
-                        contentAlignment = Alignment.CenterStart
+                            },
+                        backgroundColor = when (viewModel.testState.wordsState[suggestedWord.index]) {
+                            "selected" -> MaterialTheme.colors.primary
+                            "error" -> MaterialTheme.colors.error
+                            "success" -> if (MaterialTheme.colors.isLight) Color(0xFF61CF54) else Color(
+                                0xFF81B977
+                            )
+                            else -> MaterialTheme.colors.surface
+                        },
+                        elevation = 2.dp,
                     ) {
-                        Text(
-                            modifier = Modifier.padding(15.dp),
-                            text = suggestedWord.word.definition,
-                            style = MaterialTheme.typography.body1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = when (viewModel.testState.wordsState[suggestedWord.index]) {
-                                "error" -> MaterialTheme.colors.onError
-                                "success" -> MaterialTheme.colors.onError
-                                else -> MaterialTheme.colors.onSurface
-                            }
-                        )
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterStart
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(15.dp),
+                                text = suggestedWord.word.definition,
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = when (viewModel.testState.wordsState[suggestedWord.index]) {
+                                    "error" -> MaterialTheme.colors.onError
+                                    "success" -> MaterialTheme.colors.onError
+                                    else -> MaterialTheme.colors.onSurface
+                                }
+                            )
+                        }
                     }
                 }
             }

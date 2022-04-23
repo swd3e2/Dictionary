@@ -15,4 +15,11 @@ sealed class WordEditEvent {
     object OnShowTranslationDialog: WordEditEvent()
     object OnHideTranslationDialog: WordEditEvent()
     object OnApplyTranslation: WordEditEvent()
+
+    object OnEdit: WordEditEvent()
+    object OnView: WordEditEvent()
+
+    object OnHideWordDeleteDialog : WordEditEvent()
+    object OnShowWordDeleteDialog : WordEditEvent()
+    object OnDeleteWord : WordEditEvent()
 }

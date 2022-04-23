@@ -15,4 +15,7 @@ sealed class CategoryListEvent {
     data class OnImportFile(val uri: Uri): CategoryListEvent()
     object OnExportFile: CategoryListEvent()
     data class OnSearchChange(val search: String) : CategoryListEvent()
+    data class OnShowDeleteCategoryDialog(val category: CategoryWithWords) : CategoryListEvent()
+    object OnHideDeleteCategoryDialog: CategoryListEvent()
+    object OnDeleteCategory: CategoryListEvent()
 }

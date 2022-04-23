@@ -12,22 +12,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.dictionary.presentation.category_list.components.AddCategoryDialog
 import com.dictionary.presentation.category_list.components.CategoryListItem
 import com.dictionary.presentation.common.lifecycle_observer.GetFileLifecycleObserver
 import com.dictionary.presentation.components.BottomBar
-import com.dictionary.ui.theme.PrimaryTextColor
-import com.dictionary.ui.theme.SecondaryTextColor
+import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.utils.UiEvent
-import com.google.accompanist.flowlayout.FlowRow
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -92,6 +90,13 @@ fun CategoryListScreen(
             BottomBar(navController)
         }
     ) { padding ->
+        if (viewModel.showDeleteCategoryDialog.value) {
+            DeleteDialog(
+                text = "Are you sure you want to delete category?",
+                onClose = { viewModel.onEvent(CategoryListEvent.OnHideDeleteCategoryDialog) },
+                onSuccess = { viewModel.onEvent(CategoryListEvent.OnDeleteCategory)}
+            )
+        }
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -112,7 +117,7 @@ fun CategoryListScreen(
                     GameButtons(viewModel::onEvent)
                 }
                 item {
-                    Search(viewModel::onEvent, viewModel.search, getFileLifecycleObserver)
+                    Buttons(viewModel::onEvent, getFileLifecycleObserver)
                 }
                 items(categories.value) { category ->
                     CategoryListItem(category, viewModel::onEvent)
@@ -126,9 +131,8 @@ fun CategoryListScreen(
 }
 
 @Composable
-private fun Search(
+private fun Buttons(
     onEvent: (CategoryListEvent) -> Unit,
-    search: MutableState<String>,
     getFileLifecycleObserver: GetFileLifecycleObserver
 ) {
     Column(
@@ -149,51 +153,30 @@ private fun Search(
 
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.End
         ) {
-            TextField(
-                value = search.value,
-                onValueChange = {
-                    onEvent(CategoryListEvent.OnSearchChange(it))
-                },
-                label = { Text(text = "Search") },
-                modifier = Modifier.padding(15.dp, 0.dp, 0.dp, 0.dp),
-                colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = Color.Transparent,
-                ),
-                trailingIcon = {
-                    if (search.value.isNotEmpty()) {
-                        IconButton(
-                            onClick = {
-                                search.value = ""
-                            }) {
-                            Icon(
-                                Icons.Default.Clear,
-                                contentDescription = "Clear",
-                                tint = MaterialTheme.colors.primary
-                            )
-                        }
-                    }
-                }
-            )
-            IconButton(
-                modifier = Modifier.padding(0.dp, 15.dp, 0.dp, 15.dp),
+            Button(
+                modifier = Modifier.padding(0.dp, 15.dp, 6.dp, 15.dp),
+                shape = RoundedCornerShape(50f),
                 onClick = { onEvent(CategoryListEvent.OnExportFile) }
             ) {
+                Text(text = "Export")
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowUp,
                     contentDescription = "Export",
-                    tint = MaterialTheme.colors.primary
+                    tint = MaterialTheme.colors.surface
                 )
             }
-            IconButton(
+            Button(
                 modifier = Modifier.padding(0.dp, 15.dp, 15.dp, 15.dp),
+                shape = RoundedCornerShape(50f),
                 onClick = getFileLifecycleObserver::selectFile
             ) {
+                Text(text = "Import")
                 Icon(
                     imageVector = Icons.Default.KeyboardArrowDown,
                     contentDescription = "Import",
-                    tint = MaterialTheme.colors.primary
+                    tint = MaterialTheme.colors.surface
                 )
             }
         }

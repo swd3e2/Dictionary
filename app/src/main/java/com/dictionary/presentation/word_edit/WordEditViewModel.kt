@@ -39,6 +39,9 @@ class WordEditViewModel @Inject constructor(
     var showTranslationDialog = mutableStateOf(false)
         private set
 
+    var showWordDeleteDialog = mutableStateOf(false)
+        private set
+
     var selectedTranslations = mutableStateListOf<String>()
         private set
 
@@ -63,7 +66,10 @@ class WordEditViewModel @Inject constructor(
     var newSimilar = mutableStateOf("")
         private set
 
-    var wordWithTermExists = mutableStateOf(false)
+    var editState = mutableStateOf(true)
+        private set
+
+    var wordWithTermExistsInCategory = mutableStateOf("")
         private set
 
     private val _state = mutableStateOf(WordTranslationState(translation = null, isLoading = false))
@@ -86,6 +92,7 @@ class WordEditViewModel @Inject constructor(
                         newAntonyms.value = w.antonyms
                         newTranscription.value = w.transcription
                         newSimilar.value = w.similar
+                        editState.value = false
                     }
                 }
             }
@@ -103,7 +110,9 @@ class WordEditViewModel @Inject constructor(
             }
             is WordEditEvent.OnTermChange -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordWithTermExists.value = wordRepository.exists(event.term)
+                    wordRepository.category(event.term)?.let {
+                        wordWithTermExistsInCategory.value = it
+                    }
                 }
                 newTerm.value = event.term
             }
@@ -123,6 +132,27 @@ class WordEditViewModel @Inject constructor(
                 newTranscription.value = event.transcription
             }
             is WordEditEvent.OnSaveClick -> {
+                if (newTerm.value.isEmpty()) {
+                    viewModelScope.launch(Dispatchers.IO) {
+                        _eventFlow.emit(
+                            UiEvent.ShowSnackbar(
+                                "Term is empty"
+                            )
+                        )
+                    }
+                    return
+                }
+                if (newDefinition.value.isEmpty()) {
+                    viewModelScope.launch(Dispatchers.IO) {
+                        _eventFlow.emit(
+                            UiEvent.ShowSnackbar(
+                                "Definition is empty"
+                            )
+                        )
+                    }
+                    return
+                }
+
                 viewModelScope.launch(Dispatchers.IO) {
                     if (word != null) {
                         wordRepository.create(word!!.apply {
@@ -206,6 +236,26 @@ class WordEditViewModel @Inject constructor(
             }
             WordEditEvent.GoBack -> viewModelScope.launch {
                 _eventFlow.emit(UiEvent.PopBackStack)
+            }
+            WordEditEvent.OnEdit -> editState.value = true
+            WordEditEvent.OnView -> {
+                viewModelScope.launch {
+                    _eventFlow.emit(UiEvent.ClearFocus)
+                }
+                editState.value = false
+            }
+            WordEditEvent.OnDeleteWord ->  viewModelScope.launch(Dispatchers.IO) {
+                wordRepository.delete(word!!.id)
+                _eventFlow.emit(UiEvent.PopBackStack)
+            }
+            WordEditEvent.OnHideWordDeleteDialog -> {
+                showWordDeleteDialog.value = false
+            }
+            WordEditEvent.OnShowWordDeleteDialog -> {
+                viewModelScope.launch {
+                    _eventFlow.emit(UiEvent.ClearFocus)
+                }
+                showWordDeleteDialog.value = true
             }
         }
     }

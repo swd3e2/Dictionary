@@ -43,7 +43,7 @@ fun Preview(viewModel: LearnWordsViewModel, onPopBackStack: () -> Unit) {
             for (word in viewModel.currentWords) {
                 Card(
                     modifier = Modifier.padding(15.dp, 5.dp),
-                    elevation = 0.dp
+                    elevation = 2.dp
                 ) {
                     Row(
                         modifier = Modifier
@@ -58,7 +58,7 @@ fun Preview(viewModel: LearnWordsViewModel, onPopBackStack: () -> Unit) {
                                 text = word.term,
                                 style = MaterialTheme.typography.body1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colors.onSurface
+                                color = MaterialTheme.colors.primary
                             )
                             Text(
                                 text = word.definition,

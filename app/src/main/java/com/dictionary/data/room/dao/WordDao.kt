@@ -1,47 +1,76 @@
 package com.dictionary.data.room.dao
 
 import androidx.room.*
+import com.dictionary.domain.entity.Category
 import com.dictionary.domain.entity.Word
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WordDao {
-    @Query("select * from ${Word.TABLE_NAME} where category = :category")
-    fun byCategory(category: Int): Flow<List<Word>>
+    @Query("SELECT * FROM ${Word.TABLE_NAME} WHERE category = :id")
+    fun byCategory(id: Int): Flow<List<Word>>
 
-    @Query("select * from ${Word.TABLE_NAME} where category = :category and (term like '%' || :term || '%' or definition like '%' || :term || '%')")
-    fun byCategoryLike(category: Int, term: String): Flow<List<Word>>
+    @Query("SELECT * FROM ${Word.TABLE_NAME} WHERE category = :id " +
+            "ORDER BY CASE WHEN :isAsc = 1 THEN term END ASC, CASE WHEN :isAsc = 0 THEN term END DESC")
+    fun byCategorySortByTerm(id: Int, isAsc: Boolean): Flow<List<Word>>
 
-    @Query("select * from ${Word.TABLE_NAME} where category = :category")
+    @Query("SELECT * FROM ${Word.TABLE_NAME} WHERE category = :id " +
+            "ORDER BY CASE WHEN :isAsc = 1 THEN created END ASC, CASE WHEN :isAsc = 0 THEN created END DESC")
+    fun byCategorySortByCreated(id: Int, isAsc: Boolean): Flow<List<Word>>
+
+    @Query("SELECT * FROM ${Word.TABLE_NAME} WHERE category = :id " +
+            "ORDER BY CASE WHEN :isAsc = 1 THEN last_repeated END ASC, CASE WHEN :isAsc = 0 THEN last_repeated END DESC")
+    fun byCategorySortByLastRepeated(id: Int, isAsc: Boolean): Flow<List<Word>>
+
+    @Query("SELECT * FROM ${Word.TABLE_NAME} " +
+            "WHERE category = :id AND (term like '%' || :term || '%' or definition like '%' || :term || '%')")
+    fun byCategoryLike(id: Int, term: String): Flow<List<Word>>
+
+    @Query("SELECT * FROM ${Word.TABLE_NAME} " +
+            "WHERE category = :id AND (term like '%' || :term || '%' or definition like '%' || :term || '%') " +
+            "ORDER BY CASE WHEN :isAsc = 1 THEN term END ASC, CASE WHEN :isAsc = 0 THEN term END DESC")
+    fun byCategoryLikeSortByTerm(id: Int, term: String, isAsc: Boolean): Flow<List<Word>>
+
+    @Query("SELECT * FROM ${Word.TABLE_NAME} " +
+            "WHERE category = :id AND (term like '%' || :term || '%' or definition like '%' || :term || '%') " +
+            "ORDER BY CASE WHEN :isAsc = 1 THEN created END ASC, CASE WHEN :isAsc = 0 THEN created END DESC")
+    fun byCategoryLikeSortByCreated(id: Int, term: String, isAsc: Boolean): Flow<List<Word>>
+
+    @Query("SELECT * FROM ${Word.TABLE_NAME} " +
+            "WHERE category = :id AND (term like '%' || :term || '%' or definition like '%' || :term || '%') " +
+            "ORDER BY CASE WHEN :isAsc = 1 THEN last_repeated END ASC, CASE WHEN :isAsc = 0 THEN last_repeated END DESC")
+    fun byCategoryLikeSortByLastRepeated(id: Int, term: String, isAsc: Boolean): Flow<List<Word>>
+
+    @Query("SELECT * FROM ${Word.TABLE_NAME} WHERE category = :category")
     fun byCategoryAsList(category: Int): List<Word>
 
-    @Query("select * from ${Word.TABLE_NAME} where id = :id")
+    @Query("SELECT * FROM ${Word.TABLE_NAME} WHERE id = :id")
     fun get(id: Int): Word?
 
     @Insert(entity = Word::class, onConflict = OnConflictStrategy.REPLACE)
     fun create(word: Word): Long
 
-    @Query("delete from ${Word.TABLE_NAME} where id = :id")
+    @Query("delete FROM ${Word.TABLE_NAME} WHERE id = :id")
     fun delete(id: Int)
 
-    @Query("delete from ${Word.TABLE_NAME} where category = :category")
+    @Query("delete FROM ${Word.TABLE_NAME} WHERE category = :category")
     fun deleteByCategory(category: Int)
 
     @Update(entity = Word::class)
     fun update(word: Word)
 
-    @Query("SELECT EXISTS(SELECT 1 FROM ${Word.TABLE_NAME} WHERE term = :term)")
-    fun exists(term: String): Boolean
+    @Query("SELECT ${Category.TABLE_NAME}.name FROM ${Word.TABLE_NAME} JOIN ${Category.TABLE_NAME} ON ${Category.TABLE_NAME}.id = ${Word.TABLE_NAME}.category WHERE term = :term")
+    fun category(term: String): String?
 
     @Insert(entity = Word::class, onConflict = OnConflictStrategy.REPLACE)
     fun batchCreate(words: List<Word>)
 
-    @Query("select * from ${Word.TABLE_NAME}")
+    @Query("SELECT * FROM ${Word.TABLE_NAME}")
     fun asList(): List<Word>
 
-    @Query("select * from ${Word.TABLE_NAME} where term like '%' || :term || '%' or definition like '%' || :term || '%'")
+    @Query("SELECT * FROM ${Word.TABLE_NAME} WHERE term like '%' || :term || '%' or definition like '%' || :term || '%'")
     fun listLike(term: String): Flow<List<Word>>
 
-    @Query("select * from ${Word.TABLE_NAME}")
+    @Query("SELECT * FROM ${Word.TABLE_NAME}")
     fun list(): Flow<List<Word>>
 }

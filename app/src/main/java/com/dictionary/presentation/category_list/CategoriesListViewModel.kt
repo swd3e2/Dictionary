@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.time.Instant
 import java.util.*
 import javax.inject.Inject
@@ -39,6 +40,9 @@ class CategoriesListViewModel @Inject constructor(
     var showAddCategoryDialog = mutableStateOf(false)
         private set
 
+    var showDeleteCategoryDialog = mutableStateOf(false)
+        private set
+
     var title = mutableStateOf("")
         private set
 
@@ -46,6 +50,8 @@ class CategoriesListViewModel @Inject constructor(
 
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
+
+    private var selectedCategory: CategoryWithWords? = null
 
     fun onEvent(event: CategoryListEvent) {
         when (event) {
@@ -84,7 +90,8 @@ class CategoriesListViewModel @Inject constructor(
                     for (line in data.lines()) {
                         val splitLine = line.split(';')
                         if (splitLine[0] == "category") {
-                            newCategoryId = categoryRepository.create(Category(id = 0, name = splitLine[1]))
+                            newCategoryId =
+                                categoryRepository.create(Category(id = 0, name = splitLine[1]))
                             continue
                         }
                         val word = Word(category = newCategoryId.toInt())
@@ -132,7 +139,8 @@ class CategoriesListViewModel @Inject constructor(
                         return@launch
                     }
 
-                    val file = File(Environment.getExternalStorageDirectory().path + "/Download/export_data1.csv")
+                    val file =
+                        File(Environment.getExternalStorageDirectory().path + "/Download/export_data1.csv")
 
                     if (!file.exists() && !file.createNewFile()) {
                         sendUiEvent(UiEvent.ShowSnackbar("Cant create file"))
@@ -145,18 +153,18 @@ class CategoriesListViewModel @Inject constructor(
                             for ((wordIndex, word) in category.words.withIndex()) {
                                 output.write(
                                     (
-                                        "${word.term};" +
-                                        "${word.definition};" +
-                                        "${word.created.toInstant().epochSecond};" +
-                                        "${if (word.lastRepeated != null) word.lastRepeated!!.toInstant().epochSecond else ""};" +
-                                        "${if (word.firstLearned != null) word.firstLearned!!.toInstant().epochSecond else ""};" +
-                                        "${word.bucket};" +
-                                        "${word.synonyms};" +
-                                        "${word.antonyms};" +
-                                        "${word.similar};" +
-                                        "${word.transcription}" +
-                                        if (categoryIndex == categories.size - 1 && wordIndex == category.words.size - 1) "" else "\n"
-                                    ).toByteArray()
+                                            "${word.term};" +
+                                                    "${word.definition};" +
+                                                    "${word.created.toInstant().epochSecond};" +
+                                                    "${if (word.lastRepeated != null) word.lastRepeated!!.toInstant().epochSecond else ""};" +
+                                                    "${if (word.firstLearned != null) word.firstLearned!!.toInstant().epochSecond else ""};" +
+                                                    "${word.bucket};" +
+                                                    "${word.synonyms};" +
+                                                    "${word.antonyms};" +
+                                                    "${word.similar};" +
+                                                    "${word.transcription}" +
+                                                    if (categoryIndex == categories.size - 1 && wordIndex == category.words.size - 1) "" else "\n"
+                                            ).toByteArray()
                                 )
                             }
                         }
@@ -172,6 +180,29 @@ class CategoriesListViewModel @Inject constructor(
             }
             is CategoryListEvent.OnGoToLearnWords -> {
                 sendUiEvent(UiEvent.Navigate(Routes.LEARN_WORDS))
+            }
+            CategoryListEvent.OnDeleteCategory -> {
+                selectedCategory?.let { category ->
+                    viewModelScope.launch(Dispatchers.IO) {
+                        categoryRepository.delete(category.category.id)
+                        wordsRepository.deleteByCategory(category.category.id)
+                        if (category.category.image.isNotEmpty()) {
+                            try {
+                                val currentFile = File(category.category.image)
+                                currentFile.exists() && currentFile.delete()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                            }
+                        }
+                        showDeleteCategoryDialog.value = false
+                        _uiEvent.send(UiEvent.ShowSnackbar("Category ${category.category.name} deleted"))
+                    }
+                }
+            }
+            CategoryListEvent.OnHideDeleteCategoryDialog -> showDeleteCategoryDialog.value = false
+            is CategoryListEvent.OnShowDeleteCategoryDialog -> {
+                showDeleteCategoryDialog.value = true
+                selectedCategory = event.category
             }
         }
     }

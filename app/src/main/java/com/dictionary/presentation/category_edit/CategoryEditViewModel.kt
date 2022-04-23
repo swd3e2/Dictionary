@@ -63,19 +63,28 @@ class CategoryEditViewModel @Inject constructor(
 
     lateinit var categories: List<Category>
     private var selectedWord: Word? = null
+    private var sortAsc: Boolean = false
+    private var sortField: String = ""
 
-    private var words = MutableStateFlow("")
+    private var words = MutableStateFlow<SearchState>(SearchState())
     @OptIn(ExperimentalCoroutinesApi::class)
     var wordsState = words.flatMapLatest {
-        if (it.isEmpty()) {
-            wordsRepository.categoryWords(category.id)
+        if (it.search.isEmpty()) {
+            when (it.sortField) {
+                "term" -> wordsRepository.categoryWordsSortByTerm(category.id, it.isAsc)
+                "created" -> wordsRepository.categoryWordsSortByCreated(category.id, it.isAsc)
+                "last_repeated" -> wordsRepository.categoryWordsSortByLastRepeated(category.id, it.isAsc)
+                else -> wordsRepository.categoryWords(category.id)
+            }
         } else {
-            wordsRepository.categoryWordsLike(category.id, it)
+            when (it.sortField) {
+                "term" -> wordsRepository.categoryWordsLikeSortByTerm(category.id, it.search, it.isAsc)
+                "created" -> wordsRepository.categoryWordsLikeSortByCreated(category.id, it.search, it.isAsc)
+                "last_repeated" -> wordsRepository.categoryWordsLikeSortByLastRepeated(category.id, it.search, it.isAsc)
+                else -> wordsRepository.categoryWordsLike(category.id, it.search)
+            }
         }
     }
-
-    var wordsCount = mutableStateOf(0)
-        private set
 
     var menuExpanded = mutableStateOf(false)
         private set
@@ -131,7 +140,11 @@ class CategoryEditViewModel @Inject constructor(
             }
             is CategoryEditEvent.OnSearchTermChange -> {
                 termSearch.value = event.term
-                words.value = event.term
+                words.value = SearchState(
+                    search = termSearch.value,
+                    sortField = sortField,
+                    isAsc = sortAsc
+                )
             }
             is CategoryEditEvent.OnShowWordDeleteDialog -> {
                 showWordDeleteDialog.value = true
@@ -169,6 +182,13 @@ class CategoryEditViewModel @Inject constructor(
             }
             is CategoryEditEvent.OnSortChange -> {
                 showSortDialog.value = false
+                sortAsc = event.direction == "asc"
+                sortField = event.field
+                words.value = SearchState(
+                    search = termSearch.value,
+                    sortField = event.field,
+                    isAsc = event.direction == "asc"
+                )
             }
             is CategoryEditEvent.OnShowRenameDialog -> {
                 menuExpanded.value = false
@@ -251,4 +271,9 @@ class CategoryEditViewModel @Inject constructor(
             }
         }
     }
+    data class SearchState(
+        val search: String = "",
+        val sortField: String = "id",
+        val isAsc: Boolean = false
+    )
 }

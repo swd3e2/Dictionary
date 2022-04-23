@@ -2,49 +2,51 @@ package com.dictionary.presentation.learn_words.state
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.snapshots.SnapshotStateMap
 import com.dictionary.domain.entity.Word
+import com.dictionary.presentation.models.MatchWordGroup
 import com.dictionary.presentation.models.WordWithIndex
 
 class MatchState {
-    var totalCountWordsCount: Int = 0
-    var currentWordsGroup: SnapshotStateList<WordWithIndex> = mutableStateListOf()
+    var currentWordsGroup = mutableStateOf(MatchWordGroup())
 
     var wordsState: SnapshotStateMap<Int, String> = mutableStateMapOf()
 
     private var wordsSelected: MutableList<WordWithIndex> = mutableListOf()
-    private var wordsGroups: MutableList<MutableList<WordWithIndex>> = mutableListOf()
+    private var wordsGroups: MutableList<MatchWordGroup> = mutableListOf()
     private var currentWordsGroupIndex: Int = 0
     private var successCount: Int = 0
 
     fun init(words: List<Word>) {
         currentWordsGroupIndex = 0
-        totalCountWordsCount = words.size
         wordsGroups = getGroups(words)
-        currentWordsGroup.addAll(wordsGroups[currentWordsGroupIndex])
+        currentWordsGroup.value = wordsGroups[currentWordsGroupIndex]
     }
 
-    private fun getGroups(words: List<Word>): MutableList<MutableList<WordWithIndex>> {
-        val groups: MutableList<MutableList<WordWithIndex>> = mutableListOf()
+    private fun getGroups(words: List<Word>): MutableList<MatchWordGroup> {
+        val groups: MutableList<MatchWordGroup> = mutableListOf()
         val listSize = words.size
 
-        var group = mutableListOf<WordWithIndex>()
+        var group = MatchWordGroup()
         for ((index, word) in words.withIndex()) {
-            if (group.size == 12) {
-                group.shuffle()
+            if (group.termWords.size + group.defWords.size == 12) {
+                group.termWords.shuffle()
+                group.defWords.shuffle()
                 groups.add(group)
-                group = mutableListOf()
+                group = MatchWordGroup()
             }
-            group.add(WordWithIndex(word = word, index = index))
-            group.add(WordWithIndex(word = word, index = index + listSize))
+            group.termWords.add(WordWithIndex(word = word, index = index))
+            group.defWords.add(WordWithIndex(word = word, index = index + listSize))
 
             wordsState[index] = "unselected"
             wordsState[index + listSize] = "unselected"
         }
 
-        if (group.size > 0) {
-            group.shuffle()
+        if (group.termWords.size > 0) {
+            group.termWords.shuffle()
+            group.defWords.shuffle()
             groups.add(group)
         }
 
@@ -80,8 +82,7 @@ class MatchState {
         if (currentWordsGroupIndex >= wordsGroups.size) {
             return false
         }
-        currentWordsGroup.clear()
-        currentWordsGroup.addAll(wordsGroups[currentWordsGroupIndex])
+        currentWordsGroup.value = wordsGroups[currentWordsGroupIndex]
         return true
     }
 
@@ -110,7 +111,7 @@ class MatchState {
     }
 
     fun canGoNextGroup(): Boolean {
-        return successCount == currentWordsGroup.size
+        return successCount == currentWordsGroup.value.termWords.size + currentWordsGroup.value.defWords.size
     }
 
     sealed class State {

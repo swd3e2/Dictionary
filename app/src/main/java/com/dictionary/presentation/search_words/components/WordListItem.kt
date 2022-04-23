@@ -15,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -26,6 +27,7 @@ import com.dictionary.R
 import com.dictionary.domain.entity.Word
 import com.dictionary.presentation.category_edit.CategoryEditEvent
 import com.dictionary.presentation.common.DisabledInteractionSource
+import com.dictionary.presentation.components.VerticalProgress
 import com.dictionary.presentation.search_words.SearchWordsEvent
 import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.ui.theme.SecondaryTextColor
@@ -53,7 +55,7 @@ fun WordListItem(
     Box(
         modifier = Modifier
             .padding(15.dp, 5.dp)
-            .wrapContentSize()
+            .height(IntrinsicSize.Min),
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -111,9 +113,22 @@ fun WordListItem(
                 elevation = 2.dp
             ) {
                 Row(
-                    modifier = Modifier.padding(10.dp).height(IntrinsicSize.Max),
+                    modifier = Modifier.height(IntrinsicSize.Min),
                 ){
-                    Column(Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (word.bucket > 0) {
+                        VerticalProgress(
+                            modifier = Modifier.fillMaxHeight().width(10.dp),
+                            color = MaterialTheme.colors.primary,
+                            progress = word.bucket.toFloat() / 8f
+                        )
+                    } else {
+                        VerticalProgress(
+                            modifier = Modifier.fillMaxHeight().width(10.dp),
+                            color = if (MaterialTheme.colors.isLight) Color(0xFF3EAF20) else Color(0xFF81B977),
+                            progress = 1f
+                        )
+                    }
+                    Column(Modifier.fillMaxHeight().padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                         if (images.containsKey(word.category)) {
                             Image(
                                 modifier = Modifier.size(50.dp).clip(RoundedCornerShape(30)),

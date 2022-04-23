@@ -14,7 +14,7 @@ val lightTheme = lightColors(
     error = Color(0xFFD53F3F),
     onPrimary = Color(0xFFF1F1F1),
     onBackground = Color(0xFF1E1E1E),
-    onSecondary = Color(0xFFF1F1F1),
+    onSecondary = Color(0xFF192038),
     onSurface = Color(0xFF1E1E1E),
     onError = Color(0xFFFFFFFF),
 )

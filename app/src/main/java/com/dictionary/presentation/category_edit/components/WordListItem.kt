@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.dictionary.domain.entity.Word
 import com.dictionary.presentation.category_edit.CategoryEditEvent
+import com.dictionary.presentation.components.VerticalProgress
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -35,8 +36,7 @@ fun WordListItem(
     onEvent: (CategoryEditEvent) -> Unit,
     canMoveWordToCategory: Boolean
 ) {
-    val coroutineScope = rememberCoroutineScope()
-    val squareSize = if (word.bucket > 1) (-140).dp else (-100).dp
+    val squareSize = if (word.bucket > 1) (-155).dp else (-100).dp
     val swipeAbleState = SwipeableState(initialValue = 0)
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, sizePx to 1)
@@ -44,7 +44,9 @@ fun WordListItem(
     val dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
 
     Box(
-        modifier = Modifier.padding(15.dp, 5.dp).height(IntrinsicSize.Min)
+        modifier = Modifier
+            .padding(15.dp, 5.dp)
+            .height(IntrinsicSize.Min)
     ) {
         Row(
             modifier = Modifier.fillMaxSize(),
@@ -55,7 +57,6 @@ fun WordListItem(
                 IconButton(
                     onClick = {
                         onEvent(CategoryEditEvent.OnDropWordBucket(word))
-                        coroutineScope.launch { swipeAbleState.snapTo(0) }
                     }
                 ) {
                     Icon(imageVector = Icons.Default.Refresh, "Refresh")
@@ -92,7 +93,8 @@ fun WordListItem(
                         shape = MaterialTheme.shapes.medium
                     )
                     .clickable { onEvent(CategoryEditEvent.OnWordClick(word.id)) }
-                    .fillMaxSize(),
+                    .fillMaxSize()
+                    .height(IntrinsicSize.Min),
                 elevation = 2.dp
             ) {
                 Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
@@ -182,31 +184,3 @@ fun WordListItem(
     }
 }
 
-
-@Composable
-fun VerticalProgress(
-    progress: Float,
-    modifier: Modifier = Modifier,
-    color: Color
-) {
-    Column(
-        modifier = modifier
-            .width(16.dp)
-    ) {
-        if (progress < 1f) {
-            Box(
-                modifier = Modifier
-                    .weight((if ((1 - progress) == 0f) 0.0001 else 1 - progress) as Float)
-                    .fillMaxWidth()
-            )
-        }
-        Box(
-            modifier = Modifier
-                .weight(progress)
-                .fillMaxWidth()
-                .background(
-                    color = color
-                )
-        )
-    }
-}

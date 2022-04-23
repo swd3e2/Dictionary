@@ -28,21 +28,11 @@ import coil.compose.AsyncImage
 import com.dictionary.R
 import com.dictionary.domain.entity.Category
 import com.dictionary.presentation.category_edit.components.*
-import com.dictionary.presentation.category_list.CategoryListEvent
 import com.dictionary.presentation.common.lifecycle_observer.GetImageLifecycleObserver
 import com.dictionary.presentation.components.BottomBar
 import com.dictionary.presentation.components.DeleteDialog
-import com.dictionary.ui.theme.PrimaryTextColor
 import com.dictionary.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
-import java.sql.Date
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun CategoryEditScreen(
@@ -126,7 +116,6 @@ fun CategoryEditScreen(
                 categoryName = viewModel.categoryName
             )
         }
-
         if (viewModel.showMoveToCategoryDialog.value) {
             MoveToCategoryDialog(
                 viewModel::onEvent,
@@ -156,8 +145,8 @@ fun CategoryEditScreen(
                 Title(
                     getImageLifecycleObserver = getImageLifecycleObserver,
                     category = viewModel.category,
-                    wordsCount = viewModel.wordsCount,
                     categoryImage = viewModel.categoryImage,
+                    count = words.value.count(),
                 )
                 GameButtons(category = viewModel.category, onEvent = viewModel::onEvent)
                 SearchAndSort(viewModel.termSearch, onEvent = viewModel::onEvent)
@@ -179,7 +168,7 @@ fun Title(
     getImageLifecycleObserver: GetImageLifecycleObserver,
     category: Category,
     categoryImage: MutableState<String>,
-    wordsCount: MutableState<Int>,
+    count: Int,
 ) {
     Column(
         modifier = Modifier
@@ -224,7 +213,7 @@ fun Title(
         }
         Text(
             modifier = Modifier.padding(0.dp, 20.dp),
-            text = "${wordsCount.value} terms",
+            text = "$count words",
             fontSize = 12.sp,
             color = MaterialTheme.colors.onBackground,
             fontWeight = FontWeight.Bold
@@ -241,7 +230,7 @@ fun GameButtons(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(15.dp, 20.dp, 15.dp, 0.dp),
+            .padding(15.dp, 10.dp, 15.dp, 0.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         val cardWidth = screenWidth / 2 - 10.dp
@@ -318,7 +307,7 @@ fun SearchAndSort(
                 if (search.value.isNotEmpty()) {
                     IconButton(
                         onClick = {
-                            search.value = ""
+                            onEvent(CategoryEditEvent.OnSearchTermChange(""))
                         }) {
                         Icon(
                             Icons.Default.Clear,
