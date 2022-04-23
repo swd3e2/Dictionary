@@ -71,13 +71,14 @@ class CardsGameViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     if (!forgottenWords.contains(event.word.id)) {
                         wordsRepository.update(event.word.apply {
+                            firstLearned = Date()
                             lastRepeated = Date()
                             bucket++
                         })
                     }
 
                     updateNextWord()
-                    updateProgress()
+                    updateProgress(true)
                 }
             }
             is CardsGameEvent.WordNotLearned -> {
@@ -93,7 +94,7 @@ class CardsGameViewModel @Inject constructor(
                     })
 
                     updateNextWord()
-                    updateProgress()
+                    updateProgress(false)
                 }
             }
         }
@@ -105,8 +106,12 @@ class CardsGameViewModel @Inject constructor(
         currentWordIndex.value = currentWordIndex.value + 1
     }
 
-    private fun updateProgress() {
-        learnProgress.value = currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
-        notLearnedWordsCount.value = notLearnedWordsCount.value + 1
+    private fun updateProgress(learned: Boolean) {
+        if (learned) {
+            learnProgress.value = currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
+            notLearnedWordsCount.value += 1
+        } else {
+            learnedWordsCount.value += 1
+        }
     }
 }
