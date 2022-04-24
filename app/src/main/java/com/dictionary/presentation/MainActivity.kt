@@ -1,13 +1,10 @@
 package com.dictionary.presentation
 
-import android.app.Application
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.*
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,7 +14,7 @@ import androidx.navigation.navArgument
 import com.dictionary.presentation.cards_game.CardsGameScreen
 import com.dictionary.presentation.category_edit.CategoryEditScreen
 import com.dictionary.presentation.category_list.CategoryListScreen
-import com.dictionary.presentation.common.Theme
+import com.dictionary.presentation.common.Settings
 import com.dictionary.presentation.common.lifecycle_observer.GetFileLifecycleObserver
 import com.dictionary.presentation.common.lifecycle_observer.GetImageLifecycleObserver
 import com.dictionary.presentation.learn_words.LearnWordsScreen
@@ -28,11 +25,14 @@ import com.dictionary.ui.theme.darkTheme
 import com.dictionary.ui.theme.lightTheme
 import com.dictionary.utils.Routes
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 //AppCompatActivity
 //ComponentActivity
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity() : ComponentActivity() {
+    @Inject lateinit var settings: Settings
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -44,10 +44,8 @@ class MainActivity : ComponentActivity() {
         lifecycle.addObserver(getImageObserver)
 
         setContent {
-            val theme = Theme(application)
-
             MaterialTheme(
-                colors = if (theme.theme.collectAsState(false).value) darkTheme else lightTheme
+                colors = if (settings.darkTheme.collectAsState(false).value) darkTheme else lightTheme
             ) {
                 Surface(color = MaterialTheme.colors.background) {
                     val navController = rememberNavController()
@@ -136,7 +134,6 @@ class MainActivity : ComponentActivity() {
                             route = Routes.SETTINGS,
                         ) {
                             SettingsScreen(
-                                theme = theme,
                                 onPopBackStack = { navController.popBackStack() },
                                 navController = navController,
                                 onNavigate = { navController.navigate(it.route) }

@@ -163,6 +163,8 @@ class WordEditViewModel @Inject constructor(
                             transcription = newTranscription.value
                             similar =  newSimilar.value
                         })
+                        _eventFlow.emit(UiEvent.ShowSnackbar("Saved"))
+                        editState.value = false
                     } else {
                         wordRepository.create(Word(
                             term = newTerm.value,
@@ -173,11 +175,8 @@ class WordEditViewModel @Inject constructor(
                             transcription = newTranscription.value,
                             similar =  newSimilar.value,
                         ))
+                        _eventFlow.emit(UiEvent.PopBackStack)
                     }
-                    _eventFlow.emit(UiEvent.ShowSnackbar(
-                        "Saved"
-                    ))
-                    _eventFlow.emit(UiEvent.PopBackStack)
                 }
             }
             WordEditEvent.OnShowTranslationDialog -> {

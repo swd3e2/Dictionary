@@ -6,6 +6,7 @@ import android.preference.PreferenceManager
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import com.dictionary.presentation.common.Settings
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -14,8 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    application: Application
-): AndroidViewModel(application) {
+    val settings: Settings
+): ViewModel() {
     var darkTheme = mutableStateOf(false)
         private set
 
@@ -23,17 +24,13 @@ class SettingsViewModel @Inject constructor(
     val uiEvent = _uiEvent.receiveAsFlow()
 
     init {
-        val prefs = getApplication<Application>().getSharedPreferences("mysettings", Context.MODE_PRIVATE)
-        darkTheme.value = prefs.getBoolean("dark_theme", false)
+        darkTheme.value = settings.darkTheme.value
     }
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
             SettingsEvent.OnChangeDarkTheme -> {
-                val prefs = getApplication<Application>().getSharedPreferences("mysettings", Context.MODE_PRIVATE)
-                prefs.edit().apply{
-                    putBoolean("dark_theme", !darkTheme.value)
-                }.apply()
+                settings.switchDarkTheme()
                 darkTheme.value = !darkTheme.value
             }
         }

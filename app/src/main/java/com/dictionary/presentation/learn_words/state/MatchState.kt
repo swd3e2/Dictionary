@@ -20,6 +20,8 @@ class MatchState {
     private var successCount: Int = 0
 
     fun init(words: List<Word>) {
+        wordsState.clear()
+        wordsGroups.clear()
         currentWordsGroupIndex = 0
         wordsGroups = getGroups(words)
         currentWordsGroup.value = wordsGroups[currentWordsGroupIndex]

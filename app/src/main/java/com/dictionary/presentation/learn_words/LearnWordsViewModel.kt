@@ -40,7 +40,7 @@ class LearnWordsViewModel @Inject constructor(
     val cardsState = CardsState()
     val writeState = WriteState()
 
-    var lastErrorWordId = 0
+    var lastWordWrong = false
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
@@ -119,7 +119,7 @@ class LearnWordsViewModel @Inject constructor(
                     is TestState.State.SelectRight -> {
                         testState.setSuccessState(event.selected.index)
                         viewModelScope.launch {
-                            delay(400)
+                            delay(200)
                             testState.selectNext()
                         }
                         addProgress()
@@ -130,7 +130,7 @@ class LearnWordsViewModel @Inject constructor(
                             delay(200)
                             testState.setDeselectedState(event.selected.index)
                         }
-                        lastErrorWordId = event.selected.word.id
+                        lastWordWrong = true
                     }
                     is TestState.State.GameEnd -> {
                         addProgress()
@@ -161,10 +161,11 @@ class LearnWordsViewModel @Inject constructor(
             }
             is LearnWordsEvent.OnWriteTryDefinition -> {
                 val guessedRight = writeState.tryGuess()
+                val word = writeState.currentWord.value!!.copy()
 
                 if (guessedRight) {
                     viewModelScope.launch(Dispatchers.IO) {
-                        wordsRepository.create(writeState.currentWord.value!!.apply {
+                        wordsRepository.create(word.apply {
                             bucket = 1
                             firstLearned = Date()
                             lastRepeated = Date()
@@ -172,7 +173,7 @@ class LearnWordsViewModel @Inject constructor(
                     }
                     addProgress()
                 } else {
-                    lastErrorWordId = 1
+                    lastWordWrong = true
                 }
 
                 if (guessedRight && !writeState.selectNext()) {
@@ -184,10 +185,10 @@ class LearnWordsViewModel @Inject constructor(
                 currentStep.value = 6
             }
             is LearnWordsEvent.OnStartNew -> {
+                wordsToLearn.removeAll(currentWords)
                 currentWords.clear()
                 val currentWordsToLearn = wordsToLearn.take(18)
                 learnProgress.value = 0f
-                wordsToLearn.removeAll(currentWordsToLearn)
                 currentWords.addAll(currentWordsToLearn)
                 currentStep.value = 1
             }
@@ -195,8 +196,8 @@ class LearnWordsViewModel @Inject constructor(
     }
 
     private fun addProgress() {
-        if (lastErrorWordId != 0) {
-            lastErrorWordId = 0
+        if (lastWordWrong) {
+            lastWordWrong = false
             return
         }
         learnProgress.value += 100f / currentWords.count() / 4f / 100f

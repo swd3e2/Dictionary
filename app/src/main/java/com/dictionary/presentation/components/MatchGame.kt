@@ -33,32 +33,39 @@ fun MatchGame(
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
     val padding = PaddingValues(5.dp)
 
-    FlowRow(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(5.dp),
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(5.dp)
     ) {
-        for (word in words.value.termWords) {
-            WordCard(
-                screenWidth = screenWidth,
-                screenHeight = screenHeight,
-                padding = padding,
-                stateMap = stateMap,
-                onItemClick = onItemClick,
-                word = word,
-                term = true
-            )
+        FlowRow(
+            modifier = Modifier.requiredHeight((screenHeight / 4 - padding.calculateTopPadding() - 20.dp) * 2).fillMaxWidth(),
+        ) {
+            for (word in words.value.termWords) {
+                WordCard(
+                    screenWidth = screenWidth,
+                    screenHeight = screenHeight,
+                    padding = padding,
+                    stateMap = stateMap,
+                    onItemClick = onItemClick,
+                    word = word,
+                    term = true
+                )
+            }
         }
-        for (word in words.value.defWords) {
-            WordCard(
-                screenWidth = screenWidth,
-                screenHeight = screenHeight,
-                padding = padding,
-                stateMap = stateMap,
-                onItemClick = onItemClick,
-                word = word,
-                term = false
-            )
+        FlowRow(
+            modifier = Modifier.requiredHeight((screenHeight / 4 - padding.calculateTopPadding() - 20.dp) * 2).fillMaxWidth()
+        ) {
+            for (word in words.value.defWords) {
+                WordCard(
+                    screenWidth = screenWidth,
+                    screenHeight = screenHeight,
+                    padding = padding,
+                    stateMap = stateMap,
+                    onItemClick = onItemClick,
+                    word = word,
+                    term = false
+                )
+            }
         }
     }
 }

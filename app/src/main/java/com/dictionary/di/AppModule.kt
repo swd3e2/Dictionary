@@ -12,6 +12,7 @@ import com.dictionary.data.room.Database
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.TranslationRepository
 import com.dictionary.domain.repository.WordRepository
+import com.dictionary.presentation.common.Settings
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,6 +34,12 @@ object AppModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(YandexTranslateApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSettings(application: Application): Settings {
+        return Settings(application)
     }
 
     @Provides

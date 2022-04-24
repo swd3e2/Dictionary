@@ -63,6 +63,7 @@ fun WordEditScreen(
         floatingActionButton = {
             if (viewModel.editState.value) {
                 FloatingActionButton(
+                    modifier = Modifier.imePadding(),
                     onClick = { viewModel.onEvent(WordEditEvent.OnSaveClick) },
                     contentColor = MaterialTheme.colors.secondary,
                     backgroundColor = MaterialTheme.colors.surface,

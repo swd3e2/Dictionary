@@ -19,6 +19,8 @@ class TestState {
     private lateinit var currentWords: List<Word>
 
     fun init(allWords: List<Word>) {
+        wordsState.clear()
+        words.clear()
         currentWords = allWords
         allWords.forEach { addWord(it) }
         currentWord.value = words[wordCurrentIndex]
@@ -60,8 +62,11 @@ class TestState {
             return State.SelectRight
         }
 
-        addWord(currentWord.value!!.word)
-        lastAddedWordId = word.word.id
+        if (lastAddedWordId != word.word.id) {
+            lastAddedWordId = word.word.id
+            addWord(currentWord.value!!.word)
+        }
+
         return State.SelectWrong
     }
 
@@ -78,6 +83,10 @@ class TestState {
     }
 
     fun selectNext() {
+        if (wordCurrentIndex + 1 >= words.size) {
+            return
+        }
+
         wordCurrentIndex++
         lastAddedWordId = 0
         currentWord.value = words[wordCurrentIndex]

@@ -11,6 +11,7 @@ class CardsState {
     private var currentWordIndex = 0
 
     fun init(allWords: MutableList<Word>) {
+        words.clear()
         words.addAll(allWords)
         currentWord.value = words[currentWordIndex]
     }

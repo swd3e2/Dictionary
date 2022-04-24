@@ -13,14 +13,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.dictionary.presentation.common.Theme
+import com.dictionary.presentation.common.Settings
 import com.dictionary.presentation.components.BottomBar
 import com.dictionary.presentation.settings.components.DropDownMenu
 import com.dictionary.utils.UiEvent
 
 @Composable
 fun SettingsScreen(
-    theme: Theme,
     onPopBackStack: () -> Unit,
     onNavigate: (UiEvent.Navigate) -> Unit,
     navController: NavHostController,
@@ -71,7 +70,6 @@ fun SettingsScreen(
                     modifier = Modifier.offset{IntOffset(0, -40)},
                     checked = viewModel.darkTheme.value,
                     onCheckedChange = {
-                        theme.switch()
                         viewModel.onEvent(SettingsEvent.OnChangeDarkTheme)
                     }
                 )
