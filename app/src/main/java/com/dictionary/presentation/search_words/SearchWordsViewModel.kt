@@ -6,12 +6,10 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.dictionary.R
 import com.dictionary.domain.entity.Category
 import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.WordRepository
-import com.dictionary.presentation.category_edit.CategoryEditEvent
 import com.dictionary.utils.Routes
 import com.dictionary.utils.UiEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -43,9 +41,9 @@ class SearchWordsViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     var wordsState = words.flatMapLatest {
         if (it.isEmpty()) {
-            wordRepository.list()
+            wordRepository.flowList()
         } else {
-            wordRepository.listLike(it)
+            wordRepository.flowListLike(it)
         }
     }
 
@@ -91,7 +89,7 @@ class SearchWordsViewModel @Inject constructor(
             }
             is SearchWordsEvent.OnDropWordBucket -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordRepository.create(event.word.apply { bucket = 1 })
+                    wordRepository.save(event.word.apply { bucket = 1 })
                     _uiEvent.send(UiEvent.ShowSnackbar("Word sent to bucket 1"))
                 }
             }
@@ -125,7 +123,7 @@ class SearchWordsViewModel @Inject constructor(
             }
             is SearchWordsEvent.OnMoveWordToCategory -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordRepository.create(selectedWord!!.apply { category = event.category.id })
+                    wordRepository.save(selectedWord!!.apply { category = event.category.id })
                     _uiEvent.send(UiEvent.ShowSnackbar("Word moved to category ${event.category.name}"))
                 }
                 showMoveToCategoryDialog.value = false

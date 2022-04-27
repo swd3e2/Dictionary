@@ -2,6 +2,7 @@ package com.dictionary.data.room.dao
 
 import androidx.room.*
 import com.dictionary.domain.entity.Category
+import com.dictionary.domain.entity.CategoryCount
 import com.dictionary.domain.entity.Word
 import kotlinx.coroutines.flow.Flow
 
@@ -73,4 +74,86 @@ interface WordDao {
 
     @Query("SELECT * FROM ${Word.TABLE_NAME}")
     fun list(): Flow<List<Word>>
+
+    @Query("SELECT * FROM ${Word.TABLE_NAME} where bucket = 0 order by RANDOM() limit :count")
+    fun asListToLearn(count: Int): List<Word>
+
+    @Query("SELECT * FROM ${Word.TABLE_NAME} WHERE category = :category AND bucket = 0 order by RANDOM() limit :count")
+    fun categoryWordsToLearn(category: Int, count: Int): List<Word>
+
+    @Query(
+        "SELECT category as first, count(id) as second FROM ${Word.TABLE_NAME} WHERE bucket > 0 AND bucket < 8 AND " +
+            "CASE " +
+            "WHEN bucket = 1 THEN last_repeated < :firstBucket " +
+            "WHEN bucket = 2 THEN last_repeated < :secondBucket " +
+            "WHEN bucket = 3 THEN last_repeated < :thirdBucket " +
+            "WHEN bucket = 4 THEN last_repeated < :fourthBucket " +
+            "WHEN bucket = 5 THEN last_repeated < :fifthBucket " +
+            "WHEN bucket = 6 THEN last_repeated < :sixBucket " +
+            "WHEN bucket = 7 THEN last_repeated < :seventhBucket " +
+            "END group by category"
+    )
+    fun countToRepeatGrouped(
+        firstBucket: Long,
+        secondBucket: Long,
+        thirdBucket: Long,
+        fourthBucket: Long,
+        fifthBucket: Long,
+        sixBucket: Long,
+        seventhBucket: Long,
+    ): List<CategoryCount>
+
+    @Query("SELECT category as first, count(id) as second FROM ${Word.TABLE_NAME} WHERE bucket = 0 group by category")
+    fun countToLearnGrouped(): List<CategoryCount>
+
+    @Query(
+        "SELECT * FROM ${Word.TABLE_NAME} WHERE bucket > 0 AND bucket < 8 AND " +
+            "CASE " +
+            "WHEN bucket = 1 THEN last_repeated < :firstBucket " +
+            "WHEN bucket = 2 THEN last_repeated < :secondBucket " +
+            "WHEN bucket = 3 THEN last_repeated < :thirdBucket " +
+            "WHEN bucket = 4 THEN last_repeated < :fourthBucket " +
+            "WHEN bucket = 5 THEN last_repeated < :fifthBucket " +
+            "WHEN bucket = 6 THEN last_repeated < :sixBucket " +
+            "WHEN bucket = 7 THEN last_repeated < :seventhBucket " +
+            "END"
+    )
+    fun listToRepeat(
+        firstBucket: Long,
+        secondBucket: Long,
+        thirdBucket: Long,
+        fourthBucket: Long,
+        fifthBucket: Long,
+        sixBucket: Long,
+        seventhBucket: Long,
+    ): List<Word>
+
+    @Query(
+        "SELECT * FROM ${Word.TABLE_NAME} WHERE bucket > 0 AND bucket < 8 AND category = :category AND " +
+            "CASE " +
+            "WHEN bucket = 1 THEN last_repeated < :firstBucket " +
+            "WHEN bucket = 2 THEN last_repeated < :secondBucket " +
+            "WHEN bucket = 3 THEN last_repeated < :thirdBucket " +
+            "WHEN bucket = 4 THEN last_repeated < :fourthBucket " +
+            "WHEN bucket = 5 THEN last_repeated < :fifthBucket " +
+            "WHEN bucket = 6 THEN last_repeated < :sixBucket " +
+            "WHEN bucket = 7 THEN last_repeated < :seventhBucket " +
+            "END"
+    )
+    fun categoryListToRepeat(
+        category: Int,
+        firstBucket: Long,
+        secondBucket: Long,
+        thirdBucket: Long,
+        fourthBucket: Long,
+        fifthBucket: Long,
+        sixBucket: Long,
+        seventhBucket: Long,
+    ): List<Word>
+
+    @Query("SELECT * FROM ${Word.TABLE_NAME} WHERE id in (:ids)")
+    fun byIds(ids: List<Int>): List<Word>
+
+    @Query("SELECT category as first, count(*) as second FROM ${Word.TABLE_NAME} group by category")
+    fun countGrouped(): List<CategoryCount>
 }

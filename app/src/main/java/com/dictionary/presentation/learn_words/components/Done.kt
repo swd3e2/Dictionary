@@ -10,7 +10,7 @@ import com.dictionary.presentation.learn_words.LearnWordsEvent
 import com.dictionary.presentation.learn_words.LearnWordsViewModel
 
 @Composable
-fun Done(viewModel: LearnWordsViewModel, onPopBackStack: () -> Unit) {
+fun Done(viewModel: LearnWordsViewModel) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
@@ -21,13 +21,11 @@ fun Done(viewModel: LearnWordsViewModel, onPopBackStack: () -> Unit) {
             textAlign = TextAlign.Center
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Button(onClick = { onPopBackStack() }) {
+            Button(onClick = { viewModel.onEvent(LearnWordsEvent.OnBack(true)) }) {
                 Text(text = "Back")
             }
-            if (viewModel.wordsToLearn.size > 0) {
-                Button(onClick = { viewModel.onEvent(LearnWordsEvent.OnStartNew) }) {
-                    Text(text = "Next")
-                }
+            Button(onClick = { viewModel.onEvent(LearnWordsEvent.OnStartNew) }) {
+                Text(text = "Next")
             }
         }
     }

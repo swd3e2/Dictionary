@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -25,6 +26,7 @@ import com.dictionary.presentation.word_edit.componetns.DropDownMenu
 import com.dictionary.presentation.word_edit.componetns.TranslationDialog
 import com.dictionary.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -36,6 +38,7 @@ fun WordEditScreen(
 ) {
     val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -45,9 +48,11 @@ fun WordEditScreen(
                     onPopBackStack()
                 }
                 is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        message = event.message
-                    )
+                    coroutineScope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(
+                            message = event.message
+                        )
+                    }
                 }
                 UiEvent.ClearFocus -> focusManager.clearFocus()
             }
@@ -108,7 +113,9 @@ fun WordEditScreen(
 
 @Composable
 fun ViewFields(viewModel: WordEditViewModel) {
-    Column(modifier = Modifier.fillMaxSize().padding(15.dp, 10.dp)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .padding(15.dp, 10.dp)) {
         val dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
         viewModel.word?.let { word ->
             Text(text = "Term", fontSize = 18.sp)
@@ -235,89 +242,91 @@ fun ViewFields(viewModel: WordEditViewModel) {
 fun EditFields(viewModel: WordEditViewModel) {
     val focusManager = LocalFocusManager.current
 
-    TextField(
-        value = viewModel.newTerm.value,
-        onValueChange = { viewModel.onEvent(WordEditEvent.OnTermChange(it)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp, 5.dp),
-        label = { Text(text = "Term") },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.Transparent,
-        ),
-    )
-    if (viewModel.wordWithTermExistsInCategory.value.isNotEmpty()) {
-        Text(
-            text = """Word already exists in category "${viewModel.wordWithTermExistsInCategory.value}" """,
-            color = MaterialTheme.colors.error
+    Column(Modifier.padding(10.dp)) {
+        TextField(
+            value = viewModel.newTerm.value,
+            onValueChange = { viewModel.onEvent(WordEditEvent.OnTermChange(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 5.dp),
+            label = { Text(text = "Term") },
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = Color.Transparent,
+            ),
+        )
+        if (viewModel.wordWithTermExistsInCategory.value.isNotEmpty()) {
+            Text(
+                text = """Word already exists in category "${viewModel.wordWithTermExistsInCategory.value}" """,
+                color = MaterialTheme.colors.error
+            )
+        }
+        TextField(
+            value = viewModel.newDefinition.value,
+            onValueChange = { viewModel.onEvent(WordEditEvent.OnDefinitionChange(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 5.dp),
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        viewModel.onEvent(WordEditEvent.OnShowTranslationDialog)
+                        focusManager.clearFocus()
+                    }) {
+                    Icon(
+                        Icons.Default.Send,
+                        contentDescription = "Edit",
+                        tint = MaterialTheme.colors.primary
+                    )
+                }
+            },
+            label = { Text(text = "Definition") },
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = Color.Transparent,
+            ),
+        )
+        TextField(
+            value = viewModel.newAntonyms.value,
+            onValueChange = { viewModel.onEvent(WordEditEvent.OnAntonymsChange(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 5.dp),
+            label = { Text(text = "Antonyms") },
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = Color.Transparent,
+            ),
+        )
+        TextField(
+            value = viewModel.newSynonyms.value,
+            onValueChange = { viewModel.onEvent(WordEditEvent.OnSynonymsChange(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 5.dp),
+            label = { Text(text = "Synonyms") },
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = Color.Transparent,
+            ),
+        )
+        TextField(
+            value = viewModel.newSimilar.value,
+            onValueChange = { viewModel.onEvent(WordEditEvent.OnSimilarChange(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 5.dp),
+            label = { Text(text = "Similar") },
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = Color.Transparent,
+            ),
+        )
+        TextField(
+            value = viewModel.newTranscription.value,
+            onValueChange = { viewModel.onEvent(WordEditEvent.OnTranscriptionChange(it)) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(0.dp, 5.dp),
+            label = { Text(text = "Transcription") },
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = Color.Transparent,
+            ),
         )
     }
-    TextField(
-        value = viewModel.newDefinition.value,
-        onValueChange = { viewModel.onEvent(WordEditEvent.OnDefinitionChange(it)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp, 5.dp),
-        trailingIcon = {
-            IconButton(
-                onClick = {
-                    viewModel.onEvent(WordEditEvent.OnShowTranslationDialog)
-                    focusManager.clearFocus()
-                }) {
-                Icon(
-                    Icons.Default.Send,
-                    contentDescription = "Edit",
-                    tint = MaterialTheme.colors.primary
-                )
-            }
-        },
-        label = { Text(text = "Definition") },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.Transparent,
-        ),
-    )
-    TextField(
-        value = viewModel.newAntonyms.value,
-        onValueChange = { viewModel.onEvent(WordEditEvent.OnAntonymsChange(it)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp, 5.dp),
-        label = { Text(text = "Antonyms") },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.Transparent,
-        ),
-    )
-    TextField(
-        value = viewModel.newSynonyms.value,
-        onValueChange = { viewModel.onEvent(WordEditEvent.OnSynonymsChange(it)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp, 5.dp),
-        label = { Text(text = "Synonyms") },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.Transparent,
-        ),
-    )
-    TextField(
-        value = viewModel.newSimilar.value,
-        onValueChange = { viewModel.onEvent(WordEditEvent.OnSimilarChange(it)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp, 5.dp),
-        label = { Text(text = "Similar") },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.Transparent,
-        ),
-    )
-    TextField(
-        value = viewModel.newTranscription.value,
-        onValueChange = { viewModel.onEvent(WordEditEvent.OnTranscriptionChange(it)) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(0.dp, 5.dp),
-        label = { Text(text = "Transcription") },
-        colors = TextFieldDefaults.textFieldColors(
-            backgroundColor = Color.Transparent,
-        ),
-    )
 }

@@ -2,11 +2,12 @@ package com.dictionary.domain.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.dictionary.presentation.utils.*
 import java.util.*
 
-@Entity(tableName = Word.TABLE_NAME)
+@Entity(tableName = Word.TABLE_NAME, indices = [Index(value = ["category"])])
 data class Word(
     @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "id")
     val id: Int = 0,

@@ -20,18 +20,26 @@ class SettingsViewModel @Inject constructor(
     var darkTheme = mutableStateOf(false)
         private set
 
+    var countWordsToLearn = mutableStateOf(0)
+        private set
+
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
     init {
         darkTheme.value = settings.darkTheme.value
+        countWordsToLearn.value = settings.countWordsToLearn.value
     }
 
     fun onEvent(event: SettingsEvent) {
         when (event) {
-            SettingsEvent.OnChangeDarkTheme -> {
+            is SettingsEvent.OnChangeDarkTheme -> {
                 settings.switchDarkTheme()
                 darkTheme.value = !darkTheme.value
+            }
+            is SettingsEvent.OnChangeCountOfWordsToLearn -> {
+                settings.setCountOfLearnWords(event.count)
+                countWordsToLearn.value = event.count
             }
         }
     }

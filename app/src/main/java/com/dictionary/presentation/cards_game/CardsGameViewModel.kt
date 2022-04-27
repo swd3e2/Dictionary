@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Word
 import com.dictionary.domain.repository.WordRepository
+import com.dictionary.presentation.utils.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,15 +42,16 @@ class CardsGameViewModel @Inject constructor(
     var isLoading = mutableStateOf(true)
         private set
 
-    private var wordsToLearn = mutableStateListOf<Word>()
+    var wordsToLearn = mutableStateListOf<Word>()
     private var forgottenWords = mutableSetOf<Int>()
 
     init {
         val id = savedStateHandle.get<Int>("id")!!
         viewModelScope.launch(Dispatchers.IO) {
+
             val words = (if (id != -1)
-                wordsRepository.categoryWordsAsList(id)
-            else wordsRepository.asList()).filter { it.shouldBeRepeated() }
+                wordsRepository.listByCategoryToRepeat(id)
+            else wordsRepository.listToRepeat())
 
             withContext(Dispatchers.Main) {
                 wordsToLearn.addAll(words)
@@ -108,9 +110,9 @@ class CardsGameViewModel @Inject constructor(
     private fun updateProgress(learned: Boolean) {
         if (learned) {
             learnProgress.value = currentWordIndex.value.toFloat() / countOfWords.value.toFloat()
-            notLearnedWordsCount.value += 1
-        } else {
             learnedWordsCount.value += 1
+        } else {
+            notLearnedWordsCount.value += 1
         }
     }
 }

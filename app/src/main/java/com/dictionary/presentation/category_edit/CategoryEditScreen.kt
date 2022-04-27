@@ -33,6 +33,7 @@ import com.dictionary.presentation.components.BottomBar
 import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun CategoryEditScreen(
@@ -47,6 +48,7 @@ fun CategoryEditScreen(
     val words = viewModel.wordsState.collectAsState(initial = emptyList())
     val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
@@ -56,9 +58,11 @@ fun CategoryEditScreen(
                     onNavigate(event)
                 }
                 is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        message = event.message
-                    )
+                    coroutineScope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(
+                            message = event.message
+                        )
+                    }
                 }
                 UiEvent.PopBackStack -> onPopBackStack()
             }

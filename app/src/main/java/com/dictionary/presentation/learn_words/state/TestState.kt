@@ -13,17 +13,16 @@ class TestState {
     var words = mutableStateListOf<WordsWithSuggest>()
     var wordsState = mutableStateMapOf<Int, String>()
 
-    private var wordCurrentIndex: Int = 0
+    private var currentWordIndex: Int = 0
     private var indexInc = 0
     private var lastAddedWordId = 0
-    private lateinit var currentWords: List<Word>
+    private var currentWords = mutableStateListOf<Word>()
 
     fun init(allWords: List<Word>) {
-        wordsState.clear()
-        words.clear()
-        currentWords = allWords
+        clear()
+        currentWords.addAll(allWords)
         allWords.forEach { addWord(it) }
-        currentWord.value = words[wordCurrentIndex]
+        currentWord.value = words[currentWordIndex]
     }
 
     private fun addWord(newWord: Word) {
@@ -37,7 +36,9 @@ class TestState {
 
             val suggestedWords = mutableListOf(WordWithIndex(word = newWord, index = indexInc++))
             while (suggestedWords.size < 5) {
-                val randomWord = currentWords[(currentWords.indices).filter { !excludedWords.contains(currentWords[it].id) }.random()]
+                val randomWord = currentWords[(currentWords.indices).filter {
+                    !excludedWords.contains(currentWords[it].id)
+                }.random()]
                 if (excludedWords.contains(newWord.id)) {
                     excludedWords.add(randomWord.id)
                     suggestedWords.add(WordWithIndex(randomWord, indexInc++))
@@ -48,7 +49,14 @@ class TestState {
             excludedWords.clear()
         } else {
             val suggestedWords = mutableListOf(WordWithIndex(newWord, indexInc++))
-            currentWords.forEach { if (it.id != newWord.id) suggestedWords.add(WordWithIndex(it, indexInc++)) }
+            currentWords.forEach {
+                if (it.id != newWord.id) suggestedWords.add(
+                    WordWithIndex(
+                        it,
+                        indexInc++
+                    )
+                )
+            }
             suggestedWords.shuffle()
             words.add(WordsWithSuggest(word = newWord, suggestedWords.toMutableStateList()))
         }
@@ -56,7 +64,7 @@ class TestState {
 
     fun onSelect(word: WordWithIndex): State {
         if (currentWord.value!!.word.id == word.word.id) {
-            if (wordCurrentIndex + 1 >= words.size) {
+            if (canEnd()) {
                 return State.GameEnd
             }
             return State.SelectRight
@@ -68,6 +76,10 @@ class TestState {
         }
 
         return State.SelectWrong
+    }
+
+    fun canEnd(): Boolean {
+        return currentWordIndex + 1 >= words.size
     }
 
     fun setSuccessState(vararg index: Int) {
@@ -83,18 +95,74 @@ class TestState {
     }
 
     fun selectNext() {
-        if (wordCurrentIndex + 1 >= words.size) {
+        if (currentWordIndex + 1 >= words.size) {
             return
         }
 
-        wordCurrentIndex++
+        currentWordIndex++
         lastAddedWordId = 0
-        currentWord.value = words[wordCurrentIndex]
+        currentWord.value = words[currentWordIndex]
+    }
+
+    fun reinitializeFromSavedState(savedState: TestSaveSate, wordsMap: HashMap<Int, Word>) {
+        currentWordIndex = savedState.currentIndex
+        lastAddedWordId = savedState.lastAddedWordId
+        savedState.groups.forEach {
+            if (wordsMap.containsKey(it.first)) {
+                val suggest = mutableStateListOf<WordWithIndex>()
+                it.second.forEach{ key ->
+                    if (wordsMap.containsKey(key)) {
+                        suggest.add(WordWithIndex(
+                            word = wordsMap[key]!!,
+                            index = indexInc++
+                        ))
+                    }
+                }
+
+                words.add(
+                    WordsWithSuggest(
+                        word = wordsMap[it.first]!!,
+                        suggested = suggest
+                    )
+                )
+            }
+        }
+        wordsMap.forEach { i, word -> currentWords.add(word) }
+        if (!canEnd()) {
+            currentWord.value = words[currentWordIndex]
+        }
+    }
+
+    fun toSaveState(): TestSaveSate {
+        val testSaveState = TestSaveSate()
+        testSaveState.currentIndex = currentWordIndex
+        testSaveState.lastAddedWordId = lastAddedWordId
+        words.forEach {
+            testSaveState.groups.add(Pair(it.word.id, it.suggested.map { word -> word.word.id }))
+        }
+        return testSaveState
+    }
+
+    fun clear() {
+        currentWordIndex = 0
+        indexInc = 0
+        lastAddedWordId = 0
+        words.clear()
+        wordsState.clear()
+        currentWords.clear()
+        currentWord.value = null
+    }
+
+    fun getProgress(size: Int): Float {
+        if (currentWordIndex == 0) {
+            return 0f
+        }
+        return currentWordIndex.toFloat() / size
     }
 
     sealed class State {
-        object SelectRight: State()
-        object SelectWrong: State()
-        object GameEnd: State()
+        object SelectRight : State()
+        object SelectWrong : State()
+        object GameEnd : State()
     }
 }

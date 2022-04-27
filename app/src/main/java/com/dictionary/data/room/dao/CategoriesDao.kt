@@ -30,4 +30,7 @@ interface CategoriesDao {
     @Transaction
     @Query("select * from ${Category.TABLE_NAME}")
     fun listWithWordsAsList(): List<CategoryWithWords>
+
+    @Query("select * from ${Category.TABLE_NAME}")
+    fun flowList(): Flow<List<Category>>
 }

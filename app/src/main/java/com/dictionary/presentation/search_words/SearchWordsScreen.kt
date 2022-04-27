@@ -8,10 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.key
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
@@ -25,6 +22,7 @@ import com.dictionary.presentation.components.BottomBar
 import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.presentation.search_words.components.DropDownMenu
 import com.dictionary.utils.UiEvent
+import kotlinx.coroutines.launch
 
 @Composable
 fun SearchWordsScreen(
@@ -36,6 +34,7 @@ fun SearchWordsScreen(
     val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current
     val words = viewModel.wordsState.collectAsState(initial = emptyList())
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
@@ -45,9 +44,11 @@ fun SearchWordsScreen(
                     onNavigate(event)
                 }
                 is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        message = event.message
-                    )
+                    coroutineScope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(
+                            message = event.message
+                        )
+                    }
                 }
                 else -> Unit
             }

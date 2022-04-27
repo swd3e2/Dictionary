@@ -27,8 +27,8 @@ import javax.inject.Inject
 class WordEditViewModel @Inject constructor(
     private val wordRepository: WordRepository,
     private val translationRepository: TranslationRepository,
-    savedStateHandle: SavedStateHandle
-): ViewModel() {
+    savedStateHandle: SavedStateHandle,
+    ): ViewModel() {
 
     private val _eventFlow = MutableSharedFlow<UiEvent>()
     val eventFlow = _eventFlow.asSharedFlow()
@@ -155,7 +155,7 @@ class WordEditViewModel @Inject constructor(
 
                 viewModelScope.launch(Dispatchers.IO) {
                     if (word != null) {
-                        wordRepository.create(word!!.apply {
+                        wordRepository.save(word!!.apply {
                             term = newTerm.value
                             definition =  newDefinition.value
                             synonyms = newSynonyms.value
@@ -166,7 +166,7 @@ class WordEditViewModel @Inject constructor(
                         _eventFlow.emit(UiEvent.ShowSnackbar("Saved"))
                         editState.value = false
                     } else {
-                        wordRepository.create(Word(
+                        wordRepository.save(Word(
                             term = newTerm.value,
                             category = categoryId,
                             definition =  newDefinition.value,

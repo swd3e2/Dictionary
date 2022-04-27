@@ -1,6 +1,5 @@
 package com.dictionary.presentation.category_list.components
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -10,18 +9,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -29,22 +23,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.dictionary.domain.entity.CategoryWithWords
-import com.dictionary.presentation.category_edit.CategoryEditEvent
+import com.dictionary.domain.entity.Category
 import com.dictionary.presentation.category_list.CategoryListEvent
-import com.dictionary.ui.theme.PrimaryTextColor
-import com.dictionary.ui.theme.SecondaryTextColor
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun CategoryListItem(
-    category: CategoryWithWords,
+    category: Category,
+    countMap: SnapshotStateMap<Int, Int>,
+    countToLearnMap: SnapshotStateMap<Int, Int>,
+    countToRepeatMap: SnapshotStateMap<Int, Int>,
     onEvent: (CategoryListEvent) -> Unit
 ) {
-    val countToRepeat = category.countWordsToRepeat()
-    val countToLearn = category.countWordsToLearn()
+    val countToRepeat = countToRepeatMap[category.id]
+    val countToLearn = countToLearnMap[category.id]
+    val count = countMap[category.id]
     val squareSize = (-60).dp
     val swipeAbleState = SwipeableState(initialValue = 0)
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
@@ -83,7 +77,7 @@ fun CategoryListItem(
                         color = MaterialTheme.colors.surface,
                         shape = MaterialTheme.shapes.medium
                     )
-                    .clickable { onEvent(CategoryListEvent.OnCategoryClick(category.category.id)) }
+                    .clickable { onEvent(CategoryListEvent.OnCategoryClick(category.id)) }
                     .fillMaxSize()
                     .height(IntrinsicSize.Min),
             ) {
@@ -93,22 +87,22 @@ fun CategoryListItem(
                         .height(IntrinsicSize.Min),
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    if (countToLearn > 0) {
+                    if (countToLearn != null && countToLearn > 0) {
                         Box(
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .width(10.dp)
+                                .width(5.dp)
                                 .background(
                                     color = if (MaterialTheme.colors.isLight) Color(
                                         0xFF3EAF20
                                     ) else Color(0xFF81B977)
                                 )
                         )
-                    } else if (countToRepeat > 0) {
+                    } else if (countToRepeat != null && countToRepeat > 0) {
                         Box(
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .width(10.dp)
+                                .width(5.dp)
                                 .background(color = MaterialTheme.colors.primary)
                         )
                     }
@@ -117,9 +111,9 @@ fun CategoryListItem(
                             .padding(10.dp)
                             .fillMaxHeight()
                     ) {
-                        if (category.category.image.isNotEmpty()) {
+                        if (category.image.isNotEmpty()) {
                             AsyncImage(
-                                model = category.category.image,
+                                model = category.image,
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(50.dp)
@@ -134,7 +128,7 @@ fun CategoryListItem(
                                     modifier = Modifier.padding(15.dp, 0.dp, 0.dp)
                                 ) {
                                     Text(
-                                        text = category.category.name,
+                                        text = category.name,
                                         style = MaterialTheme.typography.body1,
                                         overflow = TextOverflow.Ellipsis,
                                         fontSize = 18.sp,
@@ -142,7 +136,7 @@ fun CategoryListItem(
                                     )
                                     Text(
                                         modifier = Modifier.padding(0.dp, 2.dp, 0.dp, 0.dp),
-                                        text = "${category.words.size} words",
+                                        text = "${count ?: 0} words",
                                         style = MaterialTheme.typography.body1,
                                         overflow = TextOverflow.Ellipsis,
                                         fontSize = 12.sp,
@@ -153,7 +147,7 @@ fun CategoryListItem(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.End
                                 ) {
-                                    if (countToLearn > 0) {
+                                    if (countToLearn != null && countToLearn > 0) {
                                         Box(
                                             modifier = Modifier
                                                 .wrapContentHeight()
@@ -177,7 +171,7 @@ fun CategoryListItem(
                                             )
                                         }
                                     }
-                                    if (countToRepeat > 0) {
+                                    if (countToRepeat != null && countToRepeat > 0) {
                                         Spacer(modifier = Modifier.padding(2.dp))
                                         Box(
                                             modifier = Modifier

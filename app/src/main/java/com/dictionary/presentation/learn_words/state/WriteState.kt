@@ -1,11 +1,7 @@
 package com.dictionary.presentation.learn_words.state
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewModelScope
 import com.dictionary.domain.entity.Word
-import com.dictionary.presentation.learn_words.LearnWordsEvent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class WriteState {
     var currentWord = mutableStateOf<Word?>(null)
@@ -24,12 +20,13 @@ class WriteState {
     var wantDefinition = mutableStateOf("")
         private set
 
-    private var currentIndex = 0
+    private var currentWordIndex = 0
     private var lastAddedWordId = 0
 
     fun init(currentWords: List<Word>) {
+        clear()
         words.addAll(currentWords)
-        currentWord.value = words[currentIndex]
+        currentWord.value = words[currentWordIndex]
     }
 
     fun tryGuess(): Boolean {
@@ -45,7 +42,7 @@ class WriteState {
         hasError.value = true
         if (lastAddedWordId != word.id) {
             lastAddedWordId = word.id
-            words.add(words[currentIndex])
+            words.add(words[currentWordIndex])
         }
 
         hasDefinition.value = definition.value
@@ -55,15 +52,19 @@ class WriteState {
     }
 
     fun selectNext() : Boolean {
-        if (currentIndex + 1 >= words.size) {
+        if (canEnd()) {
             return false
         }
         hasError.value = false
         lastAddedWordId = 0
-        currentIndex++
-        currentWord.value = words[currentIndex]
+        currentWordIndex++
+        currentWord.value = words[currentWordIndex]
         definition.value = ""
         return true
+    }
+
+    fun canEnd(): Boolean {
+        return currentWordIndex + 1 >= words.size
     }
 
     private fun guessedRight(word: Word, definition: String): Boolean {
@@ -75,5 +76,40 @@ class WriteState {
                 .lowercase() == definition.lowercase()
         }
         return guessedRight
+    }
+
+    fun reinitializeFromSavedState(savedState: WriteSaveState, wordsMap: HashMap<Int, Word>) {
+        currentWordIndex = savedState.currentIndex
+        savedState.words.forEach {
+            if (wordsMap.containsKey(it)) {
+                words.add(wordsMap[it]!!)
+            }
+        }
+        if (!canEnd()) {
+            currentWord.value = words[currentWordIndex]
+        }
+    }
+
+    fun toSaveState(): WriteSaveState {
+        val saveState = WriteSaveState()
+        saveState.currentIndex = currentWordIndex
+        words.forEach { saveState.words.add(it.id) }
+        return saveState
+    }
+
+    fun clear() {
+        hasError.value = false
+        hasDefinition.value = ""
+        wantDefinition.value = ""
+        currentWordIndex = 0
+        words.clear()
+        currentWord.value = null
+    }
+
+    fun getProgress(size: Int): Float {
+        if (currentWordIndex == 0) {
+            return 0f
+        }
+        return currentWordIndex.toFloat() / size
     }
 }

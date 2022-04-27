@@ -27,6 +27,7 @@ import com.dictionary.presentation.components.BottomBar
 import com.dictionary.presentation.components.DeleteDialog
 import com.dictionary.utils.UiEvent
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun CategoryListScreen(
@@ -36,10 +37,12 @@ fun CategoryListScreen(
     getFileLifecycleObserver: GetFileLifecycleObserver
 ) {
     getFileLifecycleObserver.reset()
-
+    LaunchedEffect(Unit) {
+        viewModel.load()
+    }
     val scaffoldState = rememberScaffoldState()
-    val categories = viewModel.categories.collectAsState(initial = emptyList())
     val focusManager = LocalFocusManager.current
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
@@ -49,9 +52,11 @@ fun CategoryListScreen(
                     onNavigate(event)
                 }
                 is UiEvent.ShowSnackbar -> {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        message = event.message
-                    )
+                    coroutineScope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(
+                            message = event.message
+                        )
+                    }
                 }
                 else -> Unit
             }
@@ -119,8 +124,21 @@ fun CategoryListScreen(
                 item {
                     Buttons(viewModel::onEvent, getFileLifecycleObserver)
                 }
-                items(categories.value) { category ->
-                    CategoryListItem(category, viewModel::onEvent)
+                item {
+                    if (viewModel.isLoading.value) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                        }
+                    }
+                }
+                items(viewModel.categories) { category ->
+                    CategoryListItem(
+                        category,
+                        viewModel.countByCategory,
+                        viewModel.countToLearn,
+                        viewModel.countToRepeat,
+                        viewModel::onEvent
+                    )
                 }
                 item {
                     Spacer(modifier = Modifier.padding(15.dp))

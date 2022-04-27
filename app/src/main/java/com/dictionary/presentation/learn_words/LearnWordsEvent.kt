@@ -15,4 +15,7 @@ sealed class LearnWordsEvent {
     data class OnCardRightSwipe(val word: Word): LearnWordsEvent()
     object OnStartNew: LearnWordsEvent()
     data class OnWriteTryDefinition(val definition: String): LearnWordsEvent()
+    data class OnBack(val end: Boolean): LearnWordsEvent()
+    object OnContinue: LearnWordsEvent()
+    object OnRestart: LearnWordsEvent()
 }

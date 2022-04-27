@@ -10,11 +10,15 @@ import javax.inject.Inject
 class CategoryRepositoryImpl @Inject constructor(
     private val dao: CategoriesDao
 ) : CategoryRepository {
-    override fun listWithWords(): Flow<List<CategoryWithWords>> {
+    override fun flowListWithWords(): Flow<List<CategoryWithWords>> {
         return dao.listWithWords()
     }
 
-    override suspend fun listWithWordsAsList(): List<CategoryWithWords> {
+    override fun flowList(): Flow<List<Category>> {
+        return dao.flowList()
+    }
+
+    override suspend fun listWithWords(): List<CategoryWithWords> {
         return dao.listWithWordsAsList()
     }
 

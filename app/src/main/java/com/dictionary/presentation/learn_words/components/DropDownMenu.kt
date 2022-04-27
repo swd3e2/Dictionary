@@ -12,10 +12,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import com.dictionary.presentation.category_edit.CategoryEditEvent
+import com.dictionary.presentation.learn_words.LearnWordsEvent
+import com.dictionary.presentation.learn_words.LearnWordsViewModel
 
 @Composable
 fun DropDownMenu(
-    onPopBackStack: () -> Unit,
+    viewModel: LearnWordsViewModel,
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -28,7 +30,7 @@ fun DropDownMenu(
                 IconButton(
                     onClick = {
                         focusManager.clearFocus()
-                        onPopBackStack()
+                        viewModel.onEvent(LearnWordsEvent.OnBack(false))
                     }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = MaterialTheme.colors.primary)
                 }

@@ -2,7 +2,6 @@ package com.dictionary.di
 
 import android.app.Application
 import androidx.room.Room
-import androidx.room.RoomDatabase
 import com.dictionary.common.Constants
 import com.dictionary.data.retrofit.YandexTranslateApi
 import com.dictionary.data.repository.CategoryRepositoryImpl
@@ -12,6 +11,7 @@ import com.dictionary.data.room.Database
 import com.dictionary.domain.repository.CategoryRepository
 import com.dictionary.domain.repository.TranslationRepository
 import com.dictionary.domain.repository.WordRepository
+import com.dictionary.presentation.common.LearnWordsSavedStateHandler
 import com.dictionary.presentation.common.Settings
 import dagger.Module
 import dagger.Provides
@@ -40,6 +40,12 @@ object AppModule {
     @Singleton
     fun provideSettings(application: Application): Settings {
         return Settings(application)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSavedStateHandle(): LearnWordsSavedStateHandler {
+        return LearnWordsSavedStateHandler()
     }
 
     @Provides

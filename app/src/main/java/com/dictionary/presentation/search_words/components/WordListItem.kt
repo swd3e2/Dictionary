@@ -46,7 +46,7 @@ fun WordListItem(
     canMoveWordToCategory: Boolean
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val squareSize = if (word.bucket > 1) (-140).dp else (-100).dp
+    val squareSize = if (word.bucket > 1) (-155).dp else (-100).dp
     val swipeAbleState = SwipeableState(initialValue = 0)
     val sizePx = with(LocalDensity.current) { squareSize.toPx() }
     val anchors = mapOf(0f to 0, sizePx to 1)
@@ -113,102 +113,118 @@ fun WordListItem(
                 elevation = 2.dp
             ) {
                 Row(
-                    modifier = Modifier.height(IntrinsicSize.Min),
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ){
+                    Row(modifier = Modifier.height(IntrinsicSize.Min)){
+                        if (word.shouldBeRepeated()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(5.dp)
+                                    .background(color = MaterialTheme.colors.primary)
+                            )
+                        } else if (word.bucket == 0) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxHeight()
+                                    .width(5.dp)
+                                    .background(
+                                        color = if (MaterialTheme.colors.isLight) Color(
+                                            0xFF3EAF20
+                                        ) else Color(0xFF81B977)
+                                    )
+                            )
+                        }
+                        Column(Modifier.fillMaxHeight().padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            if (images.containsKey(word.category)) {
+                                Image(
+                                    modifier = Modifier.size(50.dp).clip(RoundedCornerShape(30)),
+                                    bitmap = images[word.category]!!,
+                                    contentDescription = ""
+                                )
+                            } else {
+                                Image(
+                                    modifier = Modifier.size(50.dp).clip(RoundedCornerShape(30)),
+                                    painter = painterResource(R.drawable.placeholder),
+                                    contentDescription = ""
+                                )
+                            }
+                        }
+                        Column(Modifier.padding(10.dp, 10.dp)) {
+                            Text(
+                                text = word.term,
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colors.primary
+                            )
+                            Text(
+                                text = word.definition,
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = 12.sp
+                            )
+                            Text(
+                                text = "Created: ${LocalDateTime.ofInstant(word.created.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
+                                style = MaterialTheme.typography.body1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = 12.sp
+                            )
+                            if (word.firstLearned != null) {
+                                Text(
+                                    text = "First learned: ${LocalDateTime.ofInstant(word.firstLearned!!.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
+                                    style = MaterialTheme.typography.body1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colors.onSurface,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            if (word.lastRepeated != null) {
+                                Text(
+                                    text = "Last repeated: ${LocalDateTime.ofInstant(word.lastRepeated!!.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
+                                    style = MaterialTheme.typography.body1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colors.onSurface,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            if (word.synonyms.isNotEmpty()) {
+                                Text(
+                                    text = "Synonyms: ${word.synonyms}",
+                                    style = MaterialTheme.typography.body1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colors.onSurface,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            if (word.antonyms.isNotEmpty()) {
+                                Text(
+                                    text = "Antonyms: ${word.antonyms}",
+                                    style = MaterialTheme.typography.body1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colors.onSurface,
+                                    fontSize = 12.sp
+                                )
+                            }
+                            if (word.similar.isNotEmpty()) {
+                                Text(
+                                    text = "Similar: ${word.similar}",
+                                    style = MaterialTheme.typography.body1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    color = MaterialTheme.colors.onSurface,
+                                    fontSize = 12.sp
+                                )
+                            }
+                        }
+                    }
                     if (word.bucket > 0) {
                         VerticalProgress(
                             modifier = Modifier.fillMaxHeight().width(10.dp),
                             color = MaterialTheme.colors.primary,
                             progress = word.bucket.toFloat() / 8f
                         )
-                    } else {
-                        VerticalProgress(
-                            modifier = Modifier.fillMaxHeight().width(10.dp),
-                            color = if (MaterialTheme.colors.isLight) Color(0xFF3EAF20) else Color(0xFF81B977),
-                            progress = 1f
-                        )
-                    }
-                    Column(Modifier.fillMaxHeight().padding(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                        if (images.containsKey(word.category)) {
-                            Image(
-                                modifier = Modifier.size(50.dp).clip(RoundedCornerShape(30)),
-                                bitmap = images[word.category]!!,
-                                contentDescription = ""
-                            )
-                        } else {
-                            Image(
-                                modifier = Modifier.size(50.dp).clip(RoundedCornerShape(30)),
-                                painter = painterResource(R.drawable.placeholder),
-                                contentDescription = ""
-                            )
-                        }
-                    }
-                    Column(Modifier.padding(10.dp, 0.dp)) {
-                        Text(
-                            text = word.term,
-                            style = MaterialTheme.typography.body1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colors.primary
-                        )
-                        Text(
-                            text = word.definition,
-                            style = MaterialTheme.typography.body1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = 12.sp
-                        )
-                        Text(
-                            text = "Created: ${LocalDateTime.ofInstant(word.created.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
-                            style = MaterialTheme.typography.body1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = 12.sp
-                        )
-                        if (word.firstLearned != null) {
-                            Text(
-                                text = "First learned: ${LocalDateTime.ofInstant(word.firstLearned!!.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
-                                style = MaterialTheme.typography.body1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colors.onSurface,
-                                fontSize = 12.sp
-                            )
-                        }
-                        if (word.lastRepeated != null) {
-                            Text(
-                                text = "Last repeated: ${LocalDateTime.ofInstant(word.lastRepeated!!.toInstant(), ZoneOffset.systemDefault()).format(dateFormat)}",
-                                style = MaterialTheme.typography.body1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colors.onSurface,
-                                fontSize = 12.sp
-                            )
-                        }
-                        if (word.synonyms.isNotEmpty()) {
-                            Text(
-                                text = "Synonyms: ${word.synonyms}",
-                                style = MaterialTheme.typography.body1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colors.onSurface,
-                                fontSize = 12.sp
-                            )
-                        }
-                        if (word.antonyms.isNotEmpty()) {
-                            Text(
-                                text = "Antonyms: ${word.antonyms}",
-                                style = MaterialTheme.typography.body1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colors.onSurface,
-                                fontSize = 12.sp
-                            )
-                        }
-                        if (word.similar.isNotEmpty()) {
-                            Text(
-                                text = "Similar: ${word.similar}",
-                                style = MaterialTheme.typography.body1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colors.onSurface,
-                                fontSize = 12.sp
-                            )
-                        }
                     }
                 }
             }

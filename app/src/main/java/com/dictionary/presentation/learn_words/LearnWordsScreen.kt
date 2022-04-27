@@ -1,5 +1,6 @@
 package com.dictionary.presentation.learn_words
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
@@ -15,14 +16,36 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.dictionary.presentation.learn_words.components.DropDownMenu
 import com.dictionary.presentation.learn_words.components.*
 import com.dictionary.utils.UiEvent
+import kotlinx.coroutines.launch
 
 @Composable
 fun LearnWordsScreen(
     onPopBackStack: () -> Unit,
     viewModel: LearnWordsViewModel = hiltViewModel()
 ) {
+    BackHandler {
+        viewModel.onEvent(LearnWordsEvent.OnBack(false))
+    }
+
     val scaffoldState = rememberScaffoldState()
     val progress = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(key1 = true) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is UiEvent.ShowSnackbar -> {
+                    coroutineScope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar(
+                            message = event.message
+                        )
+                    }
+                }
+                UiEvent.PopBackStack -> onPopBackStack()
+            }
+        }
+    }
+
     LaunchedEffect(key1 = viewModel.learnProgress.value) {
         progress.animateTo(
             targetValue = viewModel.learnProgress.value,
@@ -39,7 +62,7 @@ fun LearnWordsScreen(
             .fillMaxSize()
             .navigationBarsPadding()
             .systemBarsPadding(),
-        topBar = { DropDownMenu(onPopBackStack) }
+        topBar = { DropDownMenu(viewModel) }
     ) { padding ->
         when (viewModel.isLoading.value) {
             true -> {
@@ -71,12 +94,12 @@ fun LearnWordsScreen(
                             .padding(padding),
                         contentAlignment = Alignment.Center,
                     ) {
-                        AnimatedPage(viewModel.currentStep, 1) { Preview(onPopBackStack = onPopBackStack, viewModel = viewModel) }
+                        AnimatedPage(viewModel.currentStep, 1) { Preview(viewModel = viewModel) }
                         AnimatedPage(viewModel.currentStep, 2) { Match(viewModel = viewModel) }
                         AnimatedPage(viewModel.currentStep, 3) { Test(viewModel = viewModel) }
                         AnimatedPage(viewModel.currentStep, 4) { Cards(viewModel = viewModel) }
                         AnimatedPage(viewModel.currentStep, 5) { Write(viewModel = viewModel) }
-                        AnimatedPage(viewModel.currentStep, 6) { Done(onPopBackStack = onPopBackStack, viewModel = viewModel) }
+                        AnimatedPage(viewModel.currentStep, 6) { Done(viewModel = viewModel) }
                     }
                 }
             }

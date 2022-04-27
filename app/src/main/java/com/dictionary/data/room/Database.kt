@@ -16,10 +16,7 @@ import com.dictionary.domain.entity.Word
         Word::class,
     ],
     version = 1,
-    exportSchema = true,
-    autoMigrations = [
-//        AutoMigration (from = 1, to = 2)
-    ]
+    exportSchema = true
 )
 @TypeConverters(Converters::class)
 abstract class Database: RoomDatabase() {
