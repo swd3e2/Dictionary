@@ -108,9 +108,7 @@ fun SearchWordsScreen(
                         trailingIcon = {
                             if (viewModel.termSearch.value.isNotEmpty()) {
                                 IconButton(
-                                    onClick = {
-                                        viewModel.termSearch.value = ""
-                                    }) {
+                                    onClick = { viewModel.onEvent(SearchWordsEvent.OnSearchTermChange("")) }) {
                                     Icon(
                                         Icons.Default.Clear,
                                         contentDescription = "Clear",

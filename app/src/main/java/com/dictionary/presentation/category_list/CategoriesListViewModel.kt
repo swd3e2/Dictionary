@@ -73,7 +73,7 @@ class CategoriesListViewModel @Inject constructor(
         }
     }
 
-    fun load() {
+    fun loadCount() {
         countToRepeat.clear()
         countToLearn.clear()
         countByCategory.clear()
@@ -214,6 +214,7 @@ class CategoriesListViewModel @Inject constructor(
             }
 
             wordsRepository.batchSave(words)
+            loadCount()
         }
     }
 

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.dictionary.presentation.category_edit.CategoryEditEvent
 import com.dictionary.presentation.components.DeleteDialog
+import com.dictionary.presentation.search_words.SearchWordsEvent
 import com.dictionary.presentation.word_edit.componetns.DropDownMenu
 import com.dictionary.presentation.word_edit.componetns.TranslationDialog
 import com.dictionary.utils.UiEvent
@@ -68,7 +69,6 @@ fun WordEditScreen(
         floatingActionButton = {
             if (viewModel.editState.value) {
                 FloatingActionButton(
-                    modifier = Modifier.imePadding(),
                     onClick = { viewModel.onEvent(WordEditEvent.OnSaveClick) },
                     contentColor = MaterialTheme.colors.secondary,
                     backgroundColor = MaterialTheme.colors.surface,
@@ -253,8 +253,23 @@ fun EditFields(viewModel: WordEditViewModel) {
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
             ),
+            trailingIcon = {
+                if (viewModel.newTerm.value.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            viewModel.onEvent(WordEditEvent.OnTermChange(""))
+                        }) {
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = "Clear",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                }
+            }
         )
-        if (viewModel.wordWithTermExistsInCategory.value.isNotEmpty()) {
+        if (viewModel.wordWithTermExistsInCategory.value != null &&
+            viewModel.wordWithTermExistsInCategory.value!!.isNotEmpty()) {
             Text(
                 text = """Word already exists in category "${viewModel.wordWithTermExistsInCategory.value}" """,
                 color = MaterialTheme.colors.error
@@ -267,16 +282,30 @@ fun EditFields(viewModel: WordEditViewModel) {
                 .fillMaxWidth()
                 .padding(0.dp, 5.dp),
             trailingIcon = {
-                IconButton(
-                    onClick = {
-                        viewModel.onEvent(WordEditEvent.OnShowTranslationDialog)
-                        focusManager.clearFocus()
-                    }) {
-                    Icon(
-                        Icons.Default.Send,
-                        contentDescription = "Edit",
-                        tint = MaterialTheme.colors.primary
-                    )
+                Row{
+                    if (viewModel.newDefinition.value.isNotEmpty()) {
+                        IconButton(
+                            onClick = {
+                                viewModel.onEvent(WordEditEvent.OnDefinitionChange(""))
+                            }) {
+                            Icon(
+                                Icons.Default.Clear,
+                                contentDescription = "Clear",
+                                tint = MaterialTheme.colors.primary
+                            )
+                        }
+                    }
+                    IconButton(
+                        onClick = {
+                            viewModel.onEvent(WordEditEvent.OnShowTranslationDialog)
+                            focusManager.clearFocus()
+                        }) {
+                        Icon(
+                            Icons.Default.Send,
+                            contentDescription = "Edit",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
                 }
             },
             label = { Text(text = "Definition") },
@@ -294,6 +323,20 @@ fun EditFields(viewModel: WordEditViewModel) {
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
             ),
+            trailingIcon = {
+                if (viewModel.newAntonyms.value.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            viewModel.onEvent(WordEditEvent.OnAntonymsChange(""))
+                        }) {
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = "Clear",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                }
+            }
         )
         TextField(
             value = viewModel.newSynonyms.value,
@@ -305,6 +348,20 @@ fun EditFields(viewModel: WordEditViewModel) {
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
             ),
+            trailingIcon = {
+                if (viewModel.newSynonyms.value.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            viewModel.onEvent(WordEditEvent.OnSynonymsChange(""))
+                        }) {
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = "Clear",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                }
+            }
         )
         TextField(
             value = viewModel.newSimilar.value,
@@ -316,6 +373,20 @@ fun EditFields(viewModel: WordEditViewModel) {
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
             ),
+            trailingIcon = {
+                if (viewModel.newSimilar.value.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            viewModel.onEvent(WordEditEvent.OnSimilarChange(""))
+                        }) {
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = "Clear",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                }
+            }
         )
         TextField(
             value = viewModel.newTranscription.value,
@@ -327,6 +398,20 @@ fun EditFields(viewModel: WordEditViewModel) {
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.Transparent,
             ),
+            trailingIcon = {
+                if (viewModel.newTranscription.value.isNotEmpty()) {
+                    IconButton(
+                        onClick = {
+                            viewModel.onEvent(WordEditEvent.OnTranscriptionChange(""))
+                        }) {
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = "Clear",
+                            tint = MaterialTheme.colors.primary
+                        )
+                    }
+                }
+            }
         )
     }
 }

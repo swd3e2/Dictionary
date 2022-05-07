@@ -12,8 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -38,7 +36,7 @@ fun CategoryListScreen(
 ) {
     getFileLifecycleObserver.reset()
     LaunchedEffect(Unit) {
-        viewModel.load()
+        viewModel.loadCount()
     }
     val scaffoldState = rememberScaffoldState()
     val focusManager = LocalFocusManager.current

@@ -69,7 +69,7 @@ class WordEditViewModel @Inject constructor(
     var editState = mutableStateOf(true)
         private set
 
-    var wordWithTermExistsInCategory = mutableStateOf("")
+    var wordWithTermExistsInCategory = mutableStateOf<String?>(null)
         private set
 
     private val _state = mutableStateOf(WordTranslationState(translation = null, isLoading = false))
@@ -110,9 +110,7 @@ class WordEditViewModel @Inject constructor(
             }
             is WordEditEvent.OnTermChange -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    wordRepository.category(event.term)?.let {
-                        wordWithTermExistsInCategory.value = it
-                    }
+                    wordWithTermExistsInCategory.value = wordRepository.category(event.term)
                 }
                 newTerm.value = event.term
             }
@@ -182,11 +180,7 @@ class WordEditViewModel @Inject constructor(
             WordEditEvent.OnShowTranslationDialog -> {
                 if (newTerm.value.isEmpty()) {
                     viewModelScope.launch(Dispatchers.IO) {
-                        _eventFlow.emit(
-                            UiEvent.ShowSnackbar(
-                                "Term is empty"
-                            )
-                        )
+                        _eventFlow.emit(UiEvent.ShowSnackbar("Term is empty"))
                     }
                     return
                 }

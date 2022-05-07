@@ -94,7 +94,6 @@ fun CategoryEditScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                modifier = Modifier.imePadding(),
                 onClick = { viewModel.onEvent(CategoryEditEvent.OnAddWord) },
                 contentColor = MaterialTheme.colors.secondary,
                 backgroundColor = MaterialTheme.colors.surface,
